@@ -1,0 +1,237 @@
+// Prisma schema for TOURLATAM 2026 Platform (PMI Bolivia Chapter)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("EDITOR") // ADMIN | EDITOR
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  auditLogs AuditLog[]
+}
+
+model EventSettings {
+  id                 String   @id @default(uuid())
+  eventName          String   @default("TourLatam 2026")
+  organizerName      String   @default("PMI Bolivia Chapter")
+  tagline            String?  @default("Congreso Internacional de Dirección de Proyectos")
+  startDate          DateTime
+  endDate            DateTime
+  city               String   @default("Santa Cruz de la Sierra")
+  venue              String   @default("Centro de Convenciones Los Tajibos")
+  address            String?  @default("Av. San Martín 455, Santa Cruz, Bolivia")
+  modality           String   @default("Híbrido (Presencial & Virtual)")
+  registrationUrl    String   @default("https://tourlatam.pmi-bolivia.org/register")
+  contactEmail       String?  @default("contacto@pmi-bolivia.org")
+  contactPhone       String?  @default("+591 3 334 5678")
+  primaryCtaText     String   @default("REGÍSTRATE AHORA")
+  secondaryCtaText   String   @default("CONOCE EL PROGRAMA")
+  heroTitle          String?  @default("TOURLATAM 2026")
+  heroSubtitle       String?  @default("Congreso Internacional de Dirección de Proyectos — Liderazgo, Inteligencia Artificial & Agilidad")
+  heroBackgroundUrl  String?
+  heroVideoUrl       String?
+  heroOverlayOpacity Float?   @default(0.7)
+  aboutTitle         String?  @default("Sobre TourLatam 2026")
+  aboutSubtitle      String?  @default("El punto de encuentro líder para profesionales de dirección de proyectos en Latinoamérica")
+  aboutDescription   String?  
+  aboutImageUrl      String?
+  aboutVideoUrl      String?
+  gaTrackingId       String?  @default("G-TOURLATAM2026")
+  gtmId              String?  @default("GTM-PMIBOLIVIA")
+  metaPixelId        String?  @default("9876543210")
+  updatedAt          DateTime @updatedAt
+}
+
+model PageSection {
+  id           String   @id @default(uuid())
+  sectionType  String   @unique // HERO, EVENT_INFO, ABOUT, FOCUS_AREAS, SPEAKERS, AGENDA, PRICING, SPONSORS, TESTIMONIALS, FAQ, CTA
+  title        String?
+  subtitle     String?
+  content      String?  // JSON stringified configuration
+  displayOrder Int      @default(0)
+  isVisible    Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+}
+
+model FocusArea {
+  id               String   @id @default(uuid())
+  slug             String   @unique
+  name             String
+  shortDescription String
+  description      String
+  icon             String   // Lucide icon identifier
+  image            String?
+  accentColor      String?  @default("#00F0FF")
+  displayOrder     Int      @default(0)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Speaker {
+  id           String       @id @default(uuid())
+  slug         String       @unique
+  name         String
+  position     String
+  company      String
+  country      String
+  photo        String
+  shortBio     String
+  fullBio      String
+  specialties  String       // JSON stringified array or comma-separated tags
+  linkedinUrl  String?
+  websiteUrl   String?
+  videoUrl     String?
+  isFeatured   Boolean      @default(false)
+  displayOrder Int          @default(0)
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  sessions     AgendaItem[]
+}
+
+model AgendaItem {
+  id           String   @id @default(uuid())
+  date         DateTime
+  startTime    String   // HH:mm
+  endTime      String   // HH:mm
+  title        String
+  description  String?
+  type         String   @default("KEYNOTE") // KEYNOTE | PANEL | WORKSHOP | BREAK | NETWORKING | OTHER
+  speakerId    String?
+  speaker      Speaker? @relation(fields: [speakerId], references: [id], onDelete: SetNull)
+  room         String?
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model TicketType {
+  id              String    @id @default(uuid())
+  name            String
+  description     String?
+  price           Float
+  originalPrice   Float?
+  currency        String    @default("USD")
+  startDate       DateTime?
+  endDate         DateTime?
+  features        String    // JSON stringified array
+  registrationUrl String?
+  badgeText       String?   // e.g. "Más Popular", "Early Bird"
+  isFeatured      Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  displayOrder    Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Sponsor {
+  id           String   @id @default(uuid())
+  name         String
+  slug         String   @unique
+  logo         String
+  website      String?
+  description  String?
+  tier         String   @default("SILVER") // TITLE | GOLD | SILVER | BRONZE | MEDIA_PARTNER | COMMUNITY_PARTNER
+  displayOrder Int      @default(0)
+  isFeatured   Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Testimonial {
+  id           String   @id @default(uuid())
+  name         String
+  position     String
+  company      String
+  photo        String?
+  quote        String
+  videoUrl     String?
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model FAQ {
+  id           String   @id @default(uuid())
+  question     String
+  answer       String
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Media {
+  id          String   @id @default(uuid())
+  filename    String
+  mimeType    String
+  size        Int
+  width       Int?
+  height      Int?
+  url         String
+  storageKey  String
+  uploadedBy  String?
+  createdAt   DateTime @default(now())
+}
+
+model SocialLink {
+  id           String   @id @default(uuid())
+  platform     String   // LinkedIn, Facebook, Instagram, YouTube, X
+  url          String
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, PUBLISH, UNPUBLISH
+  entity    String   // Speaker, Sponsor, EventSettings, etc.
+  entityId  String?
+  details   String?  // JSON stringified metadata
+  ipAddress String?
+  timestamp DateTime @default(now())
+}
+
+model ContentTranslation {
+  id         String   @id @default(uuid())
+  entityType String   // Speaker, FocusArea, FAQ, etc.
+  entityId   String
+  language   String   // es | en
+  field      String   // title, description, bio
+  value      String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([entityType, entityId, language, field])
+}
+
+// Future Extensions Models (Stubs for Registration, Tickets, Payments, Certificates)
+model Registration {
+  id            String   @id @default(uuid())
+  attendeeName  String
+  attendeeEmail String
+  ticketTypeId  String
+  status        String   @default("PENDING") // PENDING | CONFIRMED | CANCELLED | REFUNDED
+  qrCode        String?
+  totalAmount   Float
+  currency      String   @default("USD")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

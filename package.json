@@ -1,0 +1,26 @@
+{
+  "name": "tourlatam-2026-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TOURLATAM 2026 Web Platform & Backoffice CMS for PMI Bolivia Chapter",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=apps/api\" \"npm run dev --workspace=apps/web\"",
+    "build": "npm run build --workspace=packages/types && npm run build --workspace=apps/api && npm run build --workspace=apps/web",
+    "typecheck": "npm run typecheck --workspace=apps/api && npm run typecheck --workspace=apps/web",
+    "lint": "npm run lint --workspace=apps/api && npm run lint --workspace=apps/web",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "ts-node --transpile-only prisma/seed.ts",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prisma": "^5.19.1",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

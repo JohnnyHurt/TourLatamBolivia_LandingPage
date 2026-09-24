@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tourlatam-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: tourlatam
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: tourlatam-api
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: "postgresql://postgres:postgrespassword2026@postgres:5432/tourlatam?schema=public"
+      JWT_SECRET: "tourlatam_2026_super_secret_jwt_key_pmi_bolivia_chapter_prod_2026"
+      STORAGE_PROVIDER: "local"
+    depends_on:
+      - postgres
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    container_name: tourlatam-web
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

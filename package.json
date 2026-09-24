@@ -20,10 +20,12 @@
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
+  "dependencies": {
+    "prisma": "^5.19.1",
+    "typescript": "^5.5.4"
+  },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "prisma": "^5.19.1",
-    "typescript": "^5.5.4",
     "vitest": "^2.0.5"
   }
 }

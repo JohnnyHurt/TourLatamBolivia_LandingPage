@@ -4,6 +4,18 @@ import crypto from 'crypto';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { config } from '../config/index.js';
 
+export type MulterFile = {
+  originalname: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+  fieldname?: string;
+  encoding?: string;
+  destination?: string;
+  filename?: string;
+  path?: string;
+};
+
 export interface UploadResult {
   url: string;
   storageKey: string;
@@ -13,7 +25,7 @@ export interface UploadResult {
 }
 
 export interface IStorageProvider {
-  uploadFile(file: Express.Multer.File): Promise<UploadResult>;
+  uploadFile(file: MulterFile): Promise<UploadResult>;
   deleteFile(storageKey: string): Promise<boolean>;
 }
 
@@ -27,7 +39,7 @@ class LocalStorageProvider implements IStorageProvider {
     }
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<UploadResult> {
+  async uploadFile(file: MulterFile): Promise<UploadResult> {
     const ext = path.extname(file.originalname);
     const hashName = `${crypto.randomUUID()}${ext}`;
     const filePath = path.join(this.uploadDir, hashName);
@@ -67,7 +79,7 @@ class S3CompatibleStorageProvider implements IStorageProvider {
     });
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<UploadResult> {
+  async uploadFile(file: MulterFile): Promise<UploadResult> {
     const ext = path.extname(file.originalname);
     const storageKey = `tourlatam-2026/${crypto.randomUUID()}${ext}`;
 
@@ -124,7 +136,7 @@ export class StorageService {
     }
   }
 
-  async upload(file: Express.Multer.File): Promise<UploadResult> {
+  async upload(file: MulterFile): Promise<UploadResult> {
     // Validate MIME types
     const allowedMimeTypes = [
       'image/jpeg',

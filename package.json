@@ -14,8 +14,11 @@
     "lint": "npm run lint --workspace=apps/api && npm run lint --workspace=apps/web",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:seed": "ts-node --transpile-only prisma/seed.ts",
+    "db:seed": "tsx prisma/seed.ts",
     "test": "vitest run"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

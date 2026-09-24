@@ -15,7 +15,7 @@ import {
   AuthResponse,
 } from '@tourlatam/types';
 
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.VITE_API_URL as string) || '/api';
 
 async function fetcher<T>(url: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('tourlatam_admin_token');

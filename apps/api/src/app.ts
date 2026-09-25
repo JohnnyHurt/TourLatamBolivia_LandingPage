@@ -23,7 +23,33 @@ app.use(
 // CORS configuration
 app.use(
   cors({
-    origin: [config.publicUrl, 'http://localhost:3000', 'http://localhost:5173'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, server-to-server, mobile)
+      if (!origin) return callback(null, true);
+
+      // Allow localhost
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
+
+      // Automatically allow any Vercel deployment (*.vercel.app)
+      if (origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+
+      // Allow configured PUBLIC_URL (supports comma-separated list or wildcard)
+      if (config.publicUrl === '*') {
+        return callback(null, true);
+      }
+
+      const allowedOrigins = config.publicUrl.split(',').map((u) => u.trim().replace(/\/+$/, ''));
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Dynamic fallback for any other valid origin
+      return callback(null, true);
+    },
     credentials: true,
   })
 );

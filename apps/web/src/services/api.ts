@@ -15,7 +15,21 @@ import {
   AuthResponse,
 } from '@tourlatam/types';
 
-const API_BASE = (import.meta.env.VITE_API_URL as string) || '/api';
+function getApiBase(): string {
+  const rawUrl = ((import.meta.env.VITE_API_URL as string) || '').trim();
+  if (!rawUrl) return '/api';
+
+  // Strip trailing slashes
+  const cleanUrl = rawUrl.replace(/\/+$/, '');
+
+  // If the user specified e.g. "https://api.onrender.com" without "/api", append "/api"
+  if (!cleanUrl.endsWith('/api')) {
+    return `${cleanUrl}/api`;
+  }
+  return cleanUrl;
+}
+
+const API_BASE = getApiBase();
 
 async function fetcher<T>(url: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('tourlatam_admin_token');

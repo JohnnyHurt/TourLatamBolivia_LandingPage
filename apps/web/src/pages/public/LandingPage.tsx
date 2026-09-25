@@ -38,16 +38,7 @@ export const LandingPage: React.FC = () => {
   useEffect(() => {
     const loadAllPublicData = async () => {
       try {
-        const [
-          eventRes,
-          secRes,
-          focusRes,
-          speakerRes,
-          sponsorRes,
-          agendaRes,
-          ticketRes,
-          faqRes,
-        ] = await Promise.all([
+        const results = await Promise.allSettled([
           api.getEventInfo(),
           api.getPageSections(),
           api.getFocusAreas(),
@@ -58,14 +49,14 @@ export const LandingPage: React.FC = () => {
           api.getFAQs(),
         ]);
 
-        setSettings(eventRes);
-        setSections(secRes);
-        setFocusAreas(focusRes);
-        setSpeakers(speakerRes);
-        setSponsors(sponsorRes);
-        setAgenda(agendaRes);
-        setTickets(ticketRes);
-        setFaqs(faqRes);
+        if (results[0].status === 'fulfilled') setSettings(results[0].value);
+        if (results[1].status === 'fulfilled') setSections(results[1].value);
+        if (results[2].status === 'fulfilled') setFocusAreas(results[2].value);
+        if (results[3].status === 'fulfilled') setSpeakers(results[3].value);
+        if (results[4].status === 'fulfilled') setSponsors(results[4].value);
+        if (results[5].status === 'fulfilled') setAgenda(results[5].value);
+        if (results[6].status === 'fulfilled') setTickets(results[6].value);
+        if (results[7].status === 'fulfilled') setFaqs(results[7].value);
       } catch (err) {
         console.error('Error loading public platform data:', err);
       } finally {

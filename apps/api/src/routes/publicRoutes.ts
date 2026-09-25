@@ -3,6 +3,18 @@ import { prisma } from '../config/prisma.js'; // FIX #5: shared singleton
 
 const router = Router();
 
+function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
+  if (!val) return fallback;
+  try {
+    return JSON.parse(val);
+  } catch {
+    if (Array.isArray(fallback) && typeof val === 'string') {
+      return val.split(',').map((s) => s.trim()).filter(Boolean) as unknown as T;
+    }
+    return fallback;
+  }
+}
+
 // GET /api/public/event-info
 router.get('/event-info', async (_req: Request, res: Response, next: NextFunction) => {
   try {
@@ -56,7 +68,7 @@ router.get('/page-sections', async (_req: Request, res: Response, next: NextFunc
       success: true,
       data: sections.map((s) => ({
         ...s,
-        content: s.content ? JSON.parse(s.content) : null,
+        content: safeJsonParse(s.content, null),
       })),
     });
   } catch (error) {
@@ -93,7 +105,7 @@ router.get('/speakers', async (_req: Request, res: Response, next: NextFunction)
       success: true,
       data: speakers.map((sp) => ({
         ...sp,
-        specialties: sp.specialties ? JSON.parse(sp.specialties) : [],
+        specialties: safeJsonParse<string[]>(sp.specialties, []),
         createdAt: sp.createdAt.toISOString(),
         updatedAt: sp.updatedAt.toISOString(),
       })),

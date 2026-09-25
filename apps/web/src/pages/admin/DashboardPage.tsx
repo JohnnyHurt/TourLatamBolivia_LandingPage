@@ -15,16 +15,16 @@ export const DashboardPage: React.FC = () => {
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const [spData, spoData, agData, tkData] = await Promise.all([
+        const results = await Promise.allSettled([
           api.getSpeakers(),
           api.getSponsors(),
           api.getAgenda(),
           api.getTickets(),
         ]);
-        setSpeakers(spData);
-        setSponsors(spoData);
-        setAgenda(agData);
-        setTickets(tkData);
+        if (results[0].status === 'fulfilled') setSpeakers(results[0].value);
+        if (results[1].status === 'fulfilled') setSponsors(results[1].value);
+        if (results[2].status === 'fulfilled') setAgenda(results[2].value);
+        if (results[3].status === 'fulfilled') setTickets(results[3].value);
 
         try {
           const logsData = await api.getAuditLogs(1);

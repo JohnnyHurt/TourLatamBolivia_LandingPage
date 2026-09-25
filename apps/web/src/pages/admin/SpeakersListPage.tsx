@@ -85,68 +85,76 @@ export const SpeakersListPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800 text-slate-300">
-              {speakers.map((sp) => (
-                <tr key={sp.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="py-4 px-6">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-800 border border-slate-700">
-                      <img src={sp.photo} alt={sp.name} className="w-full h-full object-cover" />
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="font-bold text-white text-sm flex items-center gap-1.5">
-                      {sp.name}
-                      {sp.isFeatured && (
-                        <span title="Featured Keynote">
-                          <Award className="w-3.5 h-3.5 text-brand-magenta" />
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[11px] text-brand-cyan">{sp.position}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="font-semibold text-slate-200">{sp.company}</div>
-                    <div className="text-[11px] text-slate-400">{sp.country}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <button
-                      onClick={() => toggleActive(sp)}
-                      className={`px-3 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${
-                        sp.isActive
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                          : 'bg-red-500/20 text-red-400 border border-red-500/40'
-                      }`}
-                    >
-                      {sp.isActive ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                      <span>{sp.isActive ? 'ACTIVO' : 'INACTIVO'}</span>
-                    </button>
-                  </td>
-                  <td className="py-4 px-6 text-center font-bold text-slate-300">#{sp.displayOrder}</td>
-                  <td className="py-4 px-6 text-right space-x-2">
-                    <Link
-                      to={`/speakers/${sp.slug}`}
-                      target="_blank"
-                      className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white inline-block"
-                      title="Preview public profile"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Link>
-                    <Link
-                      to={`/admin/speakers/${sp.id}`}
-                      className="p-2 rounded-lg bg-slate-800 text-brand-cyan hover:bg-slate-700 inline-block"
-                      title="Edit speaker"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(sp.id, sp.name)}
-                      className="p-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20 inline-block"
-                      title="Delete speaker"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+              {speakers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                    No se encontraron speakers registrados en la base de datos.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                speakers.map((sp) => (
+                  <tr key={sp.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="py-4 px-6">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-800 border border-slate-700">
+                        <img src={sp.photo} alt={sp.name} className="w-full h-full object-cover" />
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="font-bold text-white text-sm flex items-center gap-1.5">
+                        {sp.name}
+                        {sp.isFeatured && (
+                          <span title="Featured Keynote">
+                            <Award className="w-3.5 h-3.5 text-brand-magenta" />
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-brand-cyan">{sp.position}</div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="font-semibold text-slate-200">{sp.company}</div>
+                      <div className="text-[11px] text-slate-400">{sp.country}</div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <button
+                        onClick={() => toggleActive(sp)}
+                        className={`px-3 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${
+                          sp.isActive
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                            : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                        }`}
+                      >
+                        {sp.isActive ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        <span>{sp.isActive ? 'ACTIVO' : 'INACTIVO'}</span>
+                      </button>
+                    </td>
+                    <td className="py-4 px-6 text-center font-bold text-slate-300">#{sp.displayOrder}</td>
+                    <td className="py-4 px-6 text-right space-x-2">
+                      <Link
+                        to={`/speakers/${sp.slug}`}
+                        target="_blank"
+                        className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white inline-block"
+                        title="Preview public profile"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Link>
+                      <Link
+                        to={`/admin/speakers/${sp.id}`}
+                        className="p-2 rounded-lg bg-slate-800 text-brand-cyan hover:bg-slate-700 inline-block"
+                        title="Edit speaker"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(sp.id, sp.name)}
+                        className="p-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20 inline-block"
+                        title="Delete speaker"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

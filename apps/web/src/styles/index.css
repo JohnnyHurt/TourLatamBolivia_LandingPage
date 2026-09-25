@@ -56,6 +56,22 @@
   src: url('/fonts/barlow-700.woff2') format('woff2');
 }
 
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/barlow-800.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/barlow-900.woff2') format('woff2');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

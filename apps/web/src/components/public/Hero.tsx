@@ -49,20 +49,20 @@ export const Hero: React.FC<HeroProps> = () => {
       {/* ─── CONTENT — z-10 so it renders above the hand ─── */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Left column stops at ~52% to let the hand dominate the right */}
-        <div className="w-full lg:max-w-[54%] xl:max-w-[50%] flex flex-col justify-center text-left">
-          {/* "TOUR" — white, Barlow Condensed Bold */}
+        <div className="w-full lg:max-w-[58%] xl:max-w-[54%] flex flex-col justify-center text-left">
+          {/* "Tour" — white, Barlow Standard Bold (Title Case) */}
           <div
-            className="font-condensed font-bold text-white uppercase leading-none select-none tracking-[0.02em]"
-            style={{ fontSize: 'clamp(2.4rem, 5.2vw, 4.8rem)' }}
+            className="font-sans font-extrabold text-white leading-none select-none tracking-tight"
+            style={{ fontSize: 'clamp(2.6rem, 6vw, 5.4rem)' }}
           >
-            TOUR
+            Tour
           </div>
 
-          {/* "LATAM" — Barlow Condensed Black 900, huge gradient Cyan → Violet → Magenta */}
+          {/* "LATAM" — Barlow Standard Black 900, huge gradient Cyan → Violet → Magenta */}
           <div
-            className="font-condensed font-black uppercase gradient-text-latam select-none tracking-[-0.02em]"
+            className="font-sans font-black uppercase gradient-text-latam select-none tracking-[-0.03em]"
             style={{
-              fontSize: 'clamp(5.4rem, 14.5vw, 11rem)',
+              fontSize: 'clamp(5.6rem, 15.5vw, 12rem)',
               lineHeight: 0.88,
               position: 'relative',
               zIndex: 20,
@@ -71,26 +71,26 @@ export const Hero: React.FC<HeroProps> = () => {
             LATAM
           </div>
 
-          {/* "BOLIVIA" — white, Barlow Condensed Bold */}
+          {/* "Bolivia" — white, Barlow Standard Bold (Title Case) */}
           <div
-            className="font-condensed font-bold text-white uppercase leading-none select-none tracking-[0.02em] mt-1"
-            style={{ fontSize: 'clamp(2.4rem, 5.2vw, 4.8rem)' }}
+            className="font-sans font-extrabold text-white leading-none select-none tracking-tight mt-1.5"
+            style={{ fontSize: 'clamp(2.6rem, 6vw, 5.4rem)' }}
           >
-            BOLIVIA
+            Bolivia
           </div>
 
-          {/* "2026" — white, Barlow Condensed Bold */}
+          {/* "2026" — white, Barlow Standard Bold */}
           <div
-            className="font-condensed font-bold text-white uppercase leading-none select-none tracking-[0.02em] mt-1 mb-8"
-            style={{ fontSize: 'clamp(2.4rem, 5.2vw, 4.8rem)' }}
+            className="font-sans font-extrabold text-white leading-none select-none tracking-tight mt-1 mb-8"
+            style={{ fontSize: 'clamp(2.6rem, 6vw, 5.4rem)' }}
           >
             2026
           </div>
 
           {/* ── SUBTITLE: CONGRESO INTERNACIONAL… — 3 lines gradient Cyan to Magenta ── */}
           <h1
-            className="font-condensed font-bold uppercase gradient-text-latam leading-[1.12] select-none tracking-[0.01em]"
-            style={{ fontSize: 'clamp(1.3rem, 2.7vw, 2.1rem)' }}
+            className="font-sans font-extrabold uppercase gradient-text-latam leading-[1.12] select-none tracking-tight"
+            style={{ fontSize: 'clamp(1.3rem, 2.8vw, 2.2rem)' }}
           >
             CONGRESO INTERNACIONAL<br />
             DE DIRECCIÓN<br />

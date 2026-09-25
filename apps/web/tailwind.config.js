@@ -31,8 +31,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Barlow', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        condensed: ['"Barlow Condensed"', 'Impact', 'Arial Narrow', 'sans-serif'],
+        sans: ['Barlow', 'Inter', 'system-ui', 'sans-serif'],
+        condensed: ['"Barlow Condensed"', 'sans-serif'],
       },
       backgroundImage: {
         'latam-gradient': 'linear-gradient(135deg, #00F2FE 0%, #7928CA 50%, #FF007F 100%)',

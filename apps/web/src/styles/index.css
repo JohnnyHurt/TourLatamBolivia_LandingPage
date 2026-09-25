@@ -171,3 +171,21 @@
 .shadow-glow-pmi:hover {
   box-shadow: 0 0 35px rgba(255, 94, 20, 0.75), 0 12px 40px rgba(255, 94, 20, 0.5);
 }
+
+/* PMI Orange Neon button (Dark Glass + Orange Neon Halo - matching local preferred aesthetic) */
+.btn-pmi-neon {
+  background: rgba(19, 8, 38, 0.85);
+  border: 1.5px solid rgba(255, 94, 20, 0.85);
+  box-shadow: 0 0 22px rgba(255, 94, 20, 0.5), inset 0 0 14px rgba(255, 94, 20, 0.15);
+  color: #FFFFFF;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-pmi-neon:hover {
+  background: rgba(255, 94, 20, 0.2);
+  border-color: #FF5E14;
+  box-shadow: 0 0 35px rgba(255, 94, 20, 0.85), 0 0 16px rgba(255, 94, 20, 0.5), inset 0 0 16px rgba(255, 94, 20, 0.3);
+  transform: translateY(-2px);
+}

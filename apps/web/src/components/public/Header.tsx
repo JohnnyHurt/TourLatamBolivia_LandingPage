@@ -83,10 +83,10 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
               href={settings?.registrationUrl || '#pricing'}
               target="_blank"
               rel="noopener noreferrer"
-              className="relative inline-flex items-center justify-center px-6 py-2.5 text-xs font-black tracking-wider text-white bg-gradient-to-r from-brand-pmiOrange to-brand-pmiOrangeDark rounded-full shadow-glow-pmi hover:brightness-110 transition-all transform hover:-translate-y-0.5 active:translate-y-0 uppercase gap-1.5"
+              className="relative inline-flex items-center justify-center px-6 py-2.5 text-xs font-black tracking-wider btn-pmi-neon rounded-full uppercase gap-1.5"
             >
               <span>{settings?.primaryCtaText || 'REGÍSTRATE AHORA'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3.5 h-3.5 text-brand-pmiOrange" />
             </a>
           </div>
 
@@ -122,7 +122,7 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
               href={settings?.registrationUrl || '#pricing'}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full text-center py-3.5 text-xs font-black text-white bg-gradient-to-r from-brand-pmiOrange to-brand-pmiOrangeDark rounded-xl hover:brightness-110 transition-colors uppercase tracking-wider shadow-glow-pmi"
+              className="w-full text-center py-3.5 text-xs font-black btn-pmi-neon rounded-xl uppercase tracking-wider"
             >
               {settings?.primaryCtaText || 'REGÍSTRATE AHORA'}
             </a>

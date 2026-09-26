@@ -32,6 +32,18 @@ function parseDate(value: string | null | undefined): Date | null {
   return isNaN(d.getTime()) ? null : d;
 }
 
+function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
+  if (!val) return fallback;
+  try {
+    return JSON.parse(val);
+  } catch {
+    if (Array.isArray(fallback) && typeof val === 'string') {
+      return val.split(',').map((s) => s.trim()).filter(Boolean) as unknown as T;
+    }
+    return fallback;
+  }
+}
+
 // -------------------------------------------------------------
 // MEDIA LIBRARY MANAGER
 // -------------------------------------------------------------
@@ -305,6 +317,7 @@ const ticketSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   description: z.string().optional().nullable(),
   price: z.number().min(0, 'Price cannot be negative'),
+  priceBs: z.number().optional().nullable(),
   originalPrice: z.number().optional().nullable(),
   currency: z.string().default('USD'),
   startDate: z.string().optional().nullable(),
@@ -315,6 +328,29 @@ const ticketSchema = z.object({
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
   displayOrder: z.number().default(0),
+});
+
+// GET /api/admin/tickets (returns ALL tickets for CMS administration, including inactive)
+router.get('/tickets', async (_req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const tickets = await prisma.ticketType.findMany({
+      orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
+    });
+
+    return res.json({
+      success: true,
+      data: tickets.map((t) => ({
+        ...t,
+        features: safeJsonParse<string[]>(t.features, []),
+        startDate: t.startDate ? t.startDate.toISOString() : null,
+        endDate: t.endDate ? t.endDate.toISOString() : null,
+        createdAt: t.createdAt.toISOString(),
+        updatedAt: t.updatedAt.toISOString(),
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post('/tickets', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -342,6 +378,31 @@ router.post('/tickets', async (req: AuthenticatedRequest, res: Response, next: N
     });
 
     return res.json({ success: true, data: ticket });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/tickets/reorder', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { items } = req.body as { items: { id: string; displayOrder: number }[] };
+
+    for (const item of items) {
+      await prisma.ticketType.update({
+        where: { id: item.id },
+        data: { displayOrder: item.displayOrder },
+      });
+    }
+
+    await AuditService.log({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entity: 'TicketType',
+      details: { count: items.length, action: 'reorder' },
+      ipAddress: req.ip,
+    });
+
+    return res.json({ success: true, message: 'Tickets reordered successfully' });
   } catch (err) {
     next(err);
   }

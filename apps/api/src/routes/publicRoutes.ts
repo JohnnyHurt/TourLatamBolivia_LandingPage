@@ -208,18 +208,19 @@ router.get('/agenda', async (_req: Request, res: Response, next: NextFunction) =
 });
 
 // GET /api/public/tickets
-router.get('/tickets', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/tickets', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const includeAll = req.query.all === 'true' || req.query.includeAll === 'true';
     const tickets = await prisma.ticketType.findMany({
-      where: { isActive: true },
-      orderBy: [{ displayOrder: 'asc' }],
+      where: includeAll ? {} : { isActive: true },
+      orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
     });
 
     return res.json({
       success: true,
       data: tickets.map((t) => ({
         ...t,
-        features: t.features ? JSON.parse(t.features) : [],
+        features: safeJsonParse<string[]>(t.features, []),
         startDate: t.startDate ? t.startDate.toISOString() : null,
         endDate: t.endDate ? t.endDate.toISOString() : null,
         createdAt: t.createdAt.toISOString(),

@@ -70,7 +70,8 @@ export const api = {
   getSpeakerBySlug: (slug: string) => fetcher<SpeakerDTO>(`/public/speakers/${slug}`),
   getSponsors: () => fetcher<SponsorDTO[]>('/public/sponsors'),
   getAgenda: () => fetcher<AgendaItemDTO[]>('/public/agenda'),
-  getTickets: () => fetcher<TicketTypeDTO[]>('/public/tickets'),
+  getTickets: (includeAll = false) =>
+    fetcher<TicketTypeDTO[]>(`/public/tickets${includeAll ? '?all=true' : ''}`),
   getFAQs: () => fetcher<FAQDTO[]>('/public/faqs'),
   getTestimonials: () => fetcher<TestimonialDTO[]>('/public/testimonials'),
 
@@ -125,6 +126,12 @@ export const api = {
     fetcher<{ message: string }>(`/admin/sponsors/${id}`, { method: 'DELETE' }),
 
   // Tickets CMS
+  getAdminTickets: () => fetcher<TicketTypeDTO[]>('/admin/tickets'),
+  reorderTickets: (items: { id: string; displayOrder: number }[]) =>
+    fetcher<{ message: string }>('/admin/tickets/reorder', {
+      method: 'PUT',
+      body: JSON.stringify({ items }),
+    }),
   createTicket: (data: Partial<TicketTypeDTO>) =>
     fetcher<TicketTypeDTO>('/admin/tickets', {
       method: 'POST',

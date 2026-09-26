@@ -123,6 +123,7 @@ model TicketType {
   name            String
   description     String?
   price           Float
+  priceBs         Float?
   originalPrice   Float?
   currency        String    @default("USD")
   startDate       DateTime?

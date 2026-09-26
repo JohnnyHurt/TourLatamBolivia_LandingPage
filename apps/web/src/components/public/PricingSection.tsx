@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Sparkles, ShieldCheck, ArrowRight, Video } from 'lucide-react';
+import { Check, Sparkles, ArrowRight } from 'lucide-react';
 import { TicketTypeDTO } from '@tourlatam/types';
 
 interface PricingSectionProps {
@@ -8,6 +8,13 @@ interface PricingSectionProps {
 }
 
 export const PricingSection: React.FC<PricingSectionProps> = ({ tickets, registrationUrl }) => {
+  // Only display tickets that are active / visible
+  const visibleTickets = (tickets || []).filter((ticket) => ticket.isActive !== false);
+
+  if (visibleTickets.length === 0) {
+    return null;
+  }
+
   return (
     <section id="pricing" className="py-24 bg-dark-900 relative overflow-hidden">
       {/* Background glow highlights */}
@@ -30,73 +37,84 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ tickets, registr
 
         {/* Pricing Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
-          {tickets.map((ticket) => (
-            <div
-              key={ticket.id}
-              className={`rounded-3xl p-8 flex flex-col justify-between transition-all relative ${
-                ticket.isFeatured
-                  ? 'bg-gradient-to-b from-dark-700 via-dark-800 to-dark-900 border-2 border-brand-cyan shadow-glow-cyan'
-                  : 'glass-card border border-dark-600 hover:border-brand-purple/50'
-              }`}
-            >
-              {ticket.badgeText && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-brand-cyan to-brand-cyanLight text-dark-950 text-[10px] font-black uppercase tracking-wider shadow-glow-cyan">
-                  {ticket.badgeText}
-                </div>
-              )}
+          {visibleTickets.map((ticket) => {
+            const displayBs = ticket.priceBs ?? Math.round(ticket.price * 6.96);
+            const featuresList = Array.isArray(ticket.features)
+              ? ticket.features
+              : typeof ticket.features === 'string'
+              ? JSON.parse(ticket.features)
+              : [];
 
-              <div>
-                <h3 className="text-2xl font-black text-white mb-2">{ticket.name}</h3>
-                {ticket.description && (
-                  <p className="text-xs text-slate-300 font-light mb-6 leading-relaxed">
-                    {ticket.description}
-                  </p>
-                )}
-
-                {/* Price Display */}
-                <div className="mb-6 pb-6 border-b border-dark-600">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl sm:text-5xl font-black text-white">
-                      ${ticket.price}
-                    </span>
-                    <span className="text-sm font-bold text-brand-cyan">{ticket.currency}</span>
-                  </div>
-                  {ticket.originalPrice && (
-                    <div className="text-xs font-bold text-slate-500 line-through mt-1">
-                      Precio regular: ${ticket.originalPrice} {ticket.currency}
-                    </div>
-                  )}
-                </div>
-
-                {/* Features List */}
-                <ul className="space-y-3.5 mb-8">
-                  {ticket.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-xs text-slate-300 font-medium">
-                      <div className="p-1 rounded-full bg-brand-cyan/20 text-brand-cyan shrink-0 mt-0.5">
-                        <Check className="w-3.5 h-3.5" />
-                      </div>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Action Register Button */}
-              <a
-                href={ticket.registrationUrl || registrationUrl || '#pricing'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`w-full inline-flex items-center justify-center gap-2 py-4 rounded-2xl text-xs font-black uppercase tracking-wider transition-all ${
+            return (
+              <div
+                key={ticket.id}
+                className={`rounded-3xl p-8 flex flex-col justify-between transition-all relative ${
                   ticket.isFeatured
-                    ? 'bg-gradient-to-r from-brand-pmiOrange to-brand-pmiOrangeDark text-white shadow-glow-pmi hover:brightness-110'
-                    : 'bg-dark-800 text-white hover:bg-brand-cyan hover:text-dark-950 border border-dark-600'
+                    ? 'bg-gradient-to-b from-dark-700 via-dark-800 to-dark-900 border-2 border-brand-cyan shadow-glow-cyan'
+                    : 'glass-card border border-dark-600 hover:border-brand-purple/50'
                 }`}
               >
-                <span>SELECCIONAR PASE</span>
-                <ArrowRight className="w-4 h-4" />
-              </a>
-            </div>
-          ))}
+                {ticket.badgeText && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-brand-cyan to-brand-cyanLight text-dark-950 text-[10px] font-black uppercase tracking-wider shadow-glow-cyan">
+                    {ticket.badgeText}
+                  </div>
+                )}
+
+                <div>
+                  <h3 className="text-2xl font-black text-white mb-2">{ticket.name}</h3>
+                  {ticket.description && (
+                    <p className="text-xs text-slate-300 font-light mb-6 leading-relaxed">
+                      {ticket.description}
+                    </p>
+                  )}
+
+                  {/* Precios: Bolivianos llamativo y USD secundario */}
+                  <div className="mb-6 pb-6 border-b border-dark-600">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-sm font-black text-brand-cyan tracking-wider">
+                        Bs.
+                      </span>
+                      <span className="text-4xl sm:text-5xl font-black text-white tracking-tight">
+                        {displayBs}
+                      </span>
+                    </div>
+                    <div className="mt-1.5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-400">
+                      <span>o</span>
+                      <span className="text-brand-cyan font-bold">${ticket.price}</span>
+                      <span className="text-xs text-slate-400 font-medium">USD</span>
+                    </div>
+                  </div>
+
+                  {/* Features List */}
+                  <ul className="space-y-3.5 mb-8">
+                    {featuresList.map((feature: string, idx: number) => (
+                      <li key={idx} className="flex items-start gap-3 text-xs text-slate-300 font-medium">
+                        <div className="p-1 rounded-full bg-brand-cyan/20 text-brand-cyan shrink-0 mt-0.5">
+                          <Check className="w-3.5 h-3.5" />
+                        </div>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Action Register Button */}
+                <a
+                  href={ticket.registrationUrl || registrationUrl || '#pricing'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-full inline-flex items-center justify-center gap-2 py-4 rounded-2xl text-xs font-black uppercase tracking-wider transition-all ${
+                    ticket.isFeatured
+                      ? 'bg-gradient-to-r from-brand-pmiOrange to-brand-pmiOrangeDark text-white shadow-glow-pmi hover:brightness-110'
+                      : 'bg-dark-800 text-white hover:bg-brand-cyan hover:text-dark-950 border border-dark-600'
+                  }`}
+                >
+                  <span>SELECCIONAR PASE</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

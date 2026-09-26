@@ -41,10 +41,13 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
         <div className="flex items-center justify-between">
           {/* Logo & Organizer */}
           <a href="#hero" className="flex items-center gap-3.5 group">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-cyan via-brand-purple to-brand-magenta p-[1.5px] group-hover:shadow-glow-cyan transition-all">
-              <div className="w-full h-full bg-dark-900 rounded-[14px] flex items-center justify-center font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-magenta text-lg">
+            {/*<div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-cyan via-brand-purple to-brand-magenta p-[1.5px] group-hover:shadow-glow-cyan transition-all">
+               <div className="w-full h-full bg-dark-900 rounded-[14px] flex items-center justify-center font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-magenta text-lg">
                 TL
               </div>
+            </div>*/}
+            <div>
+              <img src="/public/PMI Logo Full Color.jpg" alt="PMI Bolivia Logo" height={50} width={50} />
             </div>
             <div>
               <div className="font-black text-xl tracking-tight text-white flex items-center gap-1.5 leading-none">

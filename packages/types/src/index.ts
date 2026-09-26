@@ -145,6 +145,7 @@ export interface TicketTypeDTO {
   name: string;
   description?: string;
   price: number;
+  priceBs?: number | null;
   originalPrice?: number;
   currency: string;
   startDate?: string;

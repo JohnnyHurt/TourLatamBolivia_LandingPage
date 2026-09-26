@@ -45,7 +45,7 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
             {/*<div className="mb-6">
               <PmiBoliviaLogo size="md" />
             </div>*/}
-            <img src="/public/LogoPMIBol_transparente.png" alt="PMI Bolivia Logo" height={120} width={120} />
+            <img src="/LogoPMIBol_transparente.png" alt="PMI Bolivia Logo" height={120} width={120} />
 
 
             <div className="font-black text-2xl text-white mb-2">

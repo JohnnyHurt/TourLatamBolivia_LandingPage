@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
               </div>
             </div>*/}
             <div>
-              <img src="/public/PMI Logo Full Color.jpg" alt="PMI Bolivia Logo" height={50} width={50} />
+              <img src="/PMI Logo Full Color.jpg" alt="PMI Bolivia Logo" height={50} width={50} />
             </div>
             <div>
               <div className="font-black text-xl tracking-tight text-white flex items-center gap-1.5 leading-none">

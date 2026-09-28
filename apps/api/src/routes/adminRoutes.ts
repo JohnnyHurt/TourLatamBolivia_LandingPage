@@ -774,6 +774,35 @@ router.post('/users', requireRole(['ADMIN']), async (req: AuthenticatedRequest, 
   }
 });
 
+router.put('/users/:id/password', requireRole(['ADMIN']), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const schema = z.object({
+      password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    });
+    const { password } = schema.parse(req.body);
+    const passwordHash = hashPassword(password);
+
+    await prisma.user.update({
+      where: { id },
+      data: { password: passwordHash },
+    });
+
+    await AuditService.log({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entity: 'User',
+      entityId: id,
+      details: { action: 'change_password' },
+      ipAddress: req.ip,
+    });
+
+    return res.json({ success: true, message: 'Contraseña actualizada exitosamente' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/audit-logs', requireRole(['ADMIN']), async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string || '1', 10);

@@ -28,7 +28,7 @@ async function main() {
   await prisma.socialLink.deleteMany();
 
   // 2. Create Users
-  const adminPassword = hashPassword('Admin123!');
+  const adminPassword = hashPassword('J%)_A4^V_9uP^6x2');
   const editorPassword = hashPassword('Editor123!');
 
   const adminUser = await prisma.user.create({

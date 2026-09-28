@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 import { UserDTO, Role } from '@tourlatam/types';
-import { Plus, UserCheck, ShieldCheck, User } from 'lucide-react';
+import { Plus, UserCheck, ShieldCheck, User, KeyRound } from 'lucide-react';
 
 export const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [passwordUser, setPasswordUser] = useState<UserDTO | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -39,6 +42,22 @@ export const UsersPage: React.FC = () => {
       loadUsers();
     } catch (err: any) {
       alert(err.message || 'Error al crear usuario');
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordUser) return;
+    setSavingPassword(true);
+    try {
+      await api.updateUserPassword(passwordUser.id, newPassword);
+      alert(`Contraseña de ${passwordUser.email} actualizada con éxito.`);
+      setPasswordUser(null);
+      setNewPassword('');
+    } catch (err: any) {
+      alert(err.message || 'Error al actualizar contraseña');
+    } finally {
+      setSavingPassword(false);
     }
   };
 
@@ -78,7 +97,7 @@ export const UsersPage: React.FC = () => {
                 <th className="py-4 px-6">Email</th>
                 <th className="py-4 px-6">Rol RBAC</th>
                 <th className="py-4 px-6">Estado</th>
-                <th className="py-4 px-6 text-right">Creado</th>
+                <th className="py-4 px-6 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800 text-slate-300">
@@ -103,8 +122,18 @@ export const UsersPage: React.FC = () => {
                       ACTIVO
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-right text-slate-500">
-                    {new Date(u.createdAt).toLocaleDateString('es-ES')}
+                  <td className="py-4 px-6 text-right">
+                    <button
+                      onClick={() => {
+                        setPasswordUser(u);
+                        setNewPassword('');
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-brand-cyan hover:bg-slate-700 font-bold text-xs border border-slate-700/80 transition-all hover:border-brand-cyan/50 cursor-pointer"
+                      title="Cambiar contraseña"
+                    >
+                      <KeyRound className="w-3.5 h-3.5" />
+                      <span>Cambiar Clave</span>
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -177,6 +206,56 @@ export const UsersPage: React.FC = () => {
                   className="px-5 py-2 rounded-xl bg-brand-cyan text-dark-900 font-bold"
                 >
                   Crear Usuario
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Cambiar Contraseña */}
+      {passwordUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-900/80 backdrop-blur-md">
+          <div className="w-full max-w-md bg-dark-800 border border-slate-700 rounded-3xl p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-brand-cyan/15 border border-brand-cyan/40 flex items-center justify-center text-brand-cyan">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Cambiar Contraseña</h3>
+                <p className="text-xs text-slate-400">{passwordUser.email}</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-300 font-bold mb-1">Nueva Contraseña *</label>
+                <input
+                  type="text"
+                  required
+                  minLength={6}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Ingresa la nueva contraseña segura"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-dark-900 border border-slate-700 focus:border-brand-cyan text-white font-mono"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">Mínimo 6 caracteres.</p>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => setPasswordUser(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold hover:bg-slate-700 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingPassword || newPassword.length < 6}
+                  className="px-5 py-2 rounded-xl bg-brand-cyan text-dark-900 font-bold hover:bg-white transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {savingPassword ? 'Guardando...' : 'Actualizar Contraseña'}
                 </button>
               </div>
             </form>

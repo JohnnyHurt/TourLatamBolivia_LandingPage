@@ -40,7 +40,9 @@ export const LoginPage: React.FC = () => {
         {/* Header Logo */}
         <div className="text-center mb-8">
           <div className="mb-4 flex justify-center">
-            <PmiBoliviaLogo size="sm" />
+            <img src="/LogoPMIBol_transparente.png" alt="PMI Bolivia Logo" height={120} width={120} />
+
+
           </div>
           <h1 className="text-2xl font-black text-white">
             Tour <span className="gradient-text-latam">LATAM</span> 2026
@@ -56,12 +58,12 @@ export const LoginPage: React.FC = () => {
           </div>
         )}
 
-        {/* Demo Credentials Helper Pill */}
+        {/* Demo Credentials Helper Pill 
         <div className="mb-6 p-3.5 rounded-2xl bg-dark-900 border border-dark-600 text-xs text-slate-300 space-y-1">
           <div className="font-black text-brand-cyan uppercase tracking-wider text-[10px]">Credenciales de Demostración:</div>
           <div><span className="font-bold text-white">ADMIN:</span> admin@tourlatam.org / Admin123!</div>
           <div><span className="font-bold text-white">EDITOR:</span> editor@tourlatam.org / Editor123!</div>
-        </div>
+        </div>*/}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>

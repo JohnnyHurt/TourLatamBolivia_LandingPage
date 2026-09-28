@@ -176,6 +176,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+  updateUserPassword: (id: string, password: string) =>
+    fetcher<{ message: string }>(`/admin/users/${id}/password`, {
+      method: 'PUT',
+      body: JSON.stringify({ password }),
+    }),
   getAuditLogs: (page = 1) =>
     fetcher<{ total: number; page: number; limit: number; totalPages: number; logs: AuditLogDTO[] }>(
       `/admin/audit-logs?page=${page}`

@@ -3,6 +3,18 @@ import { api } from '../../services/api';
 import { AgendaItemDTO, SpeakerDTO, AgendaType } from '@tourlatam/types';
 import { Plus, Edit2, Trash2, Clock, Calendar, MapPin } from 'lucide-react';
 
+const formatDateLabel = (dateStr?: string) => {
+  if (!dateStr) return '';
+  const dateObj = dateStr.includes('T')
+    ? new Date(dateStr)
+    : new Date(`${dateStr}T00:00:00.000Z`);
+  return dateObj.toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
+};
+
 export const AgendaPage: React.FC = () => {
   const [items, setItems] = useState<AgendaItemDTO[]>([]);
   const [speakers, setSpeakers] = useState<SpeakerDTO[]>([]);
@@ -41,10 +53,19 @@ export const AgendaPage: React.FC = () => {
     if (!editingItem) return;
 
     try {
+      const payload = {
+        ...editingItem,
+        date: editingItem.date
+          ? (editingItem.date.includes('T')
+              ? editingItem.date
+              : `${editingItem.date}T00:00:00.000Z`)
+          : new Date().toISOString(),
+      };
+
       if (editingItem.id) {
-        await api.updateAgendaItem(editingItem.id, editingItem);
+        await api.updateAgendaItem(editingItem.id, payload);
       } else {
-        await api.createAgendaItem(editingItem);
+        await api.createAgendaItem(payload);
       }
       setEditingItem(null);
       loadData();
@@ -74,7 +95,7 @@ export const AgendaPage: React.FC = () => {
         <button
           onClick={() =>
             setEditingItem({
-              date: new Date('2026-11-12').toISOString(),
+              date: '2026-11-20T00:00:00.000Z',
               startTime: '09:00',
               endTime: '10:00',
               title: '',
@@ -111,8 +132,8 @@ export const AgendaPage: React.FC = () => {
                       <Clock className="w-3.5 h-3.5" />
                       {it.startTime} - {it.endTime}
                     </div>
-                    <div className="text-[11px] text-slate-400">
-                      {new Date(it.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                    <div className="text-[11px] text-slate-400 capitalize">
+                      {formatDateLabel(it.date)}
                     </div>
                   </td>
                   <td className="py-4 px-6">
@@ -172,7 +193,7 @@ export const AgendaPage: React.FC = () => {
                   <label className="block text-slate-300 font-bold mb-1">Fecha</label>
                   <input
                     type="date"
-                    value={editingItem.date ? new Date(editingItem.date).toISOString().slice(0, 10) : ''}
+                    value={editingItem.date ? editingItem.date.slice(0, 10) : ''}
                     onChange={(e) => setEditingItem({ ...editingItem, date: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-700 text-white"
                     required

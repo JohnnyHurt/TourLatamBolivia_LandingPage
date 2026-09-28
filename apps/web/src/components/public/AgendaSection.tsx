@@ -64,6 +64,7 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items }) => {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',
+                timeZone: 'UTC',
               });
 
               return (

@@ -21,7 +21,7 @@ export const EventInfo: React.FC<EventInfoProps> = ({ settings }) => {
       icon: Video,
       label: 'MODALIDAD',
       value: 'Modalidad Virtual',
-      subtext: 'Transmisión HD Interactiva',
+      subtext: 'Transmisión HD Interactiva por Airmeet',
       color: 'text-brand-magenta',
       borderColor: 'border-brand-magenta/30',
       bgColor: 'bg-brand-magenta/10',
@@ -47,7 +47,7 @@ export const EventInfo: React.FC<EventInfoProps> = ({ settings }) => {
     {
       icon: Users,
       label: 'SPEAKERS',
-      value: '20+ Referentes',
+      value: '30+ Referentes',
       subtext: 'Líderes de Latinoamérica',
       color: 'text-brand-magenta',
       borderColor: 'border-brand-magenta/30',

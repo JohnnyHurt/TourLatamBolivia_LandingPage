@@ -119,6 +119,12 @@ const SortableTicketCard: React.FC<SortableTicketCardProps> = ({ tk, onEdit, onD
 
         <h3 className="text-xl font-bold text-white mb-2">{tk.name}</h3>
 
+        {tk.description && (
+          <p className="text-xs text-slate-300 font-light mb-3 leading-relaxed">
+            {tk.description}
+          </p>
+        )}
+
         {/* Precios: Bs. llamativo y USD secundario */}
         <div className="mb-4 p-3 rounded-2xl bg-dark-900/60 border border-slate-800">
           <div className="flex items-baseline gap-1.5">
@@ -258,6 +264,7 @@ export const TicketsPage: React.FC = () => {
           onClick={() =>
             setEditingTicket({
               name: '',
+              description: '',
               priceBs: 105,
               price: 15,
               currency: 'USD',
@@ -314,6 +321,20 @@ export const TicketsPage: React.FC = () => {
                   className="w-full px-3.5 py-2.5 rounded-xl bg-dark-900 border border-slate-700 focus:border-brand-cyan text-white font-medium"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-bold mb-1">Descripción de la Tarifa</label>
+                <textarea
+                  rows={2}
+                  value={editingTicket.description || ''}
+                  onChange={(e) => setEditingTicket({ ...editingTicket, description: e.target.value })}
+                  placeholder="Ej: Tarifa preferencial para miembros activos de cualquier capítulo del PMI a nivel global."
+                  className="w-full px-3.5 py-2 rounded-xl bg-dark-900 border border-slate-700 focus:border-brand-cyan text-white font-normal"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Texto explicativo que se muestra debajo del título en la tarjeta pública.
+                </p>
               </div>
 
               {/* 2 Precios: Bolivianos (llamativo) y Dólares (USD) */}

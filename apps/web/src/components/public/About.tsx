@@ -32,7 +32,7 @@ export const About: React.FC<AboutProps> = ({ settings }) => {
 
             <p className="text-lg text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-purple-300 to-brand-magenta font-bold mb-6">
               {settings?.aboutSubtitle ||
-                'Impulsando la transformación digital, agilidad estratégica e inteligencia artificial en Latinoamérica.'}
+                'Impulsando la transformación digital, agilidad estratégica e inteligencia artificial en Bolivia y Latinoamérica.'}
             </p>
 
             <div className="text-slate-300 space-y-4 leading-relaxed font-light mb-8 text-base sm:text-lg">

@@ -42,11 +42,10 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled || mobileMenuOpen
-            ? 'bg-dark-900/95 backdrop-blur-xl border-b border-dark-600/80 py-3 shadow-[0_10px_30px_rgba(11,4,24,0.9)]'
-            : 'bg-transparent py-4 sm:py-5'
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || mobileMenuOpen
+          ? 'bg-dark-900/95 backdrop-blur-xl border-b border-dark-600/80 py-3 shadow-[0_10px_30px_rgba(11,4,24,0.9)]'
+          : 'bg-transparent py-4 sm:py-5'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -84,14 +83,14 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
               ))}
             </nav>
 
-            {/* Desktop CTA & Admin Link */}
+            {/* Desktop CTA & Admin Link*/}
             <div className="hidden lg:flex items-center gap-3 xl:gap-4 shrink-0">
-              <a
+              {/* <a
                 href="/admin/login"
                 className="text-xs font-bold text-slate-400 hover:text-brand-cyan px-3 py-2 rounded-xl hover:bg-dark-800 transition-colors"
               >
-                CMS Backoffice
-              </a>
+                //CMS Backoffice
+              </a>*/}
               <a
                 href={settings?.registrationUrl || '#pricing'}
                 target="_blank"
@@ -171,16 +170,18 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
             </div>
           </div>
         )}
-      </header>
+      </header >
 
       {/* Backdrop overlay for mobile menu */}
-      {mobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setMobileMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      {
+        mobileMenuOpen && (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+        )
+      }
     </>
   );
 };

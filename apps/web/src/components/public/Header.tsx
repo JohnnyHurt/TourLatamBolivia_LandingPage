@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { EventSettingsDTO } from '@tourlatam/types';
 import { PmiBoliviaLogo } from '../common/PmiBoliviaLogo';
+import { BoliviaFlag } from '../common/BoliviaFlag';
 
 interface HeaderProps {
   settings: EventSettingsDTO | null;
@@ -62,10 +63,11 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
                 <div className="font-black text-lg sm:text-xl tracking-tight text-white flex items-center gap-1.5 leading-none font-display">
                   Tour <span className="gradient-text-latam font-black">LATAM</span> <span className="text-white text-xs sm:text-sm font-bold">2026</span>
                 </div>
-                <div className="text-[10px] font-bold text-brand-cyan tracking-wider uppercase flex items-center gap-1 mt-1">
+                <div className="text-[15px] font-bold text-brand-cyan tracking-wider uppercase flex items-center gap-1.5 mt-1">
                   <span>Bolivia</span>
-                  <span className="text-slate-500">•</span>
-                  <span className="text-slate-400">PMI Bolivia Chapter</span>
+                  <BoliviaFlag size="sm" className="ml-0.5" />
+                  {/*<span className="text-slate-500">•</span>*/}
+                  {/*<span className="text-slate-400">PMI Bolivia Chapter</span>*/}
                 </div>
               </div>
             </a>

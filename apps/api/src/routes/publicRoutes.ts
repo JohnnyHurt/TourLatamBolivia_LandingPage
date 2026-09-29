@@ -32,6 +32,14 @@ router.post('/save-afiche', async (req: Request, res: Response) => {
   }
 });
 
+// Middleware for Edge/Browser caching on all public GET routes
+router.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600');
+  }
+  next();
+});
+
 function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
   if (!val) return fallback;
   try {
@@ -43,6 +51,113 @@ function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
     return fallback;
   }
 }
+
+// GET /api/public/landing-data - Ultra-fast aggregated endpoint for the landing page
+router.get('/landing-data', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.set('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600');
+    const [settings, socialLinks, sections, focusAreas, speakers, sponsors, agenda, tickets, faqs] =
+      await Promise.all([
+        prisma.eventSettings.findFirst(),
+        prisma.socialLink.findMany({ where: { isActive: true }, orderBy: { displayOrder: 'asc' } }),
+        prisma.pageSection.findMany({ where: { isVisible: true }, orderBy: { displayOrder: 'asc' } }),
+        prisma.focusArea.findMany({ where: { isActive: true }, orderBy: { displayOrder: 'asc' } }),
+        prisma.speaker.findMany({
+          where: { isActive: true },
+          orderBy: [{ isFeatured: 'desc' }, { displayOrder: 'asc' }],
+        }),
+        prisma.sponsor.findMany({ where: { isActive: true }, orderBy: { displayOrder: 'asc' } }),
+        prisma.agendaItem.findMany({
+          where: { isActive: true },
+          orderBy: [{ date: 'asc' }, { startTime: 'asc' }, { displayOrder: 'asc' }],
+          include: {
+            speaker: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                position: true,
+                company: true,
+                photo: true,
+                country: true,
+              },
+            },
+          },
+        }),
+        prisma.ticketType.findMany({
+          where: { isActive: true },
+          orderBy: [{ displayOrder: 'asc' }, { createdAt: 'desc' }],
+        }),
+        prisma.fAQ.findMany({ where: { isActive: true }, orderBy: { displayOrder: 'asc' } }),
+      ]);
+
+    const formattedSettings = settings
+      ? {
+          ...settings,
+          startDate: settings.startDate.toISOString(),
+          endDate: settings.endDate.toISOString(),
+          updatedAt: settings.updatedAt.toISOString(),
+          socialLinks,
+        }
+      : null;
+
+    const formattedSections = sections.map((s) => ({
+      ...s,
+      content: safeJsonParse(s.content, null),
+    }));
+
+    const formattedSpeakers = speakers.map((sp) => ({
+      ...sp,
+      specialties: safeJsonParse<string[]>(sp.specialties, []),
+      createdAt: sp.createdAt.toISOString(),
+      updatedAt: sp.updatedAt.toISOString(),
+    }));
+
+    const formattedSponsors = sponsors.map((s) => ({
+      ...s,
+      createdAt: s.createdAt.toISOString(),
+      updatedAt: s.updatedAt.toISOString(),
+    }));
+
+    const formattedAgenda = agenda.map((item) => ({
+      ...item,
+      date: item.date.toISOString(),
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
+    }));
+
+    const formattedTickets = tickets.map((t) => ({
+      ...t,
+      features: safeJsonParse<string[]>(t.features, []),
+      startDate: t.startDate ? t.startDate.toISOString() : null,
+      endDate: t.endDate ? t.endDate.toISOString() : null,
+      createdAt: t.createdAt.toISOString(),
+      updatedAt: t.updatedAt.toISOString(),
+    }));
+
+    const formattedFaqs = faqs.map((f) => ({
+      ...f,
+      createdAt: f.createdAt.toISOString(),
+      updatedAt: f.updatedAt.toISOString(),
+    }));
+
+    return res.json({
+      success: true,
+      data: {
+        settings: formattedSettings,
+        sections: formattedSections,
+        focusAreas,
+        speakers: formattedSpeakers,
+        sponsors: formattedSponsors,
+        agenda: formattedAgenda,
+        tickets: formattedTickets,
+        faqs: formattedFaqs,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 // GET /api/public/event-info
 router.get('/event-info', async (_req: Request, res: Response, next: NextFunction) => {

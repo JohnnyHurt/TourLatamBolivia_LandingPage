@@ -80,6 +80,8 @@ export const About: React.FC<AboutProps> = ({ settings }) => {
                 src={settings?.aboutImageUrl || defaultImage}
                 alt="TourLatam Stage"
                 className="w-full h-[460px] object-cover group-hover:scale-105 transition-transform duration-700 brightness-90"
+                loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-900/60 to-transparent" />
 

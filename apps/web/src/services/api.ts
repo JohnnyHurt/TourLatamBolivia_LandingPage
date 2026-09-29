@@ -63,6 +63,17 @@ async function fetcher<T>(url: string, options: RequestInit = {}): Promise<T> {
 
 export const api = {
   // Public Endpoints
+  getLandingData: () =>
+    fetcher<{
+      settings: EventSettingsDTO | null;
+      sections: PageSectionDTO[];
+      focusAreas: FocusAreaDTO[];
+      speakers: SpeakerDTO[];
+      sponsors: SponsorDTO[];
+      agenda: AgendaItemDTO[];
+      tickets: TicketTypeDTO[];
+      faqs: FAQDTO[];
+    }>('/public/landing-data'),
   getEventInfo: () => fetcher<EventSettingsDTO>('/public/event-info'),
   getPageSections: () => fetcher<PageSectionDTO[]>('/public/page-sections'),
   getFocusAreas: () => fetcher<FocusAreaDTO[]>('/public/focus-areas'),

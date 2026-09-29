@@ -64,6 +64,8 @@ export const SponsorsSection: React.FC<SponsorsSectionProps> = ({ sponsors }) =>
                         src={sponsor.logo}
                         alt={sponsor.name}
                         className="max-h-14 max-w-[140px] object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-105"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <span className="text-xs font-bold text-slate-400 group-hover:text-white mt-3 flex items-center gap-1 transition-colors">
                         <span>{sponsor.name}</span>

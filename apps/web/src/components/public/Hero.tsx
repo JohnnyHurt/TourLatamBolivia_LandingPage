@@ -34,16 +34,23 @@ export const Hero: React.FC<HeroProps> = () => {
             background: 'radial-gradient(ellipse at 60% 45%, rgba(0,242,254,0.10) 0%, rgba(121,40,202,0.06) 40%, transparent 70%)',
           }}
         />
-        <img
-          src="/Cyber_Hand_transparente.png"
-          alt="Cyber Hand Tour Latam 2026"
-          className="w-full h-full object-contain object-right select-none"
-          style={{
-            filter:
-              'drop-shadow(0 0 45px rgba(0,242,254,0.38)) drop-shadow(0 0 90px rgba(121,40,202,0.28))',
-          }}
-          draggable={false}
-        />
+        <picture className="w-full h-full flex items-center justify-end">
+          <source srcSet="/Cyber_Hand_transparente.webp" type="image/webp" />
+          <img
+            src="/Cyber_Hand_transparente.png"
+            alt="Cyber Hand Tour Latam 2026"
+            className="w-full h-full object-contain object-right select-none"
+            style={{
+              filter:
+                'drop-shadow(0 0 45px rgba(0,242,254,0.38)) drop-shadow(0 0 90px rgba(121,40,202,0.28))',
+            }}
+            draggable={false}
+            fetchPriority="high"
+            decoding="async"
+            width={1024}
+            height={1536}
+          />
+        </picture>
       </div>
 
       {/* ─── CONTENT — z-10 so it renders above the hand ─── */}

@@ -81,6 +81,8 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                     src={speaker.photo}
                     alt={speaker.name}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-95" />
 

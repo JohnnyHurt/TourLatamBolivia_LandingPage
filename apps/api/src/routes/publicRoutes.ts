@@ -1,7 +1,36 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import fs from 'fs';
+import path from 'path';
 import { prisma } from '../config/prisma.js'; // FIX #5: shared singleton
 
 const router = Router();
+
+// POST /api/public/save-afiche
+router.post('/save-afiche', async (req: Request, res: Response) => {
+  try {
+    const { filename, dataUrl } = req.body;
+    if (!dataUrl || !filename) {
+      return res.status(400).json({ error: 'dataUrl and filename required' });
+    }
+    const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    // Save to web public
+    const publicDir = path.resolve(process.cwd(), '../web/public');
+    const targetPath = path.join(publicDir, filename);
+    fs.writeFileSync(targetPath, buffer);
+
+    // Also save to artifacts folder if it exists
+    const artifactsDir = '/Users/admin/.gemini/antigravity-ide/brain/779da5d3-e621-42b8-bea6-49ffe64a0493';
+    if (fs.existsSync(artifactsDir)) {
+      fs.writeFileSync(path.join(artifactsDir, filename), buffer);
+    }
+
+    return res.json({ success: true, savedPath: targetPath, sizeBytes: buffer.length });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
 
 function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
   if (!val) return fallback;

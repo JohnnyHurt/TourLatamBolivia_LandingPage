@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Afiches Instagram — Tour LATAM Bolivia 2026</title>
+  <style>
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 400;
+      src: url('/fonts/barlow-400.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 700;
+      src: url('/fonts/barlow-700.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Barlow';
+      font-style: normal;
+      font-weight: 900;
+      src: url('/fonts/barlow-900.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Barlow Condensed';
+      font-style: normal;
+      font-weight: 700;
+      src: url('/fonts/barlow-condensed-700.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Barlow Condensed';
+      font-style: normal;
+      font-weight: 900;
+      src: url('/fonts/barlow-condensed-900.woff2') format('woff2');
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #06020c;
+      color: #fff;
+      font-family: 'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 60px;
+    }
+
+    .badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(0, 242, 254, 0.12);
+      border: 1px solid rgba(0, 242, 254, 0.35);
+      color: #00F2FE;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 900;
+      text-align: center;
+      background: linear-gradient(90deg, #00F2FE 0%, #a855f7 50%, #FF007F 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    p.subtitle {
+      color: #94a3b8;
+      font-size: 15px;
+      text-align: center;
+      max-width: 600px;
+      margin-bottom: 20px;
+    }
+
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 24px;
+      background: rgba(19, 9, 36, 0.7);
+      border: 1px solid rgba(121, 40, 202, 0.35);
+      border-radius: 16px;
+      padding: 16px 20px;
+      width: 100%;
+      max-width: 640px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: #cbd5e1;
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+    .btn-secondary.active {
+      background: rgba(0, 242, 254, 0.15);
+      border-color: #00F2FE;
+      color: #00F2FE;
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #00F2FE 0%, #7928CA 50%, #FF007F 100%);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 12px 24px;
+      box-shadow: 0 4px 20px rgba(0, 242, 254, 0.4);
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-download:hover {
+      box-shadow: 0 6px 28px rgba(255, 0, 127, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .preview-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 540px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.9), 0 0 45px rgba(121, 40, 202, 0.35);
+      border: 1px solid rgba(121, 40, 202, 0.5);
+      background: #0B0418;
+    }
+
+    #posterCanvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .status-badge {
+      margin-top: 14px;
+      font-size: 13px;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-grid {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      width: 100%;
+      max-width: 540px;
+    }
+
+    .info-card {
+      background: rgba(19, 9, 36, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    .info-card .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .info-card .val {
+      font-size: 13px;
+      font-weight: 800;
+      color: #f1f5f9;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="badge-top">
+    <span>📸</span> Afiche Oficial para Instagram
+  </div>
+
+  <h1>Tour LATAM Bolivia 2026</h1>
+  <p class="subtitle">
+    Congreso Internacional de Dirección de Proyectos • 20 y 21 de Noviembre, 2026 • Modalidad Virtual
+  </p>
+
+  <div class="control-panel">
+    <div class="btn-group">
+      <button class="btn btn-secondary active" id="btnMode1" onclick="setMode('composite')">
+        ✨ Opción A: Arte Futurista 3D + Logo Oficial
+      </button>
+      <button class="btn btn-secondary" id="btnMode2" onclick="setMode('vector')">
+        ⚡ Opción B: Minimalista High-Tech
+      </button>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-secondary active" id="btnRatioSquare" onclick="setFormat('square')">
+        ⏹️ Cuadrado 1:1 (1080 x 1080 px)
+      </button>
+      <button class="btn btn-secondary" id="btnRatioPortrait" onclick="setFormat('portrait')">
+        📱 Vertical 4:5 (1080 x 1350 px)
+      </button>
+    </div>
+
+    <button class="btn btn-download" id="downloadBtn" onclick="downloadPoster()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+      </svg>
+      Descargar Afiche en Alta Resolución (PNG)
+    </button>
+  </div>
+
+  <div class="preview-wrapper">
+    <canvas id="posterCanvas" width="1080" height="1080"></canvas>
+  </div>
+
+  <div class="status-badge" id="statusBadge">
+    <span>⏳</span> Cargando recursos y fuentes oficiales...
+  </div>
+
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="label">Resolución</div>
+      <div class="val" id="resVal">1080 x 1080 px</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Formato</div>
+      <div class="val">PNG Sin Pérdida</div>
+    </div>
+    <div class="info-card">
+      <div class="label">Logo</div>
+      <div class="val" style="color: #00F2FE;">PMI Bolivia Oficial</div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('posterCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusBadge = document.getElementById('statusBadge');
+    const resVal = document.getElementById('resVal');
+
+    let currentMode = 'composite';
+    let currentFormat = 'square'; // 'square' (1080x1080) or 'portrait' (1080x1350)
+
+    let baseImg = new Image();
+    let logoImg = new Image();
+    let handImg = new Image();
+
+    async function loadAllAssets() {
+      try {
+        statusBadge.innerHTML = '<span>⏳</span> Cargando recursos e imágenes...';
+        
+        async function fetchImg(url) {
+          const res = await fetch(url);
+          const blob = await res.blob();
+          const img = new Image();
+          img.src = URL.createObjectURL(blob);
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          return img;
+        }
+
+        const [b, l, h] = await Promise.all([
+          fetchImg('/afiche_base.jpg'),
+          fetchImg('/LogoPMIBol_transparente.png'),
+          fetchImg('/Cyber_Hand_transparente.png'),
+        ]);
+
+        baseImg = b;
+        logoImg = l;
+        handImg = h;
+
+        // Auto-save all 4 formats
+        const combos = [
+          { mode: 'composite', fmt: 'square' },
+          { mode: 'composite', fmt: 'portrait' },
+          { mode: 'vector', fmt: 'square' },
+          { mode: 'vector', fmt: 'portrait' },
+        ];
+
+        for (const c of combos) {
+          currentMode = c.mode;
+          currentFormat = c.fmt;
+          canvas.width = c.fmt === 'square' ? 1080 : 1080;
+          canvas.height = c.fmt === 'square' ? 1080 : 1350;
+          render();
+          await autoSaveToServer();
+        }
+
+        // Reset to default
+        currentMode = 'composite';
+        currentFormat = 'square';
+        canvas.width = 1080;
+        canvas.height = 1080;
+        document.getElementById('btnMode1').classList.add('active');
+        document.getElementById('btnMode2').classList.remove('active');
+        document.getElementById('btnRatioSquare').classList.add('active');
+        document.getElementById('btnRatioPortrait').classList.remove('active');
+        resVal.innerText = '1080 x 1080 px';
+        render();
+
+        statusBadge.innerHTML = '<span>✅</span> Los 4 afiches en alta resolución (1080x1080 y 1080x1350) se generaron y guardaron.';
+      } catch (err) {
+        console.error(err);
+        statusBadge.innerHTML = `<span style="color:#ef4444">⚠️ Error al cargar: ${err.message}</span>`;
+      }
+    }
+
+    loadAllAssets();
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('btnMode1').classList.toggle('active', mode === 'composite');
+      document.getElementById('btnMode2').classList.toggle('active', mode === 'vector');
+      render();
+    }
+
+    function setFormat(fmt) {
+      currentFormat = fmt;
+      document.getElementById('btnRatioSquare').classList.toggle('active', fmt === 'square');
+      document.getElementById('btnRatioPortrait').classList.toggle('active', fmt === 'portrait');
+
+      if (fmt === 'square') {
+        canvas.width = 1080;
+        canvas.height = 1080;
+        resVal.innerText = '1080 x 1080 px';
+      } else {
+        canvas.width = 1080;
+        canvas.height = 1350;
+        resVal.innerText = '1080 x 1350 px';
+      }
+      render();
+    }
+
+    function render() {
+      const W = canvas.width;
+      const H = canvas.height;
+
+      if (currentMode === 'composite') {
+        renderComposite(W, H);
+      } else {
+        renderVector(W, H);
+      }
+    }
+
+    function renderComposite(W, H) {
+      // Background base
+      if (H === 1080) {
+        ctx.drawImage(baseImg, 0, 0, 1080, 1080);
+      } else {
+        // Vertical 1080x1350: draw background extended with dark cosmic gradients
+        ctx.fillStyle = '#06020c';
+        ctx.fillRect(0, 0, W, H);
+        // Draw image centered vertically
+        ctx.drawImage(baseImg, 0, 135, 1080, 1080);
+
+        // Ambient top and bottom fade
+        const topGrad = ctx.createLinearGradient(0, 0, 0, 200);
+        topGrad.addColorStop(0, '#06020c');
+        topGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = topGrad;
+        ctx.fillRect(0, 0, W, 200);
+
+        const botGrad = ctx.createLinearGradient(0, H - 200, 0, H);
+        botGrad.addColorStop(0, 'transparent');
+        botGrad.addColorStop(1, '#06020c');
+        ctx.fillStyle = botGrad;
+        ctx.fillRect(0, H - 200, W, 200);
+      }
+
+      // Draw Top Right Official PMI Bolivia Logo with crisp high-end card container
+      const logoW = 290;
+      const logoH = logoW / (logoImg.width / logoImg.height);
+      const cardW = 330;
+      const cardH = 115;
+      const cardX = W - cardW - 35;
+      const cardY = H === 1080 ? 35 : 45;
+
+      ctx.save();
+      // Frosted dark glass container
+      ctx.fillStyle = 'rgba(11, 4, 24, 0.94)';
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.45)';
+      ctx.lineWidth = 1.8;
+      ctx.shadowColor = 'rgba(0, 242, 254, 0.4)';
+      ctx.shadowBlur = 18;
+
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(cardX, cardY, cardW, cardH, 16);
+      } else {
+        ctx.rect(cardX, cardY, cardW, cardH);
+      }
+      ctx.fill();
+      ctx.stroke();
+
+      // Official Logo transparent
+      const lx = cardX + (cardW - logoW) / 2;
+      const ly = cardY + (cardH - logoH) / 2;
+      ctx.shadowBlur = 0;
+      ctx.drawImage(logoImg, lx, ly, logoW, logoH);
+      ctx.restore();
+    }
+
+    function renderVector(W, H) {
+      // Cosmic Deep Purple background
+      ctx.fillStyle = '#0B0418';
+      ctx.fillRect(0, 0, W, H);
+
+      // Ambient glows
+      const g1 = ctx.createRadialGradient(250, 280, 50, 250, 280, 600);
+      g1.addColorStop(0, 'rgba(121, 40, 202, 0.5)');
+      g1.addColorStop(1, 'transparent');
+      ctx.fillStyle = g1;
+      ctx.fillRect(0, 0, W, H);
+
+      const g2 = ctx.createRadialGradient(W - 200, 350, 50, W - 200, 350, 650);
+      g2.addColorStop(0, 'rgba(0, 242, 254, 0.35)');
+      g2.addColorStop(1, 'transparent');
+      ctx.fillStyle = g2;
+      ctx.fillRect(0, 0, W, H);
+
+      const g3 = ctx.createRadialGradient(W - 250, H - 250, 50, W - 250, H - 250, 600);
+      g3.addColorStop(0, 'rgba(255, 0, 127, 0.35)');
+      g3.addColorStop(1, 'transparent');
+      ctx.fillStyle = g3;
+      ctx.fillRect(0, 0, W, H);
+
+      // Geometric mesh accent lines
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.14)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(0, 180); ctx.lineTo(420, 0);
+      ctx.moveTo(220, 0); ctx.lineTo(580, 480); ctx.lineTo(W, 200);
+      ctx.moveTo(0, 580); ctx.lineTo(480, 720); ctx.lineTo(280, H);
+      ctx.moveTo(480, 720); ctx.lineTo(W, 880);
+      ctx.stroke();
+
+      // Cyber Hand on the Right
+      ctx.save();
+      ctx.shadowColor = '#00F2FE';
+      ctx.shadowBlur = 35;
+      const handW = 630;
+      const handH = handW * (handImg.height / handImg.width);
+      const handX = W - handW + 60;
+      const handY = (H - handH) / 2 + (H > 1080 ? 80 : 40);
+      ctx.drawImage(handImg, handX, handY, handW, handH);
+      ctx.restore();
+
+      // Official PMI Bolivia Logo
+      const cardW = 340;
+      const cardH = 118;
+      const cardX = W - cardW - 40;
+      const cardY = 40;
+      ctx.save();
+      ctx.fillStyle = 'rgba(19, 9, 36, 0.9)';
+      ctx.strokeStyle = 'rgba(121, 40, 202, 0.65)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(cardX, cardY, cardW, cardH, 16);
+      else ctx.rect(cardX, cardY, cardW, cardH);
+      ctx.fill();
+      ctx.stroke();
+
+      const logoW = 295;
+      const logoH = logoW / (logoImg.width / logoImg.height);
+      ctx.drawImage(logoImg, cardX + (cardW - logoW)/2, cardY + (cardH - logoH)/2, logoW, logoH);
+      ctx.restore();
+
+      // Typography Left Side
+      const startX = 65;
+      let curY = H > 1080 ? 180 : 155;
+
+      // "Tour"
+      ctx.font = '900 68px "Barlow", sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText('Tour', startX, curY);
+
+      // "LATAM"
+      curY += 115;
+      const latamGrad = ctx.createLinearGradient(startX, 0, startX + 500, 0);
+      latamGrad.addColorStop(0, '#00F2FE');
+      latamGrad.addColorStop(0.5, '#8338EC');
+      latamGrad.addColorStop(1, '#FF007F');
+
+      ctx.save();
+      ctx.font = '900 135px "Barlow", sans-serif';
+      ctx.fillStyle = latamGrad;
+      ctx.shadowColor = 'rgba(0, 242, 254, 0.55)';
+      ctx.shadowBlur = 24;
+      ctx.fillText('LATAM', startX - 4, curY);
+      ctx.restore();
+
+      // "Bolivia 2026"
+      curY += 85;
+      ctx.font = '900 64px "Barlow", sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText('Bolivia 2026', startX, curY);
+
+      // Title Subtitle
+      curY += 85;
+      const subGrad = ctx.createLinearGradient(startX, 0, startX + 460, 0);
+      subGrad.addColorStop(0, '#00F2FE');
+      subGrad.addColorStop(1, '#FF007F');
+      ctx.save();
+      ctx.fillStyle = subGrad;
+      ctx.font = '900 36px "Barlow Condensed", sans-serif';
+      ctx.fillText('CONGRESO INTERNACIONAL', startX, curY);
+      curY += 46;
+      ctx.fillText('DE DIRECCIÓN DE PROYECTOS', startX, curY);
+      ctx.restore();
+
+      // Neon Divider Line
+      curY += 25;
+      const lineGrad = ctx.createLinearGradient(startX, 0, startX + 480, 0);
+      lineGrad.addColorStop(0, '#00F2FE');
+      lineGrad.addColorStop(0.8, '#FF007F');
+      lineGrad.addColorStop(1, 'transparent');
+      ctx.strokeStyle = lineGrad;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(startX, curY);
+      ctx.lineTo(startX + 480, curY);
+      ctx.stroke();
+
+      // Pillars (PMO - Agilidad - IA)
+      curY += 35;
+      const pillars = ['PMO', 'AGILIDAD', 'IA'];
+      const icons = ['📊', '⚡', '🧠'];
+      const colors = ['#00F2FE', '#8338EC', '#FF007F'];
+      const badgeW = 140;
+      const badgeH = 100;
+
+      pillars.forEach((p, idx) => {
+        const bx = startX + idx * 155;
+        ctx.save();
+        ctx.fillStyle = 'rgba(29, 11, 56, 0.85)';
+        ctx.strokeStyle = colors[idx];
+        ctx.lineWidth = 2;
+        ctx.shadowColor = colors[idx];
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(bx, curY, badgeW, badgeH, 14);
+        else ctx.rect(bx, curY, badgeW, badgeH);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = '26px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(icons[idx], bx + badgeW / 2, curY + 42);
+
+        ctx.font = '900 20px "Barlow", sans-serif';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowBlur = 0;
+        ctx.fillText(p, bx + badgeW / 2, curY + 80);
+        ctx.restore();
+      });
+
+      // Bottom Section: Dates & Modality
+      curY += badgeH + 35;
+      const boxW = 465;
+      const boxH = 220;
+      ctx.save();
+      ctx.fillStyle = 'rgba(19, 9, 36, 0.85)';
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(startX, curY, boxW, boxH, 18);
+      else ctx.rect(startX, curY, boxW, boxH);
+      ctx.fill();
+      ctx.stroke();
+
+      // Date Header & Value
+      ctx.font = '700 16px "Barlow", sans-serif';
+      ctx.fillStyle = '#00F2FE';
+      ctx.fillText('FECHA OFICIAL', startX + 28, curY + 40);
+
+      ctx.font = '900 32px "Barlow", sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText('20 y 21 de Noviembre, 2026', startX + 28, curY + 82);
+
+      // Inner divider
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(startX + 28, curY + 110);
+      ctx.lineTo(startX + boxW - 28, curY + 110);
+      ctx.stroke();
+
+      // Virtual Pill
+      const pillY = curY + 138;
+      const pillGrad = ctx.createLinearGradient(startX + 28, 0, startX + 320, 0);
+      pillGrad.addColorStop(0, 'rgba(0, 242, 254, 0.22)');
+      pillGrad.addColorStop(1, 'rgba(255, 0, 127, 0.22)');
+      ctx.fillStyle = pillGrad;
+      ctx.strokeStyle = '#00F2FE';
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = '#00F2FE';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(startX + 28, pillY, 280, 50, 25);
+      else ctx.rect(startX + 28, pillY, 280, 50);
+      ctx.fill();
+      ctx.stroke();
+
+      // Pulsing cyan indicator
+      ctx.fillStyle = '#00F2FE';
+      ctx.beginPath();
+      ctx.arc(startX + 58, pillY + 25, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.font = '900 20px "Barlow", sans-serif';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.shadowBlur = 0;
+      ctx.fillText('MODALIDAD VIRTUAL', startX + 80, pillY + 32);
+
+      ctx.restore();
+    }
+
+    async function autoSaveToServer() {
+      try {
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
+        const filename = `Afiche_Instagram_TourLATAM_Bolivia_2026_${currentMode}_${currentFormat}.png`;
+        await fetch('http://localhost:4000/api/public/save-afiche', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename, dataUrl })
+        });
+      } catch (e) {
+        console.warn('Auto save note:', e);
+      }
+    }
+
+    async function downloadPoster() {
+      statusBadge.innerHTML = '<span>⏳</span> Preparando archivo PNG para descarga...';
+      const filename = `Afiche_Instagram_TourLATAM_Bolivia_2026_${currentMode}_${currentFormat}.png`;
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
+
+      // Send to server
+      try {
+        await fetch('http://localhost:4000/api/public/save-afiche', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename, dataUrl })
+        });
+      } catch (err) {}
+
+      // Trigger browser download
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = dataUrl;
+      link.click();
+
+      statusBadge.innerHTML = '<span>🎉</span> ¡Afiche descargado correctamente!';
+      setTimeout(() => {
+        statusBadge.innerHTML = '<span>✅</span> Afiche listo en máxima calidad para publicación.';
+      }, 4000);
+    }
+  </script>
+</body>
+</html>

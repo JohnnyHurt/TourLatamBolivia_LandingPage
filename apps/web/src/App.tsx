@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 // Public Pages
 import { LandingPage } from './pages/public/LandingPage';
 import { SpeakerDetailPage } from './pages/public/SpeakerDetailPage';
+import { ThankYouPage } from './pages/public/ThankYouPage';
 
 // Admin Pages
 import { LoginPage } from './pages/admin/LoginPage';
@@ -55,6 +56,7 @@ export const App: React.FC = () => {
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/speakers/:slug" element={<SpeakerDetailPage />} />
+          <Route path="/gracias" element={<ThankYouPage />} />
 
           {/* Admin Login */}
           <Route path="/admin/login" element={<LoginPage />} />

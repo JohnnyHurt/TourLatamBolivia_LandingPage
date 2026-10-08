@@ -467,6 +467,20 @@ export const TicketsPage: React.FC = () => {
               </div>
 
               <div>
+                <label className="block text-slate-300 font-bold mb-1">URL de Pasarela de Pago (Opcional)</label>
+                <input
+                  type="url"
+                  value={editingTicket.registrationUrl || ''}
+                  onChange={(e) => setEditingTicket({ ...editingTicket, registrationUrl: e.target.value })}
+                  placeholder="Ej: https://pay.stripe.com/..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-dark-900 border border-slate-700 focus:border-brand-cyan text-white"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Si se deja en blanco, usará el enlace global del evento.
+                </p>
+              </div>
+
+              <div>
                 <label className="block text-slate-300 font-bold mb-1">
                   Beneficios / Características (una por línea)
                 </label>

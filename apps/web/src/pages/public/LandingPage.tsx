@@ -57,6 +57,82 @@ const DEFAULT_SETTINGS: EventSettingsDTO = {
   updatedAt: new Date().toISOString(),
 };
 
+const DEFAULT_TICKETS: TicketTypeDTO[] = [
+  {
+    id: 'a52e8761-da8d-4d79-907c-c78b59af0f63',
+    name: 'NO MIEMBROS',
+    description: 'Pase general para profesionales no asociados al PMI con descuento anticipado.',
+    price: 29,
+    priceBs: 290,
+    originalPrice: 320,
+    currency: 'USD',
+    startDate: '2026-06-01T00:00:00.000Z',
+    endDate: '2026-08-31T23:59:59.000Z',
+    features: [
+      'Acceso completo a 2 días de conferencias magistrales',
+      'Acceso a Workshops inmersivos de IA & Agilidad',
+      'Certificado oficial de asistencia con PDU credits (24 PDUs)',
+      'Networking International',
+      'Acceso a la plataforma virtual por 60 días post-evento',
+    ],
+    registrationUrl: 'https://lck.page.link/s6vi',
+    badgeText: 'PRE VENTA',
+    isFeatured: false,
+    isActive: true,
+    displayOrder: 0,
+    createdAt: '2026-09-24T23:20:19.981Z',
+    updatedAt: '2026-10-11T00:23:37.381Z',
+  },
+  {
+    id: '4252d1f1-e888-450d-a2b4-8364c2dab57b',
+    name: 'MIEMBROS - PMI BOLIVIA',
+    description: 'Tarifa preferencial para miembros activos de cualquier capítulo del PMI a nivel global.',
+    price: 15,
+    priceBs: 150,
+    originalPrice: 150,
+    currency: 'USD',
+    startDate: '2026-06-01T00:00:00.000Z',
+    endDate: '2026-08-31T23:59:59.000Z',
+    features: [
+      'Acceso completo a 2 días de conferencias magistrales',
+      'Acceso a Workshops inmersivos de IA & Agilidad',
+      'Certificado oficial de asistencia con PDU credits (24 PDUs)',
+      'Networking International',
+      'Acceso a la plataforma virtual por 60 días post-evento',
+    ],
+    registrationUrl: 'https://lck.page.link/SrmV',
+    badgeText: 'PRE VENTA',
+    isFeatured: true,
+    isActive: true,
+    displayOrder: 1,
+    createdAt: '2026-09-24T23:20:19.743Z',
+    updatedAt: '2026-10-11T00:48:25.000Z',
+  },
+  {
+    id: '53ee5971-c022-4fec-b3ed-7bec994f50ec',
+    name: 'ESTUDIANTES',
+    description: 'Precio preferencial para Estudiantes de Pre-grado y Post-grado',
+    price: 20,
+    priceBs: 200,
+    originalPrice: 550,
+    currency: 'USD',
+    features: [
+      'Acceso completo a 2 días de conferencias magistrales',
+      'Acceso a Workshops inmersivos de IA & Agilidad',
+      'Certificado oficial de asistencia.',
+      'Networking International',
+      'Acceso a la plataforma virtual por 60 días post-evento',
+    ],
+    registrationUrl: 'https://lck.page.link/ZfwU',
+    badgeText: 'PRE VENTA',
+    isFeatured: false,
+    isActive: true,
+    displayOrder: 2,
+    createdAt: '2026-09-24T23:20:20.102Z',
+    updatedAt: '2026-10-11T00:38:06.479Z',
+  },
+];
+
 function getLocalCache() {
   try {
     const raw = localStorage.getItem('tourlatam_landing_cache_v1');
@@ -76,7 +152,9 @@ export const LandingPage: React.FC = () => {
   const [speakers, setSpeakers] = useState<SpeakerDTO[]>(cached?.speakers || []);
   const [sponsors, setSponsors] = useState<SponsorDTO[]>(cached?.sponsors || []);
   const [agenda, setAgenda] = useState<AgendaItemDTO[]>(cached?.agenda || []);
-  const [tickets, setTickets] = useState<TicketTypeDTO[]>(cached?.tickets || []);
+  const [tickets, setTickets] = useState<TicketTypeDTO[]>(
+    cached?.tickets && cached.tickets.length > 0 ? cached.tickets : DEFAULT_TICKETS
+  );
   const [faqs, setFaqs] = useState<FAQDTO[]>(cached?.faqs || []);
 
   useEffect(() => {

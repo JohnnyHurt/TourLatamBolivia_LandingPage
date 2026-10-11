@@ -94,10 +94,8 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
                 //CMS Backoffice
               </a>*/}
               <a
-                href={settings?.registrationUrl || '#pricing'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative inline-flex items-center justify-center px-5 xl:px-6 py-2.5 text-xs font-black tracking-wider btn-pmi-neon rounded-full uppercase gap-1.5 shadow-lg shadow-brand-pmiOrange/20 hover:scale-105 transition-all"
+                href="#pricing"
+                className="relative inline-flex items-center justify-center px-5 xl:px-6 py-2.5 text-xs font-black tracking-wider btn-pmi-neon rounded-full uppercase gap-1.5 shadow-lg shadow-brand-pmiOrange/20 hover:scale-105 transition-all cursor-pointer"
               >
                 <span>{settings?.primaryCtaText || 'REGÍSTRATE AHORA'}</span>
                 <ArrowRight className="w-3.5 h-3.5 text-brand-pmiOrange" />
@@ -107,10 +105,8 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
             {/* Mobile / Tablet Actions (< 1024px) */}
             <div className="flex lg:hidden items-center gap-2 sm:gap-3">
               <a
-                href={settings?.registrationUrl || '#pricing'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden sm:inline-flex items-center justify-center px-4 py-2 text-[11px] font-black tracking-wider btn-pmi-neon rounded-full uppercase gap-1"
+                href="#pricing"
+                className="hidden sm:inline-flex items-center justify-center px-4 py-2 text-[11px] font-black tracking-wider btn-pmi-neon rounded-full uppercase gap-1 cursor-pointer"
               >
                 <span>{settings?.primaryCtaText || 'REGÍSTRATE'}</span>
                 <ArrowRight className="w-3 h-3 text-brand-pmiOrange" />
@@ -153,11 +149,9 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
             </div>
             <div className="pt-5 mt-3 border-t border-dark-600/80 flex flex-col gap-3">
               <a
-                href={settings?.registrationUrl || '#pricing'}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#pricing"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-3 text-xs font-black btn-pmi-neon rounded-xl uppercase tracking-wider flex items-center justify-center gap-2"
+                className="w-full text-center py-3 text-xs font-black btn-pmi-neon rounded-xl uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>{settings?.primaryCtaText || 'REGÍSTRATE AHORA'}</span>
                 <ArrowRight className="w-4 h-4 text-brand-pmiOrange" />

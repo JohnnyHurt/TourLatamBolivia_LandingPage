@@ -34,10 +34,8 @@ export const CtaSection: React.FC<CtaSectionProps> = ({ settings }) => {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
-                href={settings?.registrationUrl || '#pricing'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center px-10 py-5 rounded-2xl text-base font-black text-white bg-gradient-to-r from-brand-pmiOrange to-brand-pmiOrangeDark shadow-glow-pmi hover:brightness-110 transition-all transform hover:-translate-y-1 gap-3 uppercase tracking-wider"
+                href="#pricing"
+                className="w-full sm:w-auto inline-flex items-center justify-center px-10 py-5 rounded-2xl text-base font-black text-white bg-gradient-to-r from-brand-pmiOrange to-brand-pmiOrangeDark shadow-glow-pmi hover:brightness-110 transition-all transform hover:-translate-y-1 gap-3 uppercase tracking-wider cursor-pointer"
               >
                 <span>{settings?.primaryCtaText || 'REGÍSTRATE AHORA'}</span>
                 <ArrowRight className="w-5 h-5" />

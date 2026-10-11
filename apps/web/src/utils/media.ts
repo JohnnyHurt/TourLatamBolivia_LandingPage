@@ -2,10 +2,23 @@
  * Utility to safely resolve media URLs (images, logos, avatars, photos).
  * Handles:
  * - Data URLs and Blob URLs for instant file upload previews
- * - Relative /uploads/... URLs (resolved through current origin or Vite proxy)
- * - Absolute localhost:4000/uploads/... URLs (converted to relative /uploads/... so they proxy smoothly)
- * - External URLs (e.g. Unsplash, CDN, S3)
+ * - Relative /uploads/... URLs (resolved against API host if deployed on Vercel/Render, or Vite proxy locally)
+ * - Absolute localhost:4000/uploads/... URLs (converted to remote API host or local proxy)
+ * - External URLs (e.g. Unsplash, CDN, S3, Supabase Storage)
  */
+function getApiOrigin(): string {
+  const rawApi = ((import.meta.env.VITE_API_URL as string) || '').trim();
+  if (rawApi && (rawApi.startsWith('http://') || rawApi.startsWith('https://'))) {
+    try {
+      const parsed = new URL(rawApi);
+      return parsed.origin;
+    } catch {
+      // ignore
+    }
+  }
+  return '';
+}
+
 export function getMediaUrl(url: string | null | undefined): string {
   if (!url) return '';
   const trimmed = url.trim();
@@ -15,18 +28,21 @@ export function getMediaUrl(url: string | null | undefined): string {
     return trimmed;
   }
 
-  // If pointing to localhost:4000/uploads, convert to relative /uploads
-  if (trimmed.includes('localhost:4000/uploads/')) {
-    const file = trimmed.split('localhost:4000/uploads/')[1];
-    return `/uploads/${file}`;
+  // If pointing to localhost:4000/uploads or relative /uploads/
+  let uploadPath = '';
+  if (trimmed.includes('/uploads/')) {
+    const parts = trimmed.split('/uploads/');
+    uploadPath = `/uploads/${parts[1]}`;
+  } else if (trimmed.startsWith('/uploads/')) {
+    uploadPath = trimmed;
   }
 
-  // If pointing to another host with /uploads/, but accessing via frontend
-  if (trimmed.startsWith('http://') && trimmed.includes('/uploads/')) {
-    const parts = trimmed.split('/uploads/');
-    if (parts.length > 1) {
-      return `/uploads/${parts[1]}`;
+  if (uploadPath) {
+    const apiOrigin = getApiOrigin();
+    if (apiOrigin) {
+      return `${apiOrigin}${uploadPath}`;
     }
+    return uploadPath;
   }
 
   return trimmed;

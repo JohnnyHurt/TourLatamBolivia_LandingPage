@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/uploads/(.*)",
+      "destination": "https://tourlatam-api.onrender.com/uploads/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

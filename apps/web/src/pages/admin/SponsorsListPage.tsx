@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../../services/api';
 import { SponsorDTO } from '@tourlatam/types';
 import { Plus, Edit2, Trash2, ExternalLink, RefreshCw, AlertCircle, Loader2, Award } from 'lucide-react';
+import { getMediaUrl } from '../../utils/media';
 
 const SPONSORS_CACHE_KEY = 'tourlatam_sponsors_cache';
 
@@ -182,7 +183,14 @@ export const SponsorsListPage: React.FC = () => {
                   <tr key={sp.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-4 px-6">
                       <div className="w-16 h-10 rounded-lg overflow-hidden bg-slate-800 p-1 flex items-center justify-center border border-slate-700">
-                        <img src={sp.logo} alt={sp.name} className="max-h-full max-w-full object-contain" />
+                        <img
+                          src={getMediaUrl(sp.logo)}
+                          alt={sp.name}
+                          className="max-h-full max-w-full object-contain"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                          }}
+                        />
                       </div>
                     </td>
                     <td className="py-4 px-6">

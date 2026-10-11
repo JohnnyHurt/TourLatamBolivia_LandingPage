@@ -5,6 +5,7 @@ import { api } from '../../services/api';
 import { ArrowLeft, Linkedin, Globe, Video, MapPin, Clock, Award, Sparkles } from 'lucide-react';
 import { Header } from '../../components/public/Header';
 import { Footer } from '../../components/public/Footer';
+import { getMediaUrl } from '../../utils/media';
 
 export const SpeakerDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -79,9 +80,12 @@ export const SpeakerDetailPage: React.FC = () => {
               <div className="md:col-span-4 relative">
                 <div className="w-full h-80 rounded-2xl overflow-hidden bg-dark-950 shadow-xl border border-dark-600">
                   <img
-                    src={speaker.photo}
+                    src={getMediaUrl(speaker.photo)}
                     alt={speaker.name}
                     className="w-full h-full object-cover object-center"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                    }}
                   />
                 </div>
                 {speaker.isFeatured && (

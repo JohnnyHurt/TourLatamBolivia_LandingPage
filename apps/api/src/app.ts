@@ -70,8 +70,20 @@ const apiLimiter = rateLimit({
 app.use('/api', apiLimiter);
 
 // Serve static uploaded media files
-const uploadsPath = path.resolve(__dirname, '../../../uploads');
-app.use('/uploads', express.static(uploadsPath));
+import fs from 'fs';
+if (!fs.existsSync(config.uploadsDir)) {
+  fs.mkdirSync(config.uploadsDir, { recursive: true });
+}
+
+const corsStatic = (_req: express.Request, res: express.Response, next: express.NextFunction) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+};
+
+const staticMiddleware = express.static(config.uploadsDir);
+app.use('/uploads', corsStatic, staticMiddleware);
+app.use('/api/uploads', corsStatic, staticMiddleware);
 
 // API Routes
 app.use('/api/auth', authRoutes);

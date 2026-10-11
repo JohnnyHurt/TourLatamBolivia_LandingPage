@@ -33,7 +33,7 @@ class LocalStorageProvider implements IStorageProvider {
   private uploadDir: string;
 
   constructor() {
-    this.uploadDir = path.resolve(__dirname, '../../../../uploads');
+    this.uploadDir = config.uploadsDir;
     if (!fs.existsSync(this.uploadDir)) {
       fs.mkdirSync(this.uploadDir, { recursive: true });
     }
@@ -46,8 +46,11 @@ class LocalStorageProvider implements IStorageProvider {
 
     await fs.promises.writeFile(filePath, file.buffer);
 
+    // For local storage, use relative /uploads/ path so Vite proxy and browsers can access seamlessly
+    const publicUrl = `/uploads/${hashName}`;
+
     return {
-      url: `${config.storage.publicUrl}/${hashName}`,
+      url: publicUrl,
       storageKey: hashName,
       filename: file.originalname,
       mimeType: file.mimetype,

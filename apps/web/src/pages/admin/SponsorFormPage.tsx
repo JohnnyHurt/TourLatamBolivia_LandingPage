@@ -4,6 +4,8 @@ import { api } from '../../services/api';
 import { SponsorDTO, SponsorTier } from '@tourlatam/types';
 import { ArrowLeft, Save, Upload, Image as ImageIcon } from 'lucide-react';
 
+import { getMediaUrl } from '../../utils/media';
+
 export const SponsorFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id && id !== 'new');
@@ -23,12 +25,16 @@ export const SponsorFormPage: React.FC = () => {
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (isEdit && id) {
-      api.getSponsors().then((list) => {
+      api.getSponsors(true).then((list) => {
         const found = list.find((s) => s.id === id);
         if (found) setForm(found);
+        setLoading(false);
+      }).catch((err) => {
+        console.error(err);
         setLoading(false);
       });
     }
@@ -42,10 +48,14 @@ export const SponsorFormPage: React.FC = () => {
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    const localBlob = URL.createObjectURL(file);
+    setPreviewUrl(localBlob);
     setUploading(true);
+
     try {
       const formData = new FormData();
-      formData.append('file', e.target.files[0]);
+      formData.append('file', file);
       const res = await api.uploadMedia(formData);
       setForm((prev) => ({ ...prev, logo: res.url }));
     } catch (err: any) {
@@ -58,12 +68,42 @@ export const SponsorFormPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+
+    const payload = {
+      name: (form.name || '').trim(),
+      logo: (form.logo || '').trim(),
+      website: (form.website || '').trim() || undefined,
+      description: (form.description || '').trim() || undefined,
+      tier: form.tier || 'SILVER',
+      displayOrder: Number(form.displayOrder ?? 0),
+      isFeatured: Boolean(form.isFeatured),
+      isActive: form.isActive !== undefined ? Boolean(form.isActive) : true,
+    };
+
     try {
+      let savedSponsor: SponsorDTO;
       if (isEdit && id) {
-        await api.updateSponsor(id, form);
+        savedSponsor = await api.updateSponsor(id, payload);
       } else {
-        await api.createSponsor(form);
+        savedSponsor = await api.createSponsor(payload);
       }
+
+      // Synchronize landing cache if present
+      try {
+        const raw = localStorage.getItem('tourlatam_landing_cache_v1');
+        if (raw) {
+          const cacheData = JSON.parse(raw);
+          if (Array.isArray(cacheData.sponsors)) {
+            cacheData.sponsors = isEdit
+              ? cacheData.sponsors.map((s: any) => (s.id === id ? { ...s, ...savedSponsor } : s))
+              : [...cacheData.sponsors, savedSponsor];
+            localStorage.setItem('tourlatam_landing_cache_v1', JSON.stringify(cacheData));
+          }
+        }
+      } catch {
+        // ignore
+      }
+
       navigate('/admin/sponsors');
     } catch (err: any) {
       alert(err.message || 'Error al guardar sponsor');
@@ -154,9 +194,16 @@ export const SponsorFormPage: React.FC = () => {
             <div className="sm:col-span-2">
               <label className="block text-xs font-bold text-slate-300 mb-1">Logo Oficial (PNG / SVG / WebP) *</label>
               <div className="flex items-center gap-4">
-                <div className="w-24 h-16 rounded-xl bg-slate-800 border border-slate-700 p-2 flex items-center justify-center shrink-0">
-                  {form.logo ? (
-                    <img src={form.logo} alt="Preview" className="max-h-full max-w-full object-contain" />
+                <div className="w-24 h-16 rounded-xl bg-slate-800 border border-slate-700 p-2 flex items-center justify-center shrink-0 overflow-hidden">
+                  {previewUrl || form.logo ? (
+                    <img
+                      src={previewUrl || getMediaUrl(form.logo)}
+                      alt="Preview"
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                      }}
+                    />
                   ) : (
                     <ImageIcon className="w-6 h-6 text-slate-500" />
                   )}

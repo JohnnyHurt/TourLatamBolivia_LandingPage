@@ -1,6 +1,7 @@
 import React from 'react';
 import { Award, ExternalLink, Sparkles } from 'lucide-react';
 import { SponsorDTO } from '@tourlatam/types';
+import { getMediaUrl } from '../../utils/media';
 
 interface SponsorsSectionProps {
   sponsors: SponsorDTO[];
@@ -61,11 +62,14 @@ export const SponsorsSection: React.FC<SponsorsSectionProps> = ({ sponsors }) =>
                       className="glass-card rounded-2xl p-6 flex flex-col items-center justify-center group border border-dark-600 hover:border-brand-cyan/50 hover:shadow-glow-cyan transition-all bg-dark-800/80 min-h-[140px]"
                     >
                       <img
-                        src={sponsor.logo}
+                        src={getMediaUrl(sponsor.logo)}
                         alt={sponsor.name}
                         className="max-h-14 max-w-[140px] object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300 transform group-hover:scale-105"
                         loading="lazy"
                         decoding="async"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                        }}
                       />
                       <span className="text-xs font-bold text-slate-400 group-hover:text-white mt-3 flex items-center gap-1 transition-colors">
                         <span>{sponsor.name}</span>

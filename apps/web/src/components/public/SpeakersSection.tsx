@@ -2,6 +2,7 @@ import React from 'react';
 import { Linkedin, Globe, Video, ArrowUpRight, Award, MapPin, Sparkles } from 'lucide-react';
 import { SpeakerDTO } from '@tourlatam/types';
 import { Link } from 'react-router-dom';
+import { getMediaUrl } from '../../utils/media';
 
 interface SpeakersSectionProps {
   speakers: SpeakerDTO[];
@@ -38,11 +39,14 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                 {/* Photo & Featured Badge */}
                 <div className="relative h-72 overflow-hidden bg-dark-950">
                   <img
-                    src={speaker.photo}
+                    src={getMediaUrl(speaker.photo)}
                     alt={speaker.name}
                     className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                     decoding="async"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-95" />
 

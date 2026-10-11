@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../../services/api';
 import { SpeakerDTO } from '@tourlatam/types';
 import { Plus, Edit2, Trash2, Award, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
+import { getMediaUrl } from '../../utils/media';
 
 export const SpeakersListPage: React.FC = () => {
   const [speakers, setSpeakers] = useState<SpeakerDTO[]>([]);
@@ -96,7 +97,14 @@ export const SpeakersListPage: React.FC = () => {
                   <tr key={sp.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-4 px-6">
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-800 border border-slate-700">
-                        <img src={sp.photo} alt={sp.name} className="w-full h-full object-cover" />
+                        <img
+                          src={getMediaUrl(sp.photo)}
+                          alt={sp.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                          }}
+                        />
                       </div>
                     </td>
                     <td className="py-4 px-6">

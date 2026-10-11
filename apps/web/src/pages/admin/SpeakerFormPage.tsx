@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { api } from '../../services/api';
 import { SpeakerDTO } from '@tourlatam/types';
 import { ArrowLeft, Save, Upload, Image as ImageIcon } from 'lucide-react';
+import { getMediaUrl } from '../../utils/media';
 
 export const SpeakerFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +31,7 @@ export const SpeakerFormPage: React.FC = () => {
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (isEdit && id) {
@@ -57,11 +59,17 @@ export const SpeakerFormPage: React.FC = () => {
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.[0]) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Instant local preview
+    const localUrl = URL.createObjectURL(file);
+    setPreviewUrl(localUrl);
+
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('file', e.target.files[0]);
+      formData.append('file', file);
       const res = await api.uploadMedia(formData);
       setForm((prev) => ({ ...prev, photo: res.url }));
     } catch (err: any) {
@@ -221,8 +229,15 @@ export const SpeakerFormPage: React.FC = () => {
               <label className="block text-xs font-bold text-slate-300 mb-1">Fotografía del Speaker *</label>
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-800 border border-slate-700 shrink-0">
-                  {form.photo ? (
-                    <img src={form.photo} alt="Preview" className="w-full h-full object-cover" />
+                  {previewUrl || form.photo ? (
+                    <img
+                      src={previewUrl || getMediaUrl(form.photo)}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                      }}
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-500">
                       <ImageIcon className="w-6 h-6" />

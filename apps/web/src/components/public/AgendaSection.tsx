@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, Clock, MapPin, ChevronRight, Sparkles, Video, Construction, Bell, CheckCircle2 } from 'lucide-react';
 import { AgendaItemDTO } from '@tourlatam/types';
 import { Link } from 'react-router-dom';
+import { getMediaUrl } from '../../utils/media';
 
 interface AgendaSectionProps {
   items: AgendaItemDTO[];
@@ -229,9 +230,12 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
                   {item.speaker && (
                     <div className="flex items-center gap-3 pt-2">
                       <img
-                        src={item.speaker.photo}
+                        src={getMediaUrl(item.speaker.photo)}
                         alt={item.speaker.name}
                         className="w-9 h-9 rounded-full object-cover border border-brand-cyan/40"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                        }}
                       />
                       <div>
                         <Link

@@ -52,7 +52,7 @@ export const ThankYouPage: React.FC = () => {
                 </li>
                 <li className="flex items-start gap-3">
                   <div className="mt-1 w-1.5 h-1.5 rounded-full bg-brand-purple shrink-0" />
-                  <p>Te sugerimos agregar nuestra dirección a tus contactos para evitar que el correo llegue a la bandeja de spam.</p>
+                  <p>Te sugerimos agregar nuestra dirección a tus contactos para evitar que el correo llegue a la bandeja de spam (contacto@pmisc.org).</p>
                 </li>
               </ul>
             </div>

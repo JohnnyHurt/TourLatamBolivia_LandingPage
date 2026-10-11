@@ -122,19 +122,37 @@ export const FAQsPage: React.FC = () => {
     setSaving(true);
     try {
       if (editingFaq.id) {
-        await api.updateFAQ(editingFaq.id, {
+        const updated = await api.updateFAQ(editingFaq.id, {
           question: editingFaq.question,
           answer: editingFaq.answer,
           displayOrder: Number(editingFaq.displayOrder || 0),
           isActive: editingFaq.isActive ?? true,
         });
+        setFaqs((prev) => {
+          const next = prev.map((f) => (f.id === updated.id ? updated : f));
+          try {
+            localStorage.setItem(FAQS_CACHE_KEY, JSON.stringify(next));
+          } catch {
+            // ignore
+          }
+          return next;
+        });
         setToast('Pregunta frecuente actualizada exitosamente.');
       } else {
-        await api.createFAQ({
+        const created = await api.createFAQ({
           question: editingFaq.question,
           answer: editingFaq.answer,
           displayOrder: Number(editingFaq.displayOrder ?? faqs.length + 1),
           isActive: editingFaq.isActive ?? true,
+        });
+        setFaqs((prev) => {
+          const next = [...prev, created].sort((a, b) => a.displayOrder - b.displayOrder);
+          try {
+            localStorage.setItem(FAQS_CACHE_KEY, JSON.stringify(next));
+          } catch {
+            // ignore
+          }
+          return next;
         });
         setToast('Nueva pregunta frecuente agregada exitosamente.');
       }

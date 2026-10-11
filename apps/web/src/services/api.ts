@@ -78,16 +78,16 @@ export const api = {
   getPageSections: () => fetcher<PageSectionDTO[]>('/public/page-sections'),
   getFocusAreas: () => fetcher<FocusAreaDTO[]>('/public/focus-areas'),
   getSpeakers: (includeAll = false) =>
-    fetcher<SpeakerDTO[]>(`/public/speakers${includeAll ? '?all=true' : ''}`),
+    fetcher<SpeakerDTO[]>(`/public/speakers${includeAll ? `?all=true&_t=${Date.now()}` : ''}`, includeAll ? { cache: 'no-store' } : {}),
   getSpeakerBySlug: (slug: string) => fetcher<SpeakerDTO>(`/public/speakers/${slug}`),
   getSponsors: (includeAll = false) =>
-    fetcher<SponsorDTO[]>(`/public/sponsors${includeAll ? '?all=true' : ''}`),
+    fetcher<SponsorDTO[]>(`/public/sponsors${includeAll ? `?all=true&_t=${Date.now()}` : ''}`, includeAll ? { cache: 'no-store' } : {}),
   getAgenda: (includeAll = false) =>
-    fetcher<AgendaItemDTO[]>(`/public/agenda${includeAll ? '?all=true' : ''}`),
+    fetcher<AgendaItemDTO[]>(`/public/agenda${includeAll ? `?all=true&_t=${Date.now()}` : ''}`, includeAll ? { cache: 'no-store' } : {}),
   getTickets: (includeAll = false) =>
-    fetcher<TicketTypeDTO[]>(`/public/tickets${includeAll ? '?all=true' : ''}`),
+    fetcher<TicketTypeDTO[]>(`/public/tickets${includeAll ? `?all=true&_t=${Date.now()}` : ''}`, includeAll ? { cache: 'no-store' } : {}),
   getFAQs: (includeAll = false) =>
-    fetcher<FAQDTO[]>(`/public/faqs${includeAll ? '?all=true' : ''}`),
+    fetcher<FAQDTO[]>(`/public/faqs${includeAll ? `?all=true&_t=${Date.now()}` : ''}`, includeAll ? { cache: 'no-store' } : {}),
   getTestimonials: () => fetcher<TestimonialDTO[]>('/public/testimonials'),
 
   // Auth

@@ -36,7 +36,11 @@ router.post('/save-afiche', async (req: Request, res: Response) => {
 // Middleware for Edge/Browser caching on all public GET routes
 router.use((req: Request, res: Response, next: NextFunction) => {
   if (req.method === 'GET') {
-    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600');
+    if (req.query.all === 'true') {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600');
+    }
   }
   next();
 });
@@ -453,10 +457,14 @@ router.get('/tickets', async (req: Request, res: Response, next: NextFunction) =
 // GET /api/public/faqs
 router.get('/faqs', async (req: Request, res: Response, next: NextFunction) => {
   const includeAll = req.query.all === 'true';
-  const cacheKey = includeAll ? 'faqs-all' : 'faqs-active';
-  const cached = cacheService.get(cacheKey);
-  if (cached) {
-    return res.json({ success: true, data: cached, _fromCache: true });
+
+  if (includeAll) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  } else {
+    const cached = cacheService.get('faqs-active');
+    if (cached) {
+      return res.json({ success: true, data: cached, _fromCache: true });
+    }
   }
 
   try {
@@ -471,13 +479,17 @@ router.get('/faqs', async (req: Request, res: Response, next: NextFunction) => {
       updatedAt: f.updatedAt.toISOString(),
     }));
 
-    cacheService.set(cacheKey, data, 600);
+    if (!includeAll) {
+      cacheService.set('faqs-active', data, 600);
+    }
     return res.json({ success: true, data });
   } catch (error) {
-    const stale = cacheService.getStale(cacheKey);
-    if (stale) {
-      console.warn('[CacheFallback] Serving stale FAQs from cache.');
-      return res.json({ success: true, data: stale, _stale: true });
+    if (!includeAll) {
+      const stale = cacheService.getStale('faqs-active');
+      if (stale) {
+        console.warn('[CacheFallback] Serving stale FAQs from cache.');
+        return res.json({ success: true, data: stale, _stale: true });
+      }
     }
     next(error);
   }

@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { prisma } from '../config/prisma.js'; // FIX #5: shared singleton
+import { cacheService } from '../services/CacheService.js';
 
 const router = Router();
 
@@ -161,6 +162,16 @@ router.get('/landing-data', async (_req: Request, res: Response, next: NextFunct
 
 // GET /api/public/event-info
 router.get('/event-info', async (_req: Request, res: Response, next: NextFunction) => {
+  // 1. Check in-memory cache for ultra-fast instant response
+  const cachedData = cacheService.get('event-info');
+  if (cachedData) {
+    return res.json({
+      success: true,
+      data: cachedData,
+      _fromCache: true,
+    });
+  }
+
   try {
     let settings = await prisma.eventSettings.findFirst();
     if (!settings) {
@@ -185,17 +196,32 @@ router.get('/event-info', async (_req: Request, res: Response, next: NextFunctio
       orderBy: { displayOrder: 'asc' },
     });
 
+    const responsePayload = {
+      ...settings,
+      startDate: settings.startDate.toISOString(),
+      endDate: settings.endDate.toISOString(),
+      updatedAt: settings.updatedAt.toISOString(),
+      socialLinks,
+    };
+
+    // Cache in RAM for 10 minutes (600 seconds)
+    cacheService.set('event-info', responsePayload, 600);
+
     return res.json({
       success: true,
-      data: {
-        ...settings,
-        startDate: settings.startDate.toISOString(),
-        endDate: settings.endDate.toISOString(),
-        updatedAt: settings.updatedAt.toISOString(),
-        socialLinks,
-      },
+      data: responsePayload,
     });
   } catch (error) {
+    // If DB is temporarily unresponsive, attempt returning stale cached version
+    const staleData = cacheService.getStale('event-info');
+    if (staleData) {
+      console.warn('[CacheFallback] Database error encountered; serving stale event-info from cache.');
+      return res.json({
+        success: true,
+        data: staleData,
+        _stale: true,
+      });
+    }
     next(error);
   }
 });

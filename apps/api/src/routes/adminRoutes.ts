@@ -5,6 +5,7 @@ import { authenticateToken, requireRole, AuthenticatedRequest, hashPassword } fr
 import { storageService } from '../services/StorageService.js';
 import { AuditService } from '../services/AuditService.js';
 import { prisma } from '../config/prisma.js'; // FIX #5: shared singleton
+import { cacheService } from '../services/CacheService.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -669,6 +670,10 @@ router.put('/event-settings', async (req: AuthenticatedRequest, res: Response, n
     });
 
 
+
+    // Invalidate event-info and landing-data in-memory cache so fresh data is immediately served
+    cacheService.del('event-info');
+    cacheService.del('landing-data');
 
     await AuditService.log({
       userId: req.user?.id,

@@ -1,20 +1,60 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { api } from '../../services/api';
 import { EventSettingsDTO } from '@tourlatam/types';
-import { Save, CheckCircle2, Settings, Globe, Calendar, MapPin, Sparkles } from 'lucide-react';
+import { Save, CheckCircle2, Settings, Globe, Calendar, MapPin, Sparkles, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
+
+const SETTINGS_CACHE_KEY = 'tourlatam_event_settings_cache';
 
 export const EventSettingsPage: React.FC = () => {
-  const [settings, setSettings] = useState<Partial<EventSettingsDTO>>({});
-  const [loading, setLoading] = useState(true);
+  // Instant Render: Seed initial state from localStorage if available
+  const [settings, setSettings] = useState<Partial<EventSettingsDTO>>(() => {
+    try {
+      const cached = localStorage.getItem(SETTINGS_CACHE_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch {
+      // ignore
+    }
+    return {};
+  });
+
+  const [loading, setLoading] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(SETTINGS_CACHE_KEY);
+    } catch {
+      return true;
+    }
+  });
+
+  const [isSyncing, setIsSyncing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  useEffect(() => {
-    api.getEventInfo().then((data) => {
-      setSettings(data);
+  const fetchSettings = useCallback(async () => {
+    setIsSyncing(true);
+    setError(null);
+    try {
+      const data = await api.getEventInfo();
+      if (data && typeof data === 'object') {
+        setSettings(data);
+        try {
+          localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(data));
+        } catch {
+          // ignore quota error
+        }
+      }
+    } catch (err: any) {
+      console.error('Error fetching event settings:', err);
+      setError(err.message || 'No se pudo conectar con el servidor para obtener los datos más recientes.');
+    } finally {
       setLoading(false);
-    });
+      setIsSyncing(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -27,8 +67,13 @@ export const EventSettingsPage: React.FC = () => {
     try {
       const updated = await api.updateEventSettings(settings);
       setSettings(updated);
+      try {
+        localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
       setToast('Configuración del evento guardada exitosamente.');
-      setTimeout(() => setToast(null), 3000);
+      setTimeout(() => setToast(null), 3500);
     } catch (err: any) {
       alert(err.message || 'Error al guardar la configuración');
     } finally {
@@ -38,22 +83,81 @@ export const EventSettingsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-400">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-cyan"></div>
+      <div className="flex flex-col items-center justify-center py-24 text-slate-400 space-y-4">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-brand-cyan"></div>
+        <p className="text-sm font-medium text-slate-300">Cargando configuración del evento...</p>
+        <p className="text-xs text-slate-500">Conectando con la base de datos...</p>
+      </div>
+    );
+  }
+
+  // If loading failed completely and there are no cached settings
+  if (error && Object.keys(settings).length === 0) {
+    return (
+      <div className="max-w-2xl mx-auto my-12 p-8 rounded-3xl glass-panel border border-red-500/30 text-center space-y-4">
+        <div className="w-12 h-12 mx-auto rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+          <AlertCircle className="w-6 h-6" />
+        </div>
+        <h3 className="text-lg font-bold text-white">No se pudo cargar la configuración</h3>
+        <p className="text-xs text-slate-400 max-w-md mx-auto">{error}</p>
+        <button
+          type="button"
+          onClick={fetchSettings}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-cyan text-dark-900 font-bold text-xs hover:bg-white transition-all shadow-md"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Reintentar conexión</span>
+        </button>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-white">Event Settings</h2>
           <p className="text-xs text-slate-400">
             Administra la información general, fechas, sede, CTAs y códigos de analítica.
           </p>
         </div>
+
+        <div className="flex items-center gap-3">
+          {isSyncing && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan text-[11px] font-semibold">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Sincronizando con BD...</span>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={fetchSettings}
+            disabled={isSyncing}
+            title="Refrescar datos desde la base de datos"
+            className="p-2.5 rounded-xl bg-dark-800 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-all text-xs flex items-center gap-1.5"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refrescar</span>
+          </button>
+        </div>
       </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs font-medium text-amber-400 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>Mostrando versión en caché local. {error}</span>
+          </div>
+          <button
+            type="button"
+            onClick={fetchSettings}
+            className="underline font-bold hover:text-white flex-shrink-0"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
 
       {toast && (
         <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400 flex items-center gap-2">

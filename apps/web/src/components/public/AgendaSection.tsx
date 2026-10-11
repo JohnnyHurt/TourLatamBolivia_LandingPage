@@ -5,19 +5,44 @@ import { Link } from 'react-router-dom';
 
 interface AgendaSectionProps {
   items: AgendaItemDTO[];
-  sectionConfig?: {
-    isUnderConstruction?: boolean;
-    noticeTitle?: string;
-    noticeMessage?: string;
-    badgeText?: string;
-  };
+  sectionConfig?: any;
 }
 
 export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConfig }) => {
-  const isUnderConstruction = sectionConfig?.isUnderConstruction ?? (items.length === 0);
-  const noticeTitle = sectionConfig?.noticeTitle || 'Agenda Oficial en Proceso de Confirmación';
-  const noticeMessage = sectionConfig?.noticeMessage || 'Estamos ultimando detalles con nuestros ponentes internacionales y organizando los horarios de cada sesión magistral y workshop para brindarte la mejor experiencia formativa. El cronograma completo será publicado muy pronto.';
-  const badgeText = sectionConfig?.badgeText || 'PROGRAMA EN DEFINICIÓN';
+  // Normalize sectionConfig if received as string or double-encoded JSON
+  let resolvedConfig: any = sectionConfig;
+  if (typeof resolvedConfig === 'string') {
+    try {
+      resolvedConfig = JSON.parse(resolvedConfig);
+      if (typeof resolvedConfig === 'string') {
+        resolvedConfig = JSON.parse(resolvedConfig);
+      }
+    } catch {
+      resolvedConfig = null;
+    }
+  }
+
+  // Fallback to local storage configuration if not present in props
+  if (!resolvedConfig || resolvedConfig.isUnderConstruction === undefined) {
+    try {
+      const stored = localStorage.getItem('tourlatam_agenda_section_config');
+      if (stored) {
+        resolvedConfig = { ...JSON.parse(stored), ...resolvedConfig };
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  // Under construction unless explicitly published (isUnderConstruction === false)
+  const isUnderConstruction =
+    resolvedConfig?.isUnderConstruction !== undefined
+      ? Boolean(resolvedConfig.isUnderConstruction)
+      : true;
+
+  const noticeTitle = resolvedConfig?.noticeTitle || 'Agenda Oficial en Proceso de Confirmación';
+  const noticeMessage = resolvedConfig?.noticeMessage || 'Estamos ultimando detalles con nuestros ponentes internacionales y organizando los horarios de cada sesión magistral y workshop para brindarte la mejor experiencia formativa. El cronograma completo será publicado muy pronto.';
+  const badgeText = resolvedConfig?.badgeText || 'PROGRAMA EN DEFINICIÓN';
 
   // Extract unique dates or fallback to 20 & 21 Nov 2026
   const extractedDates = Array.from(

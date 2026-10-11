@@ -138,6 +138,24 @@ export const AgendaPage: React.FC = () => {
     loadData();
   }, [loadData]);
 
+  const syncLandingCacheConfig = (cfg: AgendaSectionConfig) => {
+    try {
+      localStorage.setItem(AGENDA_SECTION_CACHE_KEY, JSON.stringify(cfg));
+      const raw = localStorage.getItem('tourlatam_landing_cache_v1');
+      if (raw) {
+        const landingData = JSON.parse(raw);
+        if (Array.isArray(landingData.sections)) {
+          landingData.sections = landingData.sections.map((s: any) =>
+            s.sectionType === 'AGENDA' ? { ...s, content: cfg } : s
+          );
+          localStorage.setItem('tourlatam_landing_cache_v1', JSON.stringify(landingData));
+        }
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   const handleSaveSectionConfig = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setSavingConfig(true);
@@ -145,11 +163,7 @@ export const AgendaPage: React.FC = () => {
       await api.updatePageSection('AGENDA', {
         content: sectionConfig,
       });
-      try {
-        localStorage.setItem(AGENDA_SECTION_CACHE_KEY, JSON.stringify(sectionConfig));
-      } catch {
-        // ignore
-      }
+      syncLandingCacheConfig(sectionConfig);
       setConfigToast(
         sectionConfig.isUnderConstruction
           ? 'Modo "Agenda en Proceso" activado exitosamente.'
@@ -172,11 +186,7 @@ export const AgendaPage: React.FC = () => {
       await api.updatePageSection('AGENDA', {
         content: nextConfig,
       });
-      try {
-        localStorage.setItem(AGENDA_SECTION_CACHE_KEY, JSON.stringify(nextConfig));
-      } catch {
-        // ignore
-      }
+      syncLandingCacheConfig(nextConfig);
       setConfigToast(
         nextState
           ? 'Modo "Agenda en Proceso" activado. En la landing se mostrará el mensaje en proceso.'

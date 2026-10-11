@@ -194,14 +194,39 @@ export const LandingPage: React.FC = () => {
 
         if (!isMounted) return;
 
-        if (results[0].status === 'fulfilled' && results[0].value) setSettings(results[0].value);
-        if (results[1].status === 'fulfilled' && results[1].value) setSections(results[1].value);
-        if (results[2].status === 'fulfilled' && results[2].value) setFocusAreas(results[2].value);
-        if (results[3].status === 'fulfilled' && results[3].value) setSpeakers(results[3].value);
-        if (results[4].status === 'fulfilled' && results[4].value) setSponsors(results[4].value);
-        if (results[5].status === 'fulfilled' && results[5].value) setAgenda(results[5].value);
-        if (results[6].status === 'fulfilled' && results[6].value) setTickets(results[6].value);
-        if (results[7].status === 'fulfilled' && results[7].value) setFaqs(results[7].value);
+        const newSettings = results[0].status === 'fulfilled' && results[0].value ? results[0].value : settings;
+        const newSections = results[1].status === 'fulfilled' && results[1].value ? results[1].value : sections;
+        const newFocus = results[2].status === 'fulfilled' && results[2].value ? results[2].value : focusAreas;
+        const newSpeakers = results[3].status === 'fulfilled' && results[3].value ? results[3].value : speakers;
+        const newSponsors = results[4].status === 'fulfilled' && results[4].value ? results[4].value : sponsors;
+        const newAgenda = results[5].status === 'fulfilled' && results[5].value ? results[5].value : agenda;
+        const newTickets = results[6].status === 'fulfilled' && results[6].value ? results[6].value : tickets;
+        const newFaqs = results[7].status === 'fulfilled' && results[7].value ? results[7].value : faqs;
+
+        if (newSettings) setSettings(newSettings);
+        if (newSections?.length) setSections(newSections);
+        if (newFocus?.length) setFocusAreas(newFocus);
+        if (newSpeakers?.length) setSpeakers(newSpeakers);
+        if (newSponsors?.length) setSponsors(newSponsors);
+        if (newAgenda?.length) setAgenda(newAgenda);
+        if (newTickets?.length) setTickets(newTickets);
+        if (newFaqs?.length) setFaqs(newFaqs);
+
+        try {
+          localStorage.setItem(
+            'tourlatam_landing_cache_v1',
+            JSON.stringify({
+              settings: newSettings,
+              sections: newSections,
+              focusAreas: newFocus,
+              speakers: newSpeakers,
+              sponsors: newSponsors,
+              agenda: newAgenda,
+              tickets: newTickets,
+              faqs: newFaqs,
+            })
+          );
+        } catch (e) {}
       } catch (err) {
         console.warn('Background data sync notice:', err);
       }

@@ -60,7 +60,7 @@ function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
 // GET /api/public/landing-data - Ultra-fast aggregated endpoint for the landing page
 router.get('/landing-data', async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    res.set('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=3600');
+    res.set('Cache-Control', 'public, max-age=10, s-maxage=60, stale-while-revalidate=300');
     const [settings, socialLinks, sections, focusAreas, speakers, sponsors, agenda, tickets, faqs] =
       await Promise.all([
         prisma.eventSettings.findFirst(),

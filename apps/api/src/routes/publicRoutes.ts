@@ -451,22 +451,34 @@ router.get('/tickets', async (req: Request, res: Response, next: NextFunction) =
 });
 
 // GET /api/public/faqs
-router.get('/faqs', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/faqs', async (req: Request, res: Response, next: NextFunction) => {
+  const includeAll = req.query.all === 'true';
+  const cacheKey = includeAll ? 'faqs-all' : 'faqs-active';
+  const cached = cacheService.get(cacheKey);
+  if (cached) {
+    return res.json({ success: true, data: cached, _fromCache: true });
+  }
+
   try {
     const faqs = await prisma.fAQ.findMany({
-      where: { isActive: true },
+      where: includeAll ? {} : { isActive: true },
       orderBy: [{ displayOrder: 'asc' }],
     });
 
-    return res.json({
-      success: true,
-      data: faqs.map((f) => ({
-        ...f,
-        createdAt: f.createdAt.toISOString(),
-        updatedAt: f.updatedAt.toISOString(),
-      })),
-    });
+    const data = faqs.map((f) => ({
+      ...f,
+      createdAt: f.createdAt.toISOString(),
+      updatedAt: f.updatedAt.toISOString(),
+    }));
+
+    cacheService.set(cacheKey, data, 600);
+    return res.json({ success: true, data });
   } catch (error) {
+    const stale = cacheService.getStale(cacheKey);
+    if (stale) {
+      console.warn('[CacheFallback] Serving stale FAQs from cache.');
+      return res.json({ success: true, data: stale, _stale: true });
+    }
     next(error);
   }
 });

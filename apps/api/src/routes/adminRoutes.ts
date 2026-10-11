@@ -585,6 +585,92 @@ router.delete('/agenda/:id', async (req: AuthenticatedRequest, res: Response, ne
 });
 
 // -------------------------------------------------------------
+// FAQS CMS CRUD
+// -------------------------------------------------------------
+const faqSchema = z.object({
+  question: z.string().min(3, 'Question is required'),
+  answer: z.string().min(5, 'Answer is required'),
+  displayOrder: z.number().int().optional().default(0),
+  isActive: z.boolean().optional().default(true),
+});
+
+router.post('/faqs', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const data = faqSchema.parse(req.body);
+
+    const faq = await prisma.fAQ.create({
+      data,
+    });
+
+    cacheService.invalidate('faqs');
+    cacheService.del('landing-data');
+
+    await AuditService.log({
+      userId: req.user?.id,
+      action: 'CREATE',
+      entity: 'FAQ',
+      entityId: faq.id,
+      details: { question: faq.question },
+      ipAddress: req.ip,
+    });
+
+    return res.json({ success: true, data: faq });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/faqs/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const data = faqSchema.partial().parse(req.body);
+
+    const updated = await prisma.fAQ.update({
+      where: { id },
+      data,
+    });
+
+    cacheService.invalidate('faqs');
+    cacheService.del('landing-data');
+
+    await AuditService.log({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entity: 'FAQ',
+      entityId: id,
+      details: { question: updated.question },
+      ipAddress: req.ip,
+    });
+
+    return res.json({ success: true, data: updated });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/faqs/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    await prisma.fAQ.delete({ where: { id } });
+
+    cacheService.invalidate('faqs');
+    cacheService.del('landing-data');
+
+    await AuditService.log({
+      userId: req.user?.id,
+      action: 'DELETE',
+      entity: 'FAQ',
+      entityId: id,
+      ipAddress: req.ip,
+    });
+
+    return res.json({ success: true, message: 'FAQ deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// -------------------------------------------------------------
 // EVENT SETTINGS CMS
 // -------------------------------------------------------------
 

@@ -19,6 +19,7 @@ import {
   ExternalLink,
   ChevronRight,
   Sparkles,
+  HelpCircle,
 } from 'lucide-react';
 import { PmiBoliviaLogo } from '../common/PmiBoliviaLogo';
 
@@ -41,6 +42,7 @@ export const AdminLayout: React.FC = () => {
     { label: 'Sponsors', path: '/admin/sponsors', icon: Award },
     { label: 'Agenda Program', path: '/admin/agenda', icon: Clock },
     { label: 'Tickets / Pricing', path: '/admin/tickets', icon: Ticket },
+    { label: 'FAQs', path: '/admin/faqs', icon: HelpCircle },
     { label: 'Media Library', path: '/admin/media', icon: ImageIcon },
   ];
 

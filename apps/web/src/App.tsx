@@ -19,6 +19,7 @@ import { SponsorsListPage } from './pages/admin/SponsorsListPage';
 import { SponsorFormPage } from './pages/admin/SponsorFormPage';
 import { TicketsPage } from './pages/admin/TicketsPage';
 import { AgendaPage } from './pages/admin/AgendaPage';
+import { FAQsPage } from './pages/admin/FAQsPage';
 import { MediaLibraryPage } from './pages/admin/MediaLibraryPage';
 import { UsersPage } from './pages/admin/UsersPage';
 import { AuditLogsPage } from './pages/admin/AuditLogsPage';
@@ -85,9 +86,10 @@ export const App: React.FC = () => {
             <Route path="sponsors/new" element={<SponsorFormPage />} />
             <Route path="sponsors/:id" element={<SponsorFormPage />} />
 
-            {/* Tickets & Agenda */}
+            {/* Tickets & Agenda & FAQs */}
             <Route path="tickets" element={<TicketsPage />} />
             <Route path="agenda" element={<AgendaPage />} />
+            <Route path="faqs" element={<FAQsPage />} />
 
             {/* Media */}
             <Route path="media" element={<MediaLibraryPage />} />

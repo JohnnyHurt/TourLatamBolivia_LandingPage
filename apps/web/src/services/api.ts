@@ -86,7 +86,8 @@ export const api = {
     fetcher<AgendaItemDTO[]>(`/public/agenda${includeAll ? '?all=true' : ''}`),
   getTickets: (includeAll = false) =>
     fetcher<TicketTypeDTO[]>(`/public/tickets${includeAll ? '?all=true' : ''}`),
-  getFAQs: () => fetcher<FAQDTO[]>('/public/faqs'),
+  getFAQs: (includeAll = false) =>
+    fetcher<FAQDTO[]>(`/public/faqs${includeAll ? '?all=true' : ''}`),
   getTestimonials: () => fetcher<TestimonialDTO[]>('/public/testimonials'),
 
   // Auth
@@ -178,6 +179,20 @@ export const api = {
     }),
   deleteAgendaItem: (id: string) =>
     fetcher<{ message: string }>(`/admin/agenda/${id}`, { method: 'DELETE' }),
+
+  // FAQs CMS
+  createFAQ: (data: Partial<FAQDTO>) =>
+    fetcher<FAQDTO>('/admin/faqs', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateFAQ: (id: string, data: Partial<FAQDTO>) =>
+    fetcher<FAQDTO>(`/admin/faqs/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteFAQ: (id: string) =>
+    fetcher<{ message: string }>(`/admin/faqs/${id}`, { method: 'DELETE' }),
 
   // Media Library
   getMedia: () => fetcher<MediaDTO[]>('/admin/media'),

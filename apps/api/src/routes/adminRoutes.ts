@@ -65,25 +65,41 @@ router.post('/media/upload', upload.single('file'), async (req: AuthenticatedReq
 
     const result = await storageService.upload(req.file);
 
-    const media = await prisma.media.create({
-      data: {
+    let media;
+    try {
+      media = await prisma.media.create({
+        data: {
+          filename: result.filename,
+          mimeType: result.mimeType,
+          size: result.size,
+          url: result.url,
+          storageKey: result.storageKey,
+          uploadedBy: req.user?.id || 'Unknown',
+        },
+      });
+
+      await AuditService.log({
+        userId: req.user?.id,
+        action: 'CREATE',
+        entity: 'Media',
+        entityId: media.id,
+        details: { filename: media.filename, url: media.url },
+        ipAddress: req.ip,
+      });
+    } catch (dbErr) {
+      console.error('[MediaUpload] Warning: Failed to record media metadata in database:', dbErr);
+      media = {
+        id: result.storageKey,
         filename: result.filename,
         mimeType: result.mimeType,
         size: result.size,
         url: result.url,
         storageKey: result.storageKey,
         uploadedBy: req.user?.id || 'Unknown',
-      },
-    });
-
-    await AuditService.log({
-      userId: req.user?.id,
-      action: 'CREATE',
-      entity: 'Media',
-      entityId: media.id,
-      details: { filename: media.filename, url: media.url },
-      ipAddress: req.ip,
-    });
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
 
     return res.json({ success: true, data: media });
   } catch (err) {

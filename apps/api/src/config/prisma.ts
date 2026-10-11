@@ -8,9 +8,22 @@ declare global {
   var __prisma: PrismaClient | undefined;
 }
 
+// Ensure PgBouncer pooler connection strings include pgbouncer=true to prevent
+// PostgresError: prepared statement "s..." does not exist
+let dbUrl = process.env.DATABASE_URL || '';
+if (
+  dbUrl &&
+  (dbUrl.includes('pooler.supabase.com') || dbUrl.includes(':6543') || dbUrl.includes('pgbouncer')) &&
+  !dbUrl.includes('pgbouncer=true')
+) {
+  dbUrl += dbUrl.includes('?') ? '&pgbouncer=true' : '?pgbouncer=true';
+  process.env.DATABASE_URL = dbUrl;
+}
+
 export const prisma: PrismaClient =
   global.__prisma ??
   new PrismaClient({
+    datasources: dbUrl ? { db: { url: dbUrl } } : undefined,
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   });
 

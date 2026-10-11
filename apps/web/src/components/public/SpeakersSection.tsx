@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Linkedin, Globe, Video, ArrowUpRight, Award, MapPin, Sparkles } from 'lucide-react';
 import { SpeakerDTO } from '@tourlatam/types';
 import { Link } from 'react-router-dom';
@@ -8,17 +8,6 @@ interface SpeakersSectionProps {
 }
 
 export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) => {
-  const [filterSpecialty, setFilterSpecialty] = useState<string>('ALL');
-
-  // Extract unique specialties
-  const allSpecialties = Array.from(
-    new Set(speakers.flatMap((s) => s.specialties || []))
-  );
-
-  const filteredSpeakers = filterSpecialty === 'ALL'
-    ? speakers
-    : speakers.filter((s) => s.specialties?.includes(filterSpecialty));
-
   return (
     <section id="speakers" className="py-24 bg-dark-900 relative overflow-hidden">
       {/* Glow aura */}
@@ -38,38 +27,9 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
           </p>
         </div>
 
-        {/* Specialty Filter Chips */}
-        {allSpecialties.length > 0 && (
-          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-12">
-            <button
-              onClick={() => setFilterSpecialty('ALL')}
-              className={`px-5 py-2 rounded-full text-xs font-black transition-all uppercase tracking-wider ${
-                filterSpecialty === 'ALL'
-                  ? 'bg-gradient-to-r from-brand-cyan to-brand-cyanLight text-dark-950 shadow-glow-cyan scale-105'
-                  : 'bg-dark-800 text-slate-300 hover:bg-dark-700 border border-dark-600'
-              }`}
-            >
-              TODOS ({speakers.length})
-            </button>
-            {allSpecialties.map((spec) => (
-              <button
-                key={spec}
-                onClick={() => setFilterSpecialty(spec)}
-                className={`px-5 py-2 rounded-full text-xs font-black transition-all uppercase tracking-wider ${
-                  filterSpecialty === spec
-                    ? 'bg-gradient-to-r from-brand-cyan to-brand-cyanLight text-dark-950 shadow-glow-cyan scale-105'
-                    : 'bg-dark-800 text-slate-300 hover:bg-dark-700 border border-dark-600'
-                }`}
-              >
-                {spec}
-              </button>
-            ))}
-          </div>
-        )}
-
         {/* Speakers Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredSpeakers.map((speaker) => (
+          {speakers.map((speaker) => (
             <div
               key={speaker.id}
               className="glass-card rounded-3xl overflow-hidden group flex flex-col justify-between border border-dark-600 hover:border-brand-cyan/50 transition-all duration-300"

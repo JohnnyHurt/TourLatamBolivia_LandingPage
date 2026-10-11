@@ -154,6 +154,10 @@ router.post('/speakers', async (req: AuthenticatedRequest, res: Response, next: 
       },
     });
 
+    cacheService.invalidate('speakers');
+    cacheService.invalidate('agenda');
+    cacheService.del('landing-data');
+
     await AuditService.log({
       userId: req.user?.id,
       action: 'CREATE',
@@ -195,6 +199,10 @@ router.put('/speakers/:id', async (req: AuthenticatedRequest, res: Response, nex
       },
     });
 
+    cacheService.invalidate('speakers');
+    cacheService.invalidate('agenda');
+    cacheService.del('landing-data');
+
     await AuditService.log({
       userId: req.user?.id,
       action: 'UPDATE',
@@ -214,6 +222,10 @@ router.delete('/speakers/:id', async (req: AuthenticatedRequest, res: Response, 
   try {
     const { id } = req.params;
     await prisma.speaker.delete({ where: { id } });
+
+    cacheService.invalidate('speakers');
+    cacheService.invalidate('agenda');
+    cacheService.del('landing-data');
 
     await AuditService.log({
       userId: req.user?.id,
@@ -252,6 +264,9 @@ router.post('/sponsors', async (req: AuthenticatedRequest, res: Response, next: 
       data: { ...data, slug },
     });
 
+    cacheService.invalidate('sponsors');
+    cacheService.del('landing-data');
+
     await AuditService.log({
       userId: req.user?.id,
       action: 'CREATE',
@@ -277,6 +292,9 @@ router.put('/sponsors/:id', async (req: AuthenticatedRequest, res: Response, nex
       data,
     });
 
+    cacheService.invalidate('sponsors');
+    cacheService.del('landing-data');
+
     await AuditService.log({
       userId: req.user?.id,
       action: 'UPDATE',
@@ -296,6 +314,9 @@ router.delete('/sponsors/:id', async (req: AuthenticatedRequest, res: Response, 
   try {
     const { id } = req.params;
     await prisma.sponsor.delete({ where: { id } });
+
+    cacheService.invalidate('sponsors');
+    cacheService.del('landing-data');
 
     await AuditService.log({
       userId: req.user?.id,
@@ -491,6 +512,9 @@ router.post('/agenda', async (req: AuthenticatedRequest, res: Response, next: Ne
       },
     });
 
+    cacheService.invalidate('agenda');
+    cacheService.del('landing-data');
+
     await AuditService.log({
       userId: req.user?.id,
       action: 'CREATE',
@@ -521,6 +545,9 @@ router.put('/agenda/:id', async (req: AuthenticatedRequest, res: Response, next:
       },
     });
 
+    cacheService.invalidate('agenda');
+    cacheService.del('landing-data');
+
     await AuditService.log({
       userId: req.user?.id,
       action: 'UPDATE',
@@ -539,6 +566,9 @@ router.delete('/agenda/:id', async (req: AuthenticatedRequest, res: Response, ne
   try {
     const { id } = req.params;
     await prisma.agendaItem.delete({ where: { id } });
+
+    cacheService.invalidate('agenda');
+    cacheService.del('landing-data');
 
     await AuditService.log({
       userId: req.user?.id,

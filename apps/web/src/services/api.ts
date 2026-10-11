@@ -77,10 +77,13 @@ export const api = {
   getEventInfo: () => fetcher<EventSettingsDTO>('/public/event-info'),
   getPageSections: () => fetcher<PageSectionDTO[]>('/public/page-sections'),
   getFocusAreas: () => fetcher<FocusAreaDTO[]>('/public/focus-areas'),
-  getSpeakers: () => fetcher<SpeakerDTO[]>('/public/speakers'),
+  getSpeakers: (includeAll = false) =>
+    fetcher<SpeakerDTO[]>(`/public/speakers${includeAll ? '?all=true' : ''}`),
   getSpeakerBySlug: (slug: string) => fetcher<SpeakerDTO>(`/public/speakers/${slug}`),
-  getSponsors: () => fetcher<SponsorDTO[]>('/public/sponsors'),
-  getAgenda: () => fetcher<AgendaItemDTO[]>('/public/agenda'),
+  getSponsors: (includeAll = false) =>
+    fetcher<SponsorDTO[]>(`/public/sponsors${includeAll ? '?all=true' : ''}`),
+  getAgenda: (includeAll = false) =>
+    fetcher<AgendaItemDTO[]>(`/public/agenda${includeAll ? '?all=true' : ''}`),
   getTickets: (includeAll = false) =>
     fetcher<TicketTypeDTO[]>(`/public/tickets${includeAll ? '?all=true' : ''}`),
   getFAQs: () => fetcher<FAQDTO[]>('/public/faqs'),

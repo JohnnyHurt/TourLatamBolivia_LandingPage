@@ -264,23 +264,35 @@ router.get('/focus-areas', async (_req: Request, res: Response, next: NextFuncti
 });
 
 // GET /api/public/speakers
-router.get('/speakers', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/speakers', async (req: Request, res: Response, next: NextFunction) => {
+  const includeAll = req.query.all === 'true';
+  const cacheKey = includeAll ? 'speakers-all' : 'speakers-active';
+  const cached = cacheService.get(cacheKey);
+  if (cached) {
+    return res.json({ success: true, data: cached, _fromCache: true });
+  }
+
   try {
     const speakers = await prisma.speaker.findMany({
-      where: { isActive: true },
+      where: includeAll ? {} : { isActive: true },
       orderBy: [{ isFeatured: 'desc' }, { displayOrder: 'asc' }],
     });
 
-    return res.json({
-      success: true,
-      data: speakers.map((sp) => ({
-        ...sp,
-        specialties: safeJsonParse<string[]>(sp.specialties, []),
-        createdAt: sp.createdAt.toISOString(),
-        updatedAt: sp.updatedAt.toISOString(),
-      })),
-    });
+    const data = speakers.map((sp) => ({
+      ...sp,
+      specialties: safeJsonParse<string[]>(sp.specialties, []),
+      createdAt: sp.createdAt.toISOString(),
+      updatedAt: sp.updatedAt.toISOString(),
+    }));
+
+    cacheService.set(cacheKey, data, 600);
+    return res.json({ success: true, data });
   } catch (error) {
+    const stale = cacheService.getStale(cacheKey);
+    if (stale) {
+      console.warn('[CacheFallback] Serving stale speakers from cache.');
+      return res.json({ success: true, data: stale, _stale: true });
+    }
     next(error);
   }
 });
@@ -322,31 +334,50 @@ router.get('/speakers/:slug', async (req: Request, res: Response, next: NextFunc
 });
 
 // GET /api/public/sponsors
-router.get('/sponsors', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/sponsors', async (req: Request, res: Response, next: NextFunction) => {
+  const includeAll = req.query.all === 'true';
+  const cacheKey = includeAll ? 'sponsors-all' : 'sponsors-active';
+  const cached = cacheService.get(cacheKey);
+  if (cached) {
+    return res.json({ success: true, data: cached, _fromCache: true });
+  }
+
   try {
     const sponsors = await prisma.sponsor.findMany({
-      where: { isActive: true },
+      where: includeAll ? {} : { isActive: true },
       orderBy: [{ displayOrder: 'asc' }],
     });
 
-    return res.json({
-      success: true,
-      data: sponsors.map((s) => ({
-        ...s,
-        createdAt: s.createdAt.toISOString(),
-        updatedAt: s.updatedAt.toISOString(),
-      })),
-    });
+    const data = sponsors.map((s) => ({
+      ...s,
+      createdAt: s.createdAt.toISOString(),
+      updatedAt: s.updatedAt.toISOString(),
+    }));
+
+    cacheService.set(cacheKey, data, 600);
+    return res.json({ success: true, data });
   } catch (error) {
+    const stale = cacheService.getStale(cacheKey);
+    if (stale) {
+      console.warn('[CacheFallback] Serving stale sponsors from cache.');
+      return res.json({ success: true, data: stale, _stale: true });
+    }
     next(error);
   }
 });
 
 // GET /api/public/agenda
-router.get('/agenda', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/agenda', async (req: Request, res: Response, next: NextFunction) => {
+  const includeAll = req.query.all === 'true';
+  const cacheKey = includeAll ? 'agenda-all' : 'agenda-active';
+  const cached = cacheService.get(cacheKey);
+  if (cached) {
+    return res.json({ success: true, data: cached, _fromCache: true });
+  }
+
   try {
     const agendaItems = await prisma.agendaItem.findMany({
-      where: { isActive: true },
+      where: includeAll ? {} : { isActive: true },
       orderBy: [{ date: 'asc' }, { startTime: 'asc' }, { displayOrder: 'asc' }],
       include: {
         speaker: {
@@ -363,16 +394,21 @@ router.get('/agenda', async (_req: Request, res: Response, next: NextFunction) =
       },
     });
 
-    return res.json({
-      success: true,
-      data: agendaItems.map((item) => ({
-        ...item,
-        date: item.date.toISOString(),
-        createdAt: item.createdAt.toISOString(),
-        updatedAt: item.updatedAt.toISOString(),
-      })),
-    });
+    const data = agendaItems.map((item) => ({
+      ...item,
+      date: item.date.toISOString(),
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
+    }));
+
+    cacheService.set(cacheKey, data, 600);
+    return res.json({ success: true, data });
   } catch (error) {
+    const stale = cacheService.getStale(cacheKey);
+    if (stale) {
+      console.warn('[CacheFallback] Serving stale agenda from cache.');
+      return res.json({ success: true, data: stale, _stale: true });
+    }
     next(error);
   }
 });

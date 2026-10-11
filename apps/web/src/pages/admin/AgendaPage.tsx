@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { api } from '../../services/api';
 import { AgendaItemDTO, SpeakerDTO, AgendaType } from '@tourlatam/types';
-import { Plus, Edit2, Trash2, Clock, Calendar, MapPin } from 'lucide-react';
+import { Plus, Edit2, Trash2, Clock, Calendar, MapPin, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
+
+const AGENDA_CACHE_KEY = 'tourlatam_agenda_cache';
+const SPEAKERS_CACHE_KEY = 'tourlatam_agenda_speakers_cache';
 
 const formatDateLabel = (dateStr?: string) => {
   if (!dateStr) return '';
@@ -16,32 +19,84 @@ const formatDateLabel = (dateStr?: string) => {
 };
 
 export const AgendaPage: React.FC = () => {
-  const [items, setItems] = useState<AgendaItemDTO[]>([]);
-  const [speakers, setSpeakers] = useState<SpeakerDTO[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<AgendaItemDTO[]>(() => {
+    try {
+      const cached = localStorage.getItem(AGENDA_CACHE_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch {
+      // ignore
+    }
+    return [];
+  });
+
+  const [speakers, setSpeakers] = useState<SpeakerDTO[]>(() => {
+    try {
+      const cached = localStorage.getItem(SPEAKERS_CACHE_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch {
+      // ignore
+    }
+    return [];
+  });
+
+  const [loading, setLoading] = useState<boolean>(() => {
+    try {
+      return !localStorage.getItem(AGENDA_CACHE_KEY);
+    } catch {
+      return true;
+    }
+  });
+
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<Partial<AgendaItemDTO> | null>(null);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    setIsSyncing(true);
+    setError(null);
     try {
-      const [agRes, spRes] = await Promise.all([api.getAgenda(), api.getSpeakers()]);
-      setItems(agRes);
-      setSpeakers(spRes);
-    } catch (err) {
+      // includeAll = true to fetch active and inactive sessions for admin
+      const [agRes, spRes] = await Promise.all([api.getAgenda(true), api.getSpeakers(true)]);
+      if (Array.isArray(agRes)) {
+        setItems(agRes);
+        try {
+          localStorage.setItem(AGENDA_CACHE_KEY, JSON.stringify(agRes));
+        } catch {
+          // ignore
+        }
+      }
+      if (Array.isArray(spRes)) {
+        setSpeakers(spRes);
+        try {
+          localStorage.setItem(SPEAKERS_CACHE_KEY, JSON.stringify(spRes));
+        } catch {
+          // ignore
+        }
+      }
+    } catch (err: any) {
       console.error('Error loading agenda:', err);
+      setError(err.message || 'No se pudo sincronizar la agenda desde la base de datos.');
     } finally {
       setLoading(false);
+      setIsSyncing(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleDelete = async (id: string, title: string) => {
     if (confirm(`¿Eliminar la sesión "${title}"?`)) {
       try {
         await api.deleteAgendaItem(id);
-        setItems(items.filter((i) => i.id !== id));
+        const updated = items.filter((i) => i.id !== id);
+        setItems(updated);
+        try {
+          localStorage.setItem(AGENDA_CACHE_KEY, JSON.stringify(updated));
+        } catch {
+          // ignore
+        }
       } catch (err: any) {
         alert(err.message || 'Error al eliminar');
       }
@@ -76,15 +131,17 @@ export const AgendaPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-400">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-cyan"></div>
+      <div className="flex flex-col items-center justify-center py-24 text-slate-400 space-y-4">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-brand-cyan"></div>
+        <p className="text-sm font-medium text-slate-300">Cargando agenda oficial...</p>
+        <p className="text-xs text-slate-500">Conectando con la base de datos...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-white">Gestión de Agenda Oficial</h2>
           <p className="text-xs text-slate-400">
@@ -92,82 +149,156 @@ export const AgendaPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() =>
-            setEditingItem({
-              date: '2026-11-20T00:00:00.000Z',
-              startTime: '09:00',
-              endTime: '10:00',
-              title: '',
-              type: 'KEYNOTE',
-              displayOrder: items.length + 1,
-              isActive: true,
-            })
-          }
-          className="px-5 py-2.5 rounded-xl bg-brand-cyan text-dark-900 font-extrabold text-xs hover:bg-white transition-all shadow-lg flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>NUEVA SESIÓN</span>
-        </button>
-      </div>
+        <div className="flex items-center gap-3">
+          {isSyncing && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan text-[11px] font-semibold">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <span>Sincronizando con BD...</span>
+            </div>
+          )}
 
-      <div className="glass-panel rounded-3xl border border-slate-700/80 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-800/80 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-700">
-              <tr>
-                <th className="py-4 px-6">Horario & Día</th>
-                <th className="py-4 px-6">Título Sesión</th>
-                <th className="py-4 px-6">Tipo</th>
-                <th className="py-4 px-6">Speaker Asignado</th>
-                <th className="py-4 px-6">Sala</th>
-                <th className="py-4 px-6 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 text-slate-300">
-              {items.map((it) => (
-                <tr key={it.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="py-4 px-6">
-                    <div className="font-bold text-brand-cyan flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      {it.startTime} - {it.endTime}
-                    </div>
-                    <div className="text-[11px] text-slate-400 capitalize">
-                      {formatDateLabel(it.date)}
-                    </div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <div className="font-bold text-white text-sm">{it.title}</div>
-                  </td>
-                  <td className="py-4 px-6">
-                    <span className="px-2.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-800 text-brand-magenta border border-slate-700">
-                      {it.type}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 font-semibold text-slate-200">
-                    {it.speaker?.name || 'N/A'}
-                  </td>
-                  <td className="py-4 px-6 text-slate-400">{it.room || 'Auditorio Principal'}</td>
-                  <td className="py-4 px-6 text-right space-x-2">
-                    <button
-                      onClick={() => setEditingItem(it)}
-                      className="p-2 rounded-lg bg-slate-800 text-brand-cyan hover:bg-slate-700"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(it.id, it.title)}
-                      className="p-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <button
+            type="button"
+            onClick={loadData}
+            disabled={isSyncing}
+            title="Refrescar agenda desde la base de datos"
+            className="p-2.5 rounded-xl bg-dark-800 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-all text-xs flex items-center gap-1.5"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refrescar</span>
+          </button>
+
+          <button
+            onClick={() =>
+              setEditingItem({
+                date: '2026-11-20T00:00:00.000Z',
+                startTime: '09:00',
+                endTime: '10:00',
+                title: '',
+                type: 'KEYNOTE',
+                displayOrder: items.length + 1,
+                isActive: true,
+              })
+            }
+            className="px-5 py-2.5 rounded-xl bg-brand-cyan text-dark-900 font-extrabold text-xs hover:bg-white transition-all shadow-lg flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>NUEVA SESIÓN</span>
+          </button>
         </div>
       </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs font-medium text-amber-400 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>Mostrando datos locales. {error}</span>
+          </div>
+          <button
+            type="button"
+            onClick={loadData}
+            className="underline font-bold hover:text-white flex-shrink-0"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      {items.length === 0 ? (
+        <div className="glass-panel rounded-3xl border border-slate-700/80 p-12 text-center space-y-4">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-brand-cyan/10 border border-brand-cyan/20 flex items-center justify-center text-brand-cyan">
+            <Calendar className="w-7 h-7" />
+          </div>
+          <h3 className="text-base font-bold text-white">No hay sesiones en la agenda</h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            Aún no se han programado sesiones para el evento o no se pudieron cargar desde el servidor.
+          </p>
+          <div className="flex justify-center gap-3 pt-2">
+            <button
+              onClick={loadData}
+              className="px-4 py-2 rounded-xl bg-dark-800 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold inline-flex items-center gap-2"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Reintentar carga</span>
+            </button>
+            <button
+              onClick={() =>
+                setEditingItem({
+                  date: '2026-11-20T00:00:00.000Z',
+                  startTime: '09:00',
+                  endTime: '10:00',
+                  title: '',
+                  type: 'KEYNOTE',
+                  displayOrder: 1,
+                  isActive: true,
+                })
+              }
+              className="px-5 py-2 rounded-xl bg-brand-cyan text-dark-900 font-extrabold text-xs hover:bg-white transition-all inline-flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Crear primera sesión</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="glass-panel rounded-3xl border border-slate-700/80 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-800/80 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-700">
+                <tr>
+                  <th className="py-4 px-6">Horario & Día</th>
+                  <th className="py-4 px-6">Título Sesión</th>
+                  <th className="py-4 px-6">Tipo</th>
+                  <th className="py-4 px-6">Speaker Asignado</th>
+                  <th className="py-4 px-6">Sala</th>
+                  <th className="py-4 px-6 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800 text-slate-300">
+                {items.map((it) => (
+                  <tr key={it.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="py-4 px-6">
+                      <div className="font-bold text-brand-cyan flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        {it.startTime} - {it.endTime}
+                      </div>
+                      <div className="text-[11px] text-slate-400 capitalize">
+                        {formatDateLabel(it.date)}
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="font-bold text-white text-sm">{it.title}</div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="px-2.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-800 text-brand-magenta border border-slate-700">
+                        {it.type}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 font-semibold text-slate-200">
+                      {it.speaker?.name || 'N/A'}
+                    </td>
+                    <td className="py-4 px-6 text-slate-400">{it.room || 'Auditorio Principal'}</td>
+                    <td className="py-4 px-6 text-right space-x-2">
+                      <button
+                        onClick={() => setEditingItem(it)}
+                        className="p-2 rounded-lg bg-slate-800 text-brand-cyan hover:bg-slate-700"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(it.id, it.title)}
+                        className="p-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Agenda Edit Modal */}
       {editingItem && (

@@ -247,11 +247,11 @@ export const SpeakerFormPage: React.FC = () => {
 
                 <div className="flex-1 space-y-2">
                   <input
-                    type="url"
+                    type="text"
                     name="photo"
                     value={form.photo || ''}
                     onChange={handleChange}
-                    placeholder="https://..."
+                    placeholder="/uploads/... o https://..."
                     className="w-full px-4 py-2 rounded-xl bg-dark-900 border border-slate-700 text-white text-xs"
                     required
                   />

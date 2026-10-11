@@ -211,11 +211,11 @@ export const SponsorFormPage: React.FC = () => {
 
                 <div className="flex-1 space-y-2">
                   <input
-                    type="url"
+                    type="text"
                     name="logo"
                     value={form.logo || ''}
                     onChange={handleChange}
-                    placeholder="URL de imagen"
+                    placeholder="/uploads/... o https://..."
                     className="w-full px-4 py-2 rounded-xl bg-dark-900 border border-slate-700 text-white text-xs"
                     required
                   />

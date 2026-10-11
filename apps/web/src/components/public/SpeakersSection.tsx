@@ -3,6 +3,7 @@ import { Linkedin, Globe, Video, ArrowUpRight, Award, MapPin, Sparkles } from 'l
 import { SpeakerDTO } from '@tourlatam/types';
 import { Link } from 'react-router-dom';
 import { getMediaUrl } from '../../utils/media';
+import { CountryFlag } from '../common/CountryFlag';
 
 interface SpeakersSectionProps {
   speakers: SpeakerDTO[];
@@ -58,9 +59,9 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                   )}
 
                   <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-200 bg-dark-950/80 px-3 py-1 rounded-full backdrop-blur-md border border-dark-600">
-                      <MapPin className="w-3.5 h-3.5 text-brand-cyan" />
-                      {speaker.country}
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-200 bg-dark-950/80 px-3 py-1 rounded-full backdrop-blur-md border border-dark-600">
+                      <CountryFlag country={speaker.country} size="sm" />
+                      <span>{speaker.country}</span>
                     </span>
                     {speaker.linkedinUrl && (
                       <a

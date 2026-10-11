@@ -4,6 +4,7 @@ import { api } from '../../services/api';
 import { SpeakerDTO } from '@tourlatam/types';
 import { Plus, Edit2, Trash2, Award, ExternalLink, CheckCircle, XCircle } from 'lucide-react';
 import { getMediaUrl } from '../../utils/media';
+import { CountryFlag } from '../../components/common/CountryFlag';
 
 export const SpeakersListPage: React.FC = () => {
   const [speakers, setSpeakers] = useState<SpeakerDTO[]>([]);
@@ -120,7 +121,10 @@ export const SpeakersListPage: React.FC = () => {
                     </td>
                     <td className="py-4 px-6">
                       <div className="font-semibold text-slate-200">{sp.company}</div>
-                      <div className="text-[11px] text-slate-400">{sp.country}</div>
+                      <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                        <CountryFlag country={sp.country} size="xs" />
+                        <span>{sp.country}</span>
+                      </div>
                     </td>
                     <td className="py-4 px-6">
                       <button

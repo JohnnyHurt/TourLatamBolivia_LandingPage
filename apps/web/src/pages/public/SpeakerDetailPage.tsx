@@ -6,6 +6,7 @@ import { ArrowLeft, Linkedin, Globe, Video, MapPin, Clock, Award, Sparkles } fro
 import { Header } from '../../components/public/Header';
 import { Footer } from '../../components/public/Footer';
 import { getMediaUrl } from '../../utils/media';
+import { CountryFlag } from '../../components/common/CountryFlag';
 
 export const SpeakerDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -99,7 +100,7 @@ export const SpeakerDetailPage: React.FC = () => {
               {/* Speaker Metadata */}
               <div className="md:col-span-8">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-dark-900 border border-dark-600 text-xs font-bold text-slate-300 mb-3">
-                  <MapPin className="w-3.5 h-3.5 text-brand-cyan" />
+                  <CountryFlag country={speaker.country} size="sm" />
                   <span>{speaker.country}</span>
                 </div>
 

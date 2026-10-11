@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { api } from '../../services/api';
-import { AgendaItemDTO, SpeakerDTO, AgendaType } from '@tourlatam/types';
-import { Plus, Edit2, Trash2, Clock, Calendar, MapPin, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
+import { AgendaItemDTO, SpeakerDTO, AgendaType, PageSectionDTO } from '@tourlatam/types';
+import { Plus, Edit2, Trash2, Clock, Calendar, MapPin, RefreshCw, AlertCircle, Loader2, Construction, Eye, CheckCircle2, Sliders } from 'lucide-react';
 
 const AGENDA_CACHE_KEY = 'tourlatam_agenda_cache';
 const SPEAKERS_CACHE_KEY = 'tourlatam_agenda_speakers_cache';
+const AGENDA_SECTION_CACHE_KEY = 'tourlatam_agenda_section_config';
 
 const formatDateLabel = (dateStr?: string) => {
   if (!dateStr) return '';
@@ -16,6 +17,20 @@ const formatDateLabel = (dateStr?: string) => {
     month: 'short',
     timeZone: 'UTC',
   });
+};
+
+interface AgendaSectionConfig {
+  isUnderConstruction: boolean;
+  noticeTitle: string;
+  noticeMessage: string;
+  badgeText: string;
+}
+
+const DEFAULT_SECTION_CONFIG: AgendaSectionConfig = {
+  isUnderConstruction: true,
+  noticeTitle: 'Agenda Oficial en Proceso de Confirmación',
+  noticeMessage: 'Estamos ultimando detalles con nuestros ponentes internacionales y organizando los horarios de cada sesión magistral y workshop para brindarte la mejor experiencia formativa. El cronograma completo será publicado muy pronto.',
+  badgeText: 'PROGRAMA EN DEFINICIÓN',
 };
 
 export const AgendaPage: React.FC = () => {
@@ -39,6 +54,16 @@ export const AgendaPage: React.FC = () => {
     return [];
   });
 
+  const [sectionConfig, setSectionConfig] = useState<AgendaSectionConfig>(() => {
+    try {
+      const cached = localStorage.getItem(AGENDA_SECTION_CACHE_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch {
+      // ignore
+    }
+    return DEFAULT_SECTION_CONFIG;
+  });
+
   const [loading, setLoading] = useState<boolean>(() => {
     try {
       return !localStorage.getItem(AGENDA_CACHE_KEY);
@@ -48,6 +73,9 @@ export const AgendaPage: React.FC = () => {
   });
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [savingConfig, setSavingConfig] = useState(false);
+  const [configToast, setConfigToast] = useState<string | null>(null);
+  const [showConfigPanel, setShowConfigPanel] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<Partial<AgendaItemDTO> | null>(null);
 
@@ -56,7 +84,12 @@ export const AgendaPage: React.FC = () => {
     setError(null);
     try {
       // includeAll = true to fetch active and inactive sessions for admin
-      const [agRes, spRes] = await Promise.all([api.getAgenda(true), api.getSpeakers(true)]);
+      const [agRes, spRes, secRes] = await Promise.all([
+        api.getAgenda(true),
+        api.getSpeakers(true),
+        api.getPageSections(),
+      ]);
+
       if (Array.isArray(agRes)) {
         setItems(agRes);
         try {
@@ -65,12 +98,31 @@ export const AgendaPage: React.FC = () => {
           // ignore
         }
       }
+
       if (Array.isArray(spRes)) {
         setSpeakers(spRes);
         try {
           localStorage.setItem(SPEAKERS_CACHE_KEY, JSON.stringify(spRes));
         } catch {
           // ignore
+        }
+      }
+
+      if (Array.isArray(secRes)) {
+        const agendaSec = secRes.find((s) => s.sectionType === 'AGENDA');
+        if (agendaSec?.content) {
+          const cfg: AgendaSectionConfig = {
+            isUnderConstruction: agendaSec.content.isUnderConstruction ?? true,
+            noticeTitle: agendaSec.content.noticeTitle || DEFAULT_SECTION_CONFIG.noticeTitle,
+            noticeMessage: agendaSec.content.noticeMessage || DEFAULT_SECTION_CONFIG.noticeMessage,
+            badgeText: agendaSec.content.badgeText || DEFAULT_SECTION_CONFIG.badgeText,
+          };
+          setSectionConfig(cfg);
+          try {
+            localStorage.setItem(AGENDA_SECTION_CACHE_KEY, JSON.stringify(cfg));
+          } catch {
+            // ignore
+          }
         }
       }
     } catch (err: any) {
@@ -85,6 +137,59 @@ export const AgendaPage: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const handleSaveSectionConfig = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setSavingConfig(true);
+    try {
+      await api.updatePageSection('AGENDA', {
+        content: sectionConfig,
+      });
+      try {
+        localStorage.setItem(AGENDA_SECTION_CACHE_KEY, JSON.stringify(sectionConfig));
+      } catch {
+        // ignore
+      }
+      setConfigToast(
+        sectionConfig.isUnderConstruction
+          ? 'Modo "Agenda en Proceso" activado exitosamente.'
+          : 'Agenda oficial publicada en la Landing Page.'
+      );
+      setTimeout(() => setConfigToast(null), 3500);
+    } catch (err: any) {
+      alert(err.message || 'Error al guardar la visibilidad de la agenda');
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+
+  const toggleUnderConstructionQuick = async () => {
+    const nextState = !sectionConfig.isUnderConstruction;
+    const nextConfig = { ...sectionConfig, isUnderConstruction: nextState };
+    setSectionConfig(nextConfig);
+    setSavingConfig(true);
+    try {
+      await api.updatePageSection('AGENDA', {
+        content: nextConfig,
+      });
+      try {
+        localStorage.setItem(AGENDA_SECTION_CACHE_KEY, JSON.stringify(nextConfig));
+      } catch {
+        // ignore
+      }
+      setConfigToast(
+        nextState
+          ? 'Modo "Agenda en Proceso" activado. En la landing se mostrará el mensaje en proceso.'
+          : '¡Agenda Oficial Activada! En la landing se mostrará el cronograma con sesiones.'
+      );
+      setTimeout(() => setConfigToast(null), 3500);
+    } catch (err: any) {
+      alert(err.message || 'Error al actualizar el estado de la agenda');
+      setSectionConfig(sectionConfig); // rollback
+    } finally {
+      setSavingConfig(false);
+    }
+  };
 
   const handleDelete = async (id: string, title: string) => {
     if (confirm(`¿Eliminar la sesión "${title}"?`)) {
@@ -141,11 +246,20 @@ export const AgendaPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Toast Feedback */}
+      {configToast && (
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400 flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>{configToast}</span>
+        </div>
+      )}
+
+      {/* Main Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black text-white">Gestión de Agenda Oficial</h2>
           <p className="text-xs text-slate-400">
-            Administra los horarios, ponencias, salas y ponentes asociados.
+            Administra los horarios, ponencias, salas y la visualización pública en la Landing Page.
           </p>
         </div>
 
@@ -169,6 +283,15 @@ export const AgendaPage: React.FC = () => {
           </button>
 
           <button
+            type="button"
+            onClick={() => setShowConfigPanel(!showConfigPanel)}
+            className="px-4 py-2.5 rounded-xl bg-dark-800 border border-slate-700 text-slate-200 hover:text-white hover:border-brand-cyan/50 transition-all text-xs font-bold flex items-center gap-2"
+          >
+            <Sliders className="w-4 h-4 text-brand-cyan" />
+            <span>Configurar Mensaje</span>
+          </button>
+
+          <button
             onClick={() =>
               setEditingItem({
                 date: '2026-11-20T00:00:00.000Z',
@@ -187,6 +310,136 @@ export const AgendaPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Agenda Public Visibility Switch Banner */}
+      <div className={`p-5 rounded-2xl border transition-all ${
+        sectionConfig.isUnderConstruction
+          ? 'bg-amber-500/10 border-amber-500/30'
+          : 'bg-emerald-500/10 border-emerald-500/30'
+      }`}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className={`p-2.5 rounded-xl ${
+              sectionConfig.isUnderConstruction
+                ? 'bg-amber-500/20 text-amber-400'
+                : 'bg-emerald-500/20 text-emerald-400'
+            }`}>
+              {sectionConfig.isUnderConstruction ? (
+                <Construction className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-white">
+                  Estado en la Landing Page:{' '}
+                  <span className={sectionConfig.isUnderConstruction ? 'text-amber-400' : 'text-emerald-400'}>
+                    {sectionConfig.isUnderConstruction
+                      ? 'Mensaje "Agenda en Proceso" Activo'
+                      : 'Agenda Oficial Publicada (Cronograma Completo)'}
+                  </span>
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {sectionConfig.isUnderConstruction
+                  ? 'Los visitantes ven una tarjeta destacada informando que la agenda está en definición. Las sesiones que cargues abajo se mantienen privadas hasta que desactives este mensaje.'
+                  : 'Los visitantes de la Landing pueden ver el cronograma por jornadas con todas las sesiones activas.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={toggleUnderConstructionQuick}
+              disabled={savingConfig}
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all shadow-md flex items-center gap-2 ${
+                sectionConfig.isUnderConstruction
+                  ? 'bg-emerald-500 hover:bg-emerald-400 text-dark-950'
+                  : 'bg-amber-500 hover:bg-amber-400 text-dark-950'
+              }`}
+            >
+              {savingConfig ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : sectionConfig.isUnderConstruction ? (
+                <Eye className="w-3.5 h-3.5" />
+              ) : (
+                <Construction className="w-3.5 h-3.5" />
+              )}
+              <span>
+                {savingConfig
+                  ? 'Guardando...'
+                  : sectionConfig.isUnderConstruction
+                  ? 'PUBLICAR AGENDA COMPLETA'
+                  : 'MOSTRAR MENSAJE EN PROCESO'}
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Optional Configuration Details Drawer/Accordion */}
+      {showConfigPanel && (
+        <form onSubmit={handleSaveSectionConfig} className="glass-panel p-6 rounded-3xl border border-slate-700 space-y-4">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <Sliders className="w-4 h-4 text-brand-cyan" />
+            <span>Personalizar Mensaje de "Agenda en Proceso"</span>
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Título del Mensaje</label>
+              <input
+                type="text"
+                value={sectionConfig.noticeTitle}
+                onChange={(e) => setSectionConfig({ ...sectionConfig, noticeTitle: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-700 text-white"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-300 font-bold mb-1">Badge Superior</label>
+              <input
+                type="text"
+                value={sectionConfig.badgeText}
+                onChange={(e) => setSectionConfig({ ...sectionConfig, badgeText: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-700 text-white"
+                required
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-slate-300 font-bold mb-1">Descripción / Texto Explicativo</label>
+              <textarea
+                rows={3}
+                value={sectionConfig.noticeMessage}
+                onChange={(e) => setSectionConfig({ ...sectionConfig, noticeMessage: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-700 text-white leading-relaxed"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowConfigPanel(false)}
+              className="px-4 py-2 rounded-xl bg-dark-800 text-slate-300 text-xs font-bold hover:text-white"
+            >
+              Cerrar
+            </button>
+            <button
+              type="submit"
+              disabled={savingConfig}
+              className="px-5 py-2 rounded-xl bg-brand-cyan text-dark-950 text-xs font-black hover:bg-white transition-all shadow-md"
+            >
+              {savingConfig ? 'Guardando...' : 'GUARDAR TEXTOS'}
+            </button>
+          </div>
+        </form>
+      )}
 
       {error && (
         <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs font-medium text-amber-400 flex items-center justify-between gap-3">

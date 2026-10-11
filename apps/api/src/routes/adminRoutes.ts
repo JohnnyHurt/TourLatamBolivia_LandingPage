@@ -731,6 +731,9 @@ router.put('/page-sections/reorder', async (req: AuthenticatedRequest, res: Resp
       });
     }
 
+    cacheService.invalidate('sections');
+    cacheService.del('landing-data');
+
     await AuditService.log({
       userId: req.user?.id,
       action: 'UPDATE',
@@ -740,6 +743,67 @@ router.put('/page-sections/reorder', async (req: AuthenticatedRequest, res: Resp
     });
 
     return res.json({ success: true, message: 'Sections reordered successfully' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/page-sections/:sectionType', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { sectionType } = req.params;
+    const { title, subtitle, content, isVisible } = req.body;
+
+    const existing = await prisma.pageSection.findUnique({
+      where: { sectionType },
+    });
+
+    let updated;
+    const stringifiedContent = content !== undefined
+      ? (typeof content === 'string' ? content : JSON.stringify(content))
+      : undefined;
+
+    if (existing) {
+      updated = await prisma.pageSection.update({
+        where: { sectionType },
+        data: {
+          title: title !== undefined ? title : existing.title,
+          subtitle: subtitle !== undefined ? subtitle : existing.subtitle,
+          content: stringifiedContent !== undefined ? stringifiedContent : existing.content,
+          isVisible: isVisible !== undefined ? isVisible : existing.isVisible,
+        },
+      });
+    } else {
+      updated = await prisma.pageSection.create({
+        data: {
+          sectionType,
+          title: title ?? null,
+          subtitle: subtitle ?? null,
+          content: stringifiedContent ?? null,
+          isVisible: isVisible !== undefined ? isVisible : true,
+          displayOrder: 5,
+        },
+      });
+    }
+
+    cacheService.invalidate('sections');
+    cacheService.del('landing-data');
+
+    await AuditService.log({
+      userId: req.user?.id,
+      action: 'UPDATE',
+      entity: 'PageSection',
+      entityId: updated.id,
+      details: { sectionType },
+      ipAddress: req.ip,
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        ...updated,
+        content: safeJsonParse(updated.content, null),
+      },
+    });
   } catch (err) {
     next(err);
   }

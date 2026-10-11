@@ -111,6 +111,12 @@ export const api = {
       body: JSON.stringify({ items }),
     }),
 
+  updatePageSection: (sectionType: string, data: { title?: string; subtitle?: string; content?: any; isVisible?: boolean }) =>
+    fetcher<PageSectionDTO>(`/admin/page-sections/${sectionType}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
   // Speakers CMS
   createSpeaker: (data: Partial<SpeakerDTO>) =>
     fetcher<SpeakerDTO>('/admin/speakers', {

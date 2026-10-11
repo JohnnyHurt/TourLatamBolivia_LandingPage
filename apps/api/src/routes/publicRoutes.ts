@@ -227,21 +227,33 @@ router.get('/event-info', async (_req: Request, res: Response, next: NextFunctio
 });
 
 // GET /api/public/page-sections
-router.get('/page-sections', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/page-sections', async (req: Request, res: Response, next: NextFunction) => {
+  const includeAll = req.query.all === 'true';
+  const cacheKey = includeAll ? 'sections-all' : 'sections-active';
+  const cached = cacheService.get(cacheKey);
+  if (cached) {
+    return res.json({ success: true, data: cached, _fromCache: true });
+  }
+
   try {
     const sections = await prisma.pageSection.findMany({
-      where: { isVisible: true },
+      where: includeAll ? {} : { isVisible: true },
       orderBy: { displayOrder: 'asc' },
     });
 
-    return res.json({
-      success: true,
-      data: sections.map((s) => ({
-        ...s,
-        content: safeJsonParse(s.content, null),
-      })),
-    });
+    const data = sections.map((s) => ({
+      ...s,
+      content: safeJsonParse(s.content, null),
+    }));
+
+    cacheService.set(cacheKey, data, 600);
+    return res.json({ success: true, data });
   } catch (error) {
+    const stale = cacheService.getStale(cacheKey);
+    if (stale) {
+      console.warn('[CacheFallback] Serving stale page sections from cache.');
+      return res.json({ success: true, data: stale, _stale: true });
+    }
     next(error);
   }
 });

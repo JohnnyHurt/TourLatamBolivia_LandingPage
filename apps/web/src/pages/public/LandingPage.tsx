@@ -227,8 +227,10 @@ export const LandingPage: React.FC = () => {
         return <FocusAreas key="focus-areas" areas={focusAreas} />;
       case 'SPEAKERS':
         return <SpeakersSection key="speakers" speakers={speakers} />;
-      case 'AGENDA':
-        return <AgendaSection key="agenda" items={agenda} />;
+      case 'AGENDA': {
+        const agendaSec = sections.find((s) => s.sectionType === 'AGENDA');
+        return <AgendaSection key="agenda" items={agenda} sectionConfig={agendaSec?.content} />;
+      }
       case 'PRICING':
         return <PricingSection key="pricing" tickets={tickets} registrationUrl={settings?.registrationUrl} />;
       case 'SPONSORS':
@@ -256,7 +258,7 @@ export const LandingPage: React.FC = () => {
             <About settings={settings} />
             <FocusAreas areas={focusAreas} />
             <SpeakersSection speakers={speakers} />
-            <AgendaSection items={agenda} />
+            <AgendaSection items={agenda} sectionConfig={sections.find((s) => s.sectionType === 'AGENDA')?.content} />
             <PricingSection tickets={tickets} registrationUrl={settings?.registrationUrl} />
             <SponsorsSection sponsors={sponsors} />
             <FAQSection faqs={faqs} />

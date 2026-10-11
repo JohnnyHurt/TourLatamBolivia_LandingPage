@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, MapPin, ChevronRight, Sparkles, Video } from 'lucide-react';
+import { Calendar, Clock, MapPin, ChevronRight, Sparkles, Video, Construction, Bell, CheckCircle2 } from 'lucide-react';
 import { AgendaItemDTO } from '@tourlatam/types';
 import { Link } from 'react-router-dom';
 
 interface AgendaSectionProps {
   items: AgendaItemDTO[];
+  sectionConfig?: {
+    isUnderConstruction?: boolean;
+    noticeTitle?: string;
+    noticeMessage?: string;
+    badgeText?: string;
+  };
 }
 
-export const AgendaSection: React.FC<AgendaSectionProps> = ({ items }) => {
+export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConfig }) => {
+  const isUnderConstruction = sectionConfig?.isUnderConstruction ?? (items.length === 0);
+  const noticeTitle = sectionConfig?.noticeTitle || 'Agenda Oficial en Proceso de Confirmación';
+  const noticeMessage = sectionConfig?.noticeMessage || 'Estamos ultimando detalles con nuestros ponentes internacionales y organizando los horarios de cada sesión magistral y workshop para brindarte la mejor experiencia formativa. El cronograma completo será publicado muy pronto.';
+  const badgeText = sectionConfig?.badgeText || 'PROGRAMA EN DEFINICIÓN';
+
   // Extract unique dates or fallback to 20 & 21 Nov 2026
   const extractedDates = Array.from(
     new Set(items.map((it) => it.date.split('T')[0]))
@@ -45,7 +56,7 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items }) => {
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-xs font-black text-brand-cyan uppercase tracking-widest mb-4">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>CRONOGRAMA OFICIAL DEL CONGRESO</span>
+            <span>{isUnderConstruction ? badgeText : 'CRONOGRAMA OFICIAL DEL CONGRESO'}</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-4">
             Programa por Jornadas
@@ -55,8 +66,69 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items }) => {
           </p>
         </div>
 
-        {/* Day Tabs */}
-        {uniqueDates.length > 0 && (
+        {isUnderConstruction ? (
+          /* Under Construction / In Progress Card */
+          <div className="max-w-3xl mx-auto glass-panel rounded-3xl p-8 sm:p-12 border border-brand-cyan/30 text-center relative overflow-hidden shadow-2xl bg-gradient-to-b from-dark-800/90 to-dark-900/95">
+            <div className="absolute -right-16 -top-16 w-48 h-48 bg-brand-cyan/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -left-16 -bottom-16 w-48 h-48 bg-brand-magenta/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="w-20 h-20 mx-auto rounded-3xl bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-center text-brand-cyan mb-6 shadow-glow-cyan animate-pulse">
+              <Construction className="w-10 h-10" />
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold mb-4">
+              <Clock className="w-3.5 h-3.5" />
+              <span>Próximamente disponible</span>
+            </div>
+
+            <h3 className="text-2xl sm:text-3xl font-black text-white mb-4 tracking-tight">
+              {noticeTitle}
+            </h3>
+
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto mb-8 font-light">
+              {noticeMessage}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto text-left pt-6 border-t border-slate-800">
+              <div className="p-4 rounded-2xl bg-dark-850/80 border border-slate-800 flex items-start gap-3">
+                <CheckCircle2 className="w-4 h-4 text-brand-cyan shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-white">20 & 21 Nov</div>
+                  <div className="text-[11px] text-slate-400">Jornadas oficiales</div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-dark-850/80 border border-slate-800 flex items-start gap-3">
+                <CheckCircle2 className="w-4 h-4 text-brand-magenta shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-white">24 PDUs</div>
+                  <div className="text-[11px] text-slate-400">Créditos certificados</div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-dark-850/80 border border-slate-800 flex items-start gap-3">
+                <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-white">100% Virtual</div>
+                  <div className="text-[11px] text-slate-400">Transmisión HD</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <a
+                href="#registro"
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-brand-cyan text-dark-950 font-black text-xs hover:bg-white transition-all shadow-glow-cyan uppercase tracking-wider"
+              >
+                <span>Asegurar mi cupo en Pre-Venta</span>
+                <ChevronRight className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Day Tabs */}
+            {uniqueDates.length > 0 && (
           <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
             {uniqueDates.map((dateStr, idx) => {
               const d = new Date(dateStr + 'T12:00:00Z');
@@ -159,7 +231,9 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items }) => {
               <p className="text-sm font-semibold">Cargando sesiones para esta jornada...</p>
             </div>
           )}
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

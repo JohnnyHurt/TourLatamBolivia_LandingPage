@@ -10,7 +10,7 @@ export const SpeakersListPage: React.FC = () => {
 
   const loadSpeakers = async () => {
     try {
-      const data = await api.getSpeakers();
+      const data = await api.getSpeakers(true);
       setSpeakers(data);
     } catch (err) {
       console.error('Error loading speakers:', err);

@@ -134,16 +134,21 @@ const speakerSchema = z.object({
   websiteUrl: z.string().optional().nullable(),
   videoUrl: z.string().optional().nullable(),
   isFeatured: z.boolean().default(false),
-  displayOrder: z.number().default(0),
+  displayOrder: z.coerce.number().default(0),
   isActive: z.boolean().default(true),
 });
 
 router.post('/speakers', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const data = speakerSchema.parse(req.body);
-    const generatedSlug = slugify(data.name);
+    const baseSlug = slugify(data.name);
+    let generatedSlug = baseSlug;
+    let counter = 1;
+    while (await prisma.speaker.findUnique({ where: { slug: generatedSlug } })) {
+      generatedSlug = `${baseSlug}-${counter++}`;
+    }
 
-    // FIX #2: destructure specialties to avoid sending raw array to Prisma
+    // destructure specialties to avoid sending raw array to Prisma
     const { specialties, ...rest } = data;
 
     const speaker = await prisma.speaker.create({
@@ -167,7 +172,16 @@ router.post('/speakers', async (req: AuthenticatedRequest, res: Response, next: 
       ipAddress: req.ip,
     });
 
-    return res.json({ success: true, data: speaker });
+    const formatted = {
+      ...speaker,
+      specialties: typeof speaker.specialties === 'string'
+        ? (() => { try { return JSON.parse(speaker.specialties); } catch { return []; } })()
+        : speaker.specialties,
+      createdAt: speaker.createdAt.toISOString(),
+      updatedAt: speaker.updatedAt.toISOString(),
+    };
+
+    return res.json({ success: true, data: formatted });
   } catch (err) {
     next(err);
   }
@@ -183,10 +197,20 @@ router.put('/speakers/:id', async (req: AuthenticatedRequest, res: Response, nex
 
     let slug = existing.slug;
     if (data.name && data.name !== existing.name) {
-      slug = slugify(data.name);
+      const baseSlug = slugify(data.name);
+      let candidateSlug = baseSlug;
+      let counter = 1;
+      while (true) {
+        const found = await prisma.speaker.findUnique({ where: { slug: candidateSlug } });
+        if (!found || found.id === id) {
+          slug = candidateSlug;
+          break;
+        }
+        candidateSlug = `${baseSlug}-${counter++}`;
+      }
     }
 
-    // FIX #2: explicitly exclude specialties from spread to avoid type conflict
+    // explicitly exclude specialties from spread to avoid type conflict
     const { specialties, ...restData } = data;
 
     const updated = await prisma.speaker.update({
@@ -212,7 +236,16 @@ router.put('/speakers/:id', async (req: AuthenticatedRequest, res: Response, nex
       ipAddress: req.ip,
     });
 
-    return res.json({ success: true, data: updated });
+    const formatted = {
+      ...updated,
+      specialties: typeof updated.specialties === 'string'
+        ? (() => { try { return JSON.parse(updated.specialties); } catch { return []; } })()
+        : updated.specialties,
+      createdAt: updated.createdAt.toISOString(),
+      updatedAt: updated.updatedAt.toISOString(),
+    };
+
+    return res.json({ success: true, data: formatted });
   } catch (err) {
     next(err);
   }

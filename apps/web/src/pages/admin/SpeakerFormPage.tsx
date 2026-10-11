@@ -33,14 +33,20 @@ export const SpeakerFormPage: React.FC = () => {
 
   useEffect(() => {
     if (isEdit && id) {
-      api.getSpeakers().then((list) => {
-        const found = list.find((s) => s.id === id);
-        if (found) {
-          setForm(found);
-          setSpecialtiesText(found.specialties ? found.specialties.join(', ') : '');
-        }
-        setLoading(false);
-      });
+      api.getSpeakers(true)
+        .then((list) => {
+          const found = list.find((s) => s.id === id);
+          if (found) {
+            setForm(found);
+            setSpecialtiesText(found.specialties ? found.specialties.join(', ') : '');
+          }
+        })
+        .catch((err) => {
+          console.error('Error loading speaker:', err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [id, isEdit]);
 
@@ -75,16 +81,46 @@ export const SpeakerFormPage: React.FC = () => {
       .filter(Boolean);
 
     const payload = {
-      ...form,
+      name: (form.name || '').trim(),
+      position: (form.position || '').trim(),
+      company: (form.company || '').trim(),
+      country: (form.country || '').trim(),
+      photo: (form.photo || '').trim(),
+      shortBio: (form.shortBio || '').trim(),
+      fullBio: (form.fullBio || '').trim(),
       specialties: specsArray,
+      linkedinUrl: (form.linkedinUrl || '').trim() || undefined,
+      websiteUrl: (form.websiteUrl || '').trim() || undefined,
+      videoUrl: (form.videoUrl || '').trim() || undefined,
+      isFeatured: Boolean(form.isFeatured),
+      displayOrder: Number(form.displayOrder ?? 0),
+      isActive: form.isActive !== undefined ? Boolean(form.isActive) : true,
     };
 
     try {
+      let savedSpeaker: SpeakerDTO;
       if (isEdit && id) {
-        await api.updateSpeaker(id, payload);
+        savedSpeaker = await api.updateSpeaker(id, payload);
       } else {
-        await api.createSpeaker(payload);
+        savedSpeaker = await api.createSpeaker(payload);
       }
+
+      // Synchronize landing cache if present
+      try {
+        const raw = localStorage.getItem('tourlatam_landing_cache_v1');
+        if (raw) {
+          const cacheData = JSON.parse(raw);
+          if (Array.isArray(cacheData.speakers)) {
+            cacheData.speakers = isEdit
+              ? cacheData.speakers.map((s: any) => (s.id === id ? { ...s, ...savedSpeaker } : s))
+              : [...cacheData.speakers, savedSpeaker];
+            localStorage.setItem('tourlatam_landing_cache_v1', JSON.stringify(cacheData));
+          }
+        }
+      } catch {
+        // ignore
+      }
+
       navigate('/admin/speakers');
     } catch (err: any) {
       alert(err.message || 'Error al guardar speaker');

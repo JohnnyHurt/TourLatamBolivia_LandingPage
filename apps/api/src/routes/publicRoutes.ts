@@ -282,10 +282,14 @@ router.get('/focus-areas', async (_req: Request, res: Response, next: NextFuncti
 // GET /api/public/speakers
 router.get('/speakers', async (req: Request, res: Response, next: NextFunction) => {
   const includeAll = req.query.all === 'true';
-  const cacheKey = includeAll ? 'speakers-all' : 'speakers-active';
-  const cached = cacheService.get(cacheKey);
-  if (cached) {
-    return res.json({ success: true, data: cached, _fromCache: true });
+
+  if (includeAll) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  } else {
+    const cached = cacheService.get('speakers-active');
+    if (cached) {
+      return res.json({ success: true, data: cached, _fromCache: true });
+    }
   }
 
   try {
@@ -301,13 +305,17 @@ router.get('/speakers', async (req: Request, res: Response, next: NextFunction) 
       updatedAt: sp.updatedAt.toISOString(),
     }));
 
-    cacheService.set(cacheKey, data, 600);
+    if (!includeAll) {
+      cacheService.set('speakers-active', data, 600);
+    }
     return res.json({ success: true, data });
   } catch (error) {
-    const stale = cacheService.getStale(cacheKey);
-    if (stale) {
-      console.warn('[CacheFallback] Serving stale speakers from cache.');
-      return res.json({ success: true, data: stale, _stale: true });
+    if (!includeAll) {
+      const stale = cacheService.getStale('speakers-active');
+      if (stale) {
+        console.warn('[CacheFallback] Serving stale speakers from cache.');
+        return res.json({ success: true, data: stale, _stale: true });
+      }
     }
     next(error);
   }

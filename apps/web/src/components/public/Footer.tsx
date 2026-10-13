@@ -100,7 +100,7 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
               <p><span className="text-white font-bold">Organiza:</span> PMI Bolivia Chapter</p>
               <p><span className="text-white font-bold">Modalidad:</span> Virtual HD Streaming</p>
               <p><span className="text-white font-bold">Fechas:</span> 20 y 21 de Noviembre, 2026</p>
-              <p><span className="text-white font-bold">Email:</span> {settings?.contactEmail || 'contacto@pmi-bolivia.org'}</p>
+              <p><span className="text-white font-bold">Email:</span> contacto@pmisc.org.bo</p>
             </div>
           </div>
         </div>

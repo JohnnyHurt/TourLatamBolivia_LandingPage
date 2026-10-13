@@ -136,7 +136,7 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
                 <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                 <div>
                   <div className="text-xs font-bold text-white">100% Virtual</div>
-                  <div className="text-[11px] text-slate-400">Transmisión HD</div>
+                  <div className="text-[11px] text-slate-400">Transmisión en Vivo: Airmeet</div>
                 </div>
               </div>
             </div>
@@ -155,111 +155,110 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
           <>
             {/* Day Tabs */}
             {uniqueDates.length > 0 && (
-          <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
-            {uniqueDates.map((dateStr, idx) => {
-              const d = new Date(dateStr + 'T12:00:00Z');
-              const formattedDay = d.toLocaleDateString('es-ES', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                timeZone: 'UTC',
-              });
+              <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
+                {uniqueDates.map((dateStr, idx) => {
+                  const d = new Date(dateStr + 'T12:00:00Z');
+                  const formattedDay = d.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    timeZone: 'UTC',
+                  });
 
-              return (
-                <button
-                  key={dateStr}
-                  onClick={() => setSelectedDate(dateStr)}
-                  className={`px-8 py-4 rounded-2xl text-sm font-black transition-all flex items-center gap-3 uppercase tracking-wider ${
-                    selectedDate === dateStr
-                      ? 'bg-gradient-to-r from-brand-cyan to-brand-cyanLight text-dark-950 shadow-glow-cyan scale-105'
-                      : 'bg-dark-800 text-slate-300 hover:bg-dark-750 border border-dark-600'
-                  }`}
-                >
-                  <Calendar className="w-4 h-4" />
-                  <span>
-                    Jornada 0{idx + 1}: <span className="capitalize">{formattedDay}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Sessions List */}
-        <div className="space-y-4 max-w-4xl mx-auto">
-          {filteredItems.length > 0 ? (
-            filteredItems.map((item) => (
-              <div
-                key={item.id}
-                className="glass-card rounded-2xl p-6 border border-dark-600 hover:border-brand-cyan/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 bg-dark-800/80"
-              >
-                {/* Left Column: Time & Room */}
-                <div className="md:w-48 shrink-0">
-                  <div className="flex items-center gap-2 text-brand-cyan font-black text-lg">
-                    <Clock className="w-5 h-5" />
-                    <span>
-                      {item.startTime} - {item.endTime}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-brand-magenta mt-1 font-semibold">
-                    <Video className="w-3.5 h-3.5" />
-                    <span>{item.room || 'Transmisión en Vivo'}</span>
-                  </div>
-                </div>
-
-                {/* Middle Column: Title & Speaker */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span
-                      className={`px-3 py-0.5 rounded-full text-[10px] font-black uppercase border ${getTypeBadgeStyle(
-                        item.type
-                      )}`}
+                  return (
+                    <button
+                      key={dateStr}
+                      onClick={() => setSelectedDate(dateStr)}
+                      className={`px-8 py-4 rounded-2xl text-sm font-black transition-all flex items-center gap-3 uppercase tracking-wider ${selectedDate === dateStr
+                          ? 'bg-gradient-to-r from-brand-cyan to-brand-cyanLight text-dark-950 shadow-glow-cyan scale-105'
+                          : 'bg-dark-800 text-slate-300 hover:bg-dark-750 border border-dark-600'
+                        }`}
                     >
-                      {item.type}
-                    </span>
-                  </div>
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        Jornada 0{idx + 1}: <span className="capitalize">{formattedDay}</span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
-                  <h3 className="text-lg font-black text-white mb-2">{item.title}</h3>
-
-                  {item.description && (
-                    <p className="text-xs text-slate-300 font-light leading-relaxed mb-3">
-                      {item.description}
-                    </p>
-                  )}
-
-                  {item.speaker && (
-                    <div className="flex items-center gap-3 pt-2">
-                      <img
-                        src={getMediaUrl(item.speaker.photo)}
-                        alt={item.speaker.name}
-                        className="w-9 h-9 rounded-full object-cover border border-brand-cyan/40"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
-                        }}
-                      />
-                      <div>
-                        <Link
-                          to={`/speakers/${item.speaker.slug}`}
-                          className="text-xs font-bold text-slate-200 hover:text-brand-cyan flex items-center gap-1"
-                        >
-                          {item.speaker.name}
-                          <ChevronRight className="w-3 h-3 text-brand-cyan" />
-                        </Link>
-                        <span className="text-[10px] text-slate-400 block font-medium">
-                          {item.speaker.position} • {item.speaker.company}
+            {/* Sessions List */}
+            <div className="space-y-4 max-w-4xl mx-auto">
+              {filteredItems.length > 0 ? (
+                filteredItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="glass-card rounded-2xl p-6 border border-dark-600 hover:border-brand-cyan/50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 bg-dark-800/80"
+                  >
+                    {/* Left Column: Time & Room */}
+                    <div className="md:w-48 shrink-0">
+                      <div className="flex items-center gap-2 text-brand-cyan font-black text-lg">
+                        <Clock className="w-5 h-5" />
+                        <span>
+                          {item.startTime} - {item.endTime}
                         </span>
                       </div>
+                      <div className="flex items-center gap-1.5 text-xs text-brand-magenta mt-1 font-semibold">
+                        <Video className="w-3.5 h-3.5" />
+                        <span>{item.room || 'Transmisión en Vivo'}</span>
+                      </div>
                     </div>
-                  )}
+
+                    {/* Middle Column: Title & Speaker */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className={`px-3 py-0.5 rounded-full text-[10px] font-black uppercase border ${getTypeBadgeStyle(
+                            item.type
+                          )}`}
+                        >
+                          {item.type}
+                        </span>
+                      </div>
+
+                      <h3 className="text-lg font-black text-white mb-2">{item.title}</h3>
+
+                      {item.description && (
+                        <p className="text-xs text-slate-300 font-light leading-relaxed mb-3">
+                          {item.description}
+                        </p>
+                      )}
+
+                      {item.speaker && (
+                        <div className="flex items-center gap-3 pt-2">
+                          <img
+                            src={getMediaUrl(item.speaker.photo)}
+                            alt={item.speaker.name}
+                            className="w-9 h-9 rounded-full object-cover border border-brand-cyan/40"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                            }}
+                          />
+                          <div>
+                            <Link
+                              to={`/speakers/${item.speaker.slug}`}
+                              className="text-xs font-bold text-slate-200 hover:text-brand-cyan flex items-center gap-1"
+                            >
+                              {item.speaker.name}
+                              <ChevronRight className="w-3 h-3 text-brand-cyan" />
+                            </Link>
+                            <span className="text-[10px] text-slate-400 block font-medium">
+                              {item.speaker.position} • {item.speaker.company}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12 glass-panel rounded-2xl border border-dark-600 text-slate-400">
+                  <Clock className="w-8 h-8 text-brand-cyan mx-auto mb-2 opacity-60" />
+                  <p className="text-sm font-semibold">Cargando sesiones para esta jornada...</p>
                 </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center py-12 glass-panel rounded-2xl border border-dark-600 text-slate-400">
-              <Clock className="w-8 h-8 text-brand-cyan mx-auto mb-2 opacity-60" />
-              <p className="text-sm font-semibold">Cargando sesiones para esta jornada...</p>
-            </div>
-          )}
+              )}
             </div>
           </>
         )}

@@ -18,9 +18,6 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
         return Instagram;
       case 'youtube':
         return Youtube;
-      case 'x':
-      case 'twitter':
-        return Twitter;
       default:
         return Linkedin;
     }

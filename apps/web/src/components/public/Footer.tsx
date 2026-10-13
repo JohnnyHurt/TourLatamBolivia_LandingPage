@@ -25,12 +25,14 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
     }
   };
 
-  const socialLinks: SocialLinkDTO[] = settings?.socialLinks || [
-    { id: '1', platform: 'LinkedIn', url: 'https://www.linkedin.com/company/pmibolivia/?viewAsMember=true?', displayOrder: 1, isActive: true },
-    { id: '2', platform: 'Facebook', url: 'https://www.facebook.com/PMIBoliviaChapter/', displayOrder: 2, isActive: true },
-    { id: '3', platform: 'Instagram', url: 'https://www.instagram.com/pmi_santacruz/', displayOrder: 3, isActive: true },
-    { id: '4', platform: 'YouTube', url: 'https://www.youtube.com/watch?v=HCDFBuxvLS4', displayOrder: 4, isActive: true },
-  ];
+  const socialLinks: SocialLinkDTO[] = (settings?.socialLinks && settings.socialLinks.length > 0)
+    ? settings.socialLinks
+    : [
+      { id: '1', platform: 'LinkedIn', url: 'https://www.linkedin.com/company/pmibolivia/?viewAsMember=true?', displayOrder: 1, isActive: true },
+      { id: '2', platform: 'Facebook', url: 'https://www.facebook.com/PMIBoliviaChapter/', displayOrder: 2, isActive: true },
+      { id: '3', platform: 'Instagram', url: 'https://www.instagram.com/pmi_santacruz/', displayOrder: 3, isActive: true },
+      { id: '4', platform: 'YouTube', url: 'https://www.youtube.com/watch?v=HCDFBuxvLS4', displayOrder: 4, isActive: true },
+    ];
 
   return (
     <footer className="bg-dark-950 border-t border-dark-600 pt-16 pb-12 text-slate-400 text-sm relative overflow-hidden">

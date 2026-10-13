@@ -1,7 +1,24 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { api } from '../../services/api';
 import { EventSettingsDTO } from '@tourlatam/types';
-import { Save, CheckCircle2, Settings, Globe, Calendar, MapPin, Sparkles, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
+import {
+  Save,
+  CheckCircle2,
+  Settings,
+  Globe,
+  Calendar,
+  MapPin,
+  Sparkles,
+  RefreshCw,
+  AlertCircle,
+  Loader2,
+  Share2,
+  Linkedin,
+  Facebook,
+  Instagram,
+  Youtube,
+  Twitter,
+} from 'lucide-react';
 
 const SETTINGS_CACHE_KEY = 'tourlatam_event_settings_cache';
 
@@ -59,6 +76,23 @@ export const EventSettingsPage: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setSettings((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const getSocialUrl = (platform: string) => {
+    return settings.socialLinks?.find((s) => s.platform.toLowerCase() === platform.toLowerCase())?.url || '';
+  };
+
+  const handleSocialChange = (platform: string, url: string) => {
+    setSettings((prev) => {
+      const list = [...(prev.socialLinks || [])];
+      const idx = list.findIndex((s) => s.platform.toLowerCase() === platform.toLowerCase());
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], url };
+      } else {
+        list.push({ id: '', platform, url, displayOrder: list.length + 1, isActive: true });
+      }
+      return { ...prev, socialLinks: list };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -316,6 +350,90 @@ export const EventSettingsPage: React.FC = () => {
                 name="secondaryCtaText"
                 value={settings.secondaryCtaText || ''}
                 onChange={handleChange}
+                className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-slate-700 text-white text-sm focus:border-brand-cyan"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Social Links Card */}
+        <div className="glass-panel rounded-3xl p-6 border border-slate-700/80 space-y-4">
+          <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
+            <Share2 className="w-5 h-5 text-brand-cyan" />
+            <span>Redes Sociales Oficiales (Footer)</span>
+          </h3>
+
+          <p className="text-xs text-slate-400">
+            Configura los enlaces a las redes sociales oficiales del congreso. Se mostrarán automáticamente en el pie de página (footer) de la web.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                <Linkedin className="w-3.5 h-3.5 text-blue-400" />
+                <span>LinkedIn</span>
+              </label>
+              <input
+                type="url"
+                value={getSocialUrl('LinkedIn')}
+                onChange={(e) => handleSocialChange('LinkedIn', e.target.value)}
+                placeholder="https://www.linkedin.com/company/..."
+                className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-slate-700 text-white text-sm focus:border-brand-cyan"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                <Facebook className="w-3.5 h-3.5 text-blue-500" />
+                <span>Facebook</span>
+              </label>
+              <input
+                type="url"
+                value={getSocialUrl('Facebook')}
+                onChange={(e) => handleSocialChange('Facebook', e.target.value)}
+                placeholder="https://www.facebook.com/..."
+                className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-slate-700 text-white text-sm focus:border-brand-cyan"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                <Instagram className="w-3.5 h-3.5 text-pink-400" />
+                <span>Instagram</span>
+              </label>
+              <input
+                type="url"
+                value={getSocialUrl('Instagram')}
+                onChange={(e) => handleSocialChange('Instagram', e.target.value)}
+                placeholder="https://www.instagram.com/..."
+                className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-slate-700 text-white text-sm focus:border-brand-cyan"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                <Youtube className="w-3.5 h-3.5 text-red-500" />
+                <span>YouTube</span>
+              </label>
+              <input
+                type="url"
+                value={getSocialUrl('YouTube')}
+                onChange={(e) => handleSocialChange('YouTube', e.target.value)}
+                placeholder="https://www.youtube.com/..."
+                className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-slate-700 text-white text-sm focus:border-brand-cyan"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                <Twitter className="w-3.5 h-3.5 text-sky-400" />
+                <span>X (Twitter)</span>
+              </label>
+              <input
+                type="url"
+                value={getSocialUrl('X') || getSocialUrl('Twitter')}
+                onChange={(e) => handleSocialChange('X', e.target.value)}
+                placeholder="https://x.com/..."
                 className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-slate-700 text-white text-sm focus:border-brand-cyan"
               />
             </div>

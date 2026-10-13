@@ -809,13 +809,22 @@ const eventSettingsSchema = z.object({
   gaTrackingId:       z.string().optional().nullable(),
   gtmId:              z.string().optional().nullable(),
   metaPixelId:        z.string().optional().nullable(),
+  socialLinks:        z.array(
+    z.object({
+      id: z.string().optional(),
+      platform: z.string().min(1),
+      url: z.string(),
+      displayOrder: z.number().optional(),
+      isActive: z.boolean().optional(),
+    })
+  ).optional(),
 });
 
 router.put('/event-settings', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     // FIX #1: validate body through Zod schema first — unknown fields are stripped
     const body = eventSettingsSchema.parse(req.body);
-    const { startDate, endDate, ...rest } = body;
+    const { startDate, endDate, socialLinks, ...rest } = body;
 
     // Helper: convert null → undefined for Prisma create input (nullable optional fields)
     // Prisma's optional-String fields expect `string | undefined`, NOT `string | null`
@@ -893,6 +902,46 @@ router.put('/event-settings', async (req: AuthenticatedRequest, res: Response, n
 
 
 
+    // If socialLinks array was provided, update or create them
+    if (Array.isArray(socialLinks)) {
+      for (const item of socialLinks) {
+        if (!item.platform || !item.platform.trim()) continue;
+        const normalizedPlatform = item.platform.trim();
+        const trimmedUrl = (item.url || '').trim();
+
+        const existing = item.id
+          ? await prisma.socialLink.findUnique({ where: { id: item.id } })
+          : await prisma.socialLink.findFirst({
+              where: { platform: { equals: normalizedPlatform, mode: 'insensitive' } },
+            });
+
+        if (existing) {
+          await prisma.socialLink.update({
+            where: { id: existing.id },
+            data: {
+              url: trimmedUrl,
+              platform: normalizedPlatform,
+              ...(item.displayOrder !== undefined && { displayOrder: item.displayOrder }),
+              ...(item.isActive !== undefined && { isActive: item.isActive }),
+            },
+          });
+        } else if (trimmedUrl) {
+          await prisma.socialLink.create({
+            data: {
+              platform: normalizedPlatform,
+              url: trimmedUrl,
+              displayOrder: item.displayOrder ?? 0,
+              isActive: item.isActive ?? true,
+            },
+          });
+        }
+      }
+    }
+
+    const currentSocialLinks = await prisma.socialLink.findMany({
+      orderBy: { displayOrder: 'asc' },
+    });
+
     // Invalidate event-info and landing-data in-memory cache so fresh data is immediately served
     cacheService.del('event-info');
     cacheService.del('landing-data');
@@ -906,7 +955,13 @@ router.put('/event-settings', async (req: AuthenticatedRequest, res: Response, n
       ipAddress: req.ip,
     });
 
-    return res.json({ success: true, data: updated });
+    return res.json({
+      success: true,
+      data: {
+        ...updated,
+        socialLinks: currentSocialLinks,
+      },
+    });
   } catch (err) {
     next(err);
   }

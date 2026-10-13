@@ -79,15 +79,28 @@ export const SpeakerDetailPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
               {/* Speaker Avatar Image */}
               <div className="md:col-span-4 relative">
-                <div className="w-full h-80 rounded-2xl overflow-hidden bg-dark-950 shadow-xl border border-dark-600">
-                  <img
-                    src={getMediaUrl(speaker.photo)}
-                    alt={speaker.name}
-                    className="w-full h-full object-cover object-center"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
-                    }}
-                  />
+                <div className="w-full h-80 rounded-2xl overflow-hidden bg-gradient-to-b from-dark-800 to-dark-950 shadow-xl border border-dark-600 relative flex items-center justify-center">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
+                    <div className="w-24 h-24 rounded-full bg-dark-900 border border-slate-700/80 flex items-center justify-center text-brand-cyan font-black text-3xl shadow-xl">
+                      {speaker.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .join('')
+                        .toUpperCase()}
+                    </div>
+                  </div>
+                  {speaker.photo ? (
+                    <img
+                      src={getMediaUrl(speaker.photo)}
+                      alt={speaker.name}
+                      className="relative z-10 w-full h-full object-cover object-center"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : null}
                 </div>
                 {speaker.isFeatured && (
                   <span className="absolute top-4 left-4 px-3.5 py-1 rounded-full bg-gradient-to-r from-brand-magenta to-brand-purple text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-glow-magenta">

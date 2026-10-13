@@ -182,15 +182,20 @@ export const SponsorsListPage: React.FC = () => {
                 {sponsors.map((sp) => (
                   <tr key={sp.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-4 px-6">
-                      <div className="w-16 h-10 rounded-lg overflow-hidden bg-slate-800 p-1 flex items-center justify-center border border-slate-700">
-                        <img
-                          src={getMediaUrl(sp.logo)}
-                          alt={sp.name}
-                          className="max-h-full max-w-full object-contain"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
-                          }}
-                        />
+                      <div className="w-16 h-10 rounded-lg overflow-hidden bg-slate-800 p-1 flex items-center justify-center border border-slate-700 relative">
+                        <span className="text-xs font-bold text-brand-cyan">
+                          {sp.name.slice(0, 2).toUpperCase()}
+                        </span>
+                        {sp.logo ? (
+                          <img
+                            src={getMediaUrl(sp.logo)}
+                            alt={sp.name}
+                            className="absolute inset-0 m-auto max-h-full max-w-full object-contain"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : null}
                       </div>
                     </td>
                     <td className="py-4 px-6">

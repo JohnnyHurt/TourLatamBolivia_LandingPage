@@ -97,15 +97,26 @@ export const SpeakersListPage: React.FC = () => {
                 speakers.map((sp) => (
                   <tr key={sp.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="py-4 px-6">
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-800 border border-slate-700">
-                        <img
-                          src={getMediaUrl(sp.photo)}
-                          alt={sp.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
-                          }}
-                        />
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-800 border border-slate-700 relative flex items-center justify-center">
+                        <span className="text-xs font-bold text-brand-cyan">
+                          {sp.name
+                            .split(' ')
+                            .map((n) => n[0])
+                            .filter(Boolean)
+                            .slice(0, 2)
+                            .join('')
+                            .toUpperCase()}
+                        </span>
+                        {sp.photo ? (
+                          <img
+                            src={getMediaUrl(sp.photo)}
+                            alt={sp.name}
+                            className="absolute inset-0 w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : null}
                       </div>
                     </td>
                     <td className="py-4 px-6">

@@ -38,18 +38,31 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
             >
               <div>
                 {/* Photo & Featured Badge */}
-                <div className="relative h-72 overflow-hidden bg-dark-950">
-                  <img
-                    src={getMediaUrl(speaker.photo)}
-                    alt={speaker.name}
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-95" />
+                <div className="relative h-72 overflow-hidden bg-gradient-to-b from-dark-800 to-dark-950 flex items-center justify-center">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
+                    <div className="w-20 h-20 rounded-full bg-dark-900 border border-slate-700/80 flex items-center justify-center text-brand-cyan font-black text-2xl shadow-xl">
+                      {speaker.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .join('')
+                        .toUpperCase()}
+                    </div>
+                  </div>
+                  {speaker.photo ? (
+                    <img
+                      src={getMediaUrl(speaker.photo)}
+                      alt={speaker.name}
+                      className="relative z-10 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : null}
+                  <div className="absolute inset-0 z-10 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-95 pointer-events-none" />
 
                   {speaker.isFeatured && (
                     <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-gradient-to-r from-brand-magenta to-brand-purple text-white text-[10px] font-black tracking-wider uppercase shadow-glow-magenta flex items-center gap-1.5">

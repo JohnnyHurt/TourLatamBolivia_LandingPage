@@ -44,10 +44,20 @@ class LocalStorageProvider implements IStorageProvider {
     const hashName = `${crypto.randomUUID()}${ext}`;
     const filePath = path.join(this.uploadDir, hashName);
 
-    await fs.promises.writeFile(filePath, file.buffer);
+    try {
+      await fs.promises.writeFile(filePath, file.buffer);
+    } catch (writeErr) {
+      console.warn('[LocalStorageProvider] Warning: could not write local cache file:', writeErr);
+    }
 
-    // For local storage, use relative /uploads/ path so Vite proxy and browsers can access seamlessly
-    const publicUrl = `/uploads/${hashName}`;
+    // Default to /uploads/ relative path for non-image assets or large files
+    let publicUrl = `/uploads/${hashName}`;
+
+    // For images <= 5MB, generate a self-contained persistent Data URL
+    // so images survive cloud container restarts (Render ephemeral disks) and never 404 on refresh
+    if (file.mimetype.startsWith('image/') && file.size <= 5 * 1024 * 1024) {
+      publicUrl = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+    }
 
     return {
       url: publicUrl,

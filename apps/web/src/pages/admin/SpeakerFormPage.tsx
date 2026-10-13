@@ -20,6 +20,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { getMediaUrl } from '../../utils/media';
+import { compressImage } from '../../utils/imageCompressor';
 
 const formatSessionDate = (dateStr?: string) => {
   if (!dateStr) return '';
@@ -112,21 +113,36 @@ export const SpeakerFormPage: React.FC = () => {
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Instant local preview
-    const localUrl = URL.createObjectURL(file);
-    setPreviewUrl(localUrl);
+    const rawFile = e.target.files?.[0];
+    if (!rawFile) return;
 
     setUploading(true);
     try {
+      // 1. Compress image client-side to lightweight WebP (max 1000x1000, ~50-90KB)
+      const { file, dataUrl } = await compressImage(rawFile, {
+        maxWidth: 1000,
+        maxHeight: 1000,
+        quality: 0.85,
+      });
+
+      // 2. Instantly set preview and durable Data URL in form state
+      setPreviewUrl(dataUrl);
+      setForm((prev) => ({ ...prev, photo: dataUrl }));
+
+      // 3. Upload to backend media storage
       const formData = new FormData();
       formData.append('file', file);
-      const res = await api.uploadMedia(formData);
-      setForm((prev) => ({ ...prev, photo: res.url }));
+      try {
+        const res = await api.uploadMedia(formData);
+        if (res && res.url) {
+          setForm((prev) => ({ ...prev, photo: res.url }));
+        }
+      } catch (uploadErr) {
+        console.warn('Backend upload notice (using client dataUrl fallback):', uploadErr);
+      }
     } catch (err: any) {
-      alert(err.message || 'Error al subir la imagen');
+      console.error('Error handling photo:', err);
+      alert(err.message || 'Error al procesar la imagen');
     } finally {
       setUploading(false);
     }

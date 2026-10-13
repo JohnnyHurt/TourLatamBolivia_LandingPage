@@ -5,6 +5,7 @@ import { SponsorDTO, SponsorTier } from '@tourlatam/types';
 import { ArrowLeft, Save, Upload, Image as ImageIcon } from 'lucide-react';
 
 import { getMediaUrl } from '../../utils/media';
+import { compressImage } from '../../utils/imageCompressor';
 
 export const SponsorFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -47,19 +48,36 @@ export const SponsorFormPage: React.FC = () => {
   };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.[0]) return;
-    const file = e.target.files[0];
-    const localBlob = URL.createObjectURL(file);
-    setPreviewUrl(localBlob);
-    setUploading(true);
+    const rawFile = e.target.files?.[0];
+    if (!rawFile) return;
 
+    setUploading(true);
     try {
+      // 1. Optimize logo client-side (max 1000px, WebP or PNG format, ~40-80KB)
+      const { file, dataUrl } = await compressImage(rawFile, {
+        maxWidth: 1000,
+        maxHeight: 1000,
+        quality: 0.88,
+      });
+
+      // 2. Instantly set preview and durable Data URL in form state
+      setPreviewUrl(dataUrl);
+      setForm((prev) => ({ ...prev, logo: dataUrl }));
+
+      // 3. Upload to backend media storage
       const formData = new FormData();
       formData.append('file', file);
-      const res = await api.uploadMedia(formData);
-      setForm((prev) => ({ ...prev, logo: res.url }));
+      try {
+        const res = await api.uploadMedia(formData);
+        if (res && res.url) {
+          setForm((prev) => ({ ...prev, logo: res.url }));
+        }
+      } catch (uploadErr) {
+        console.warn('Backend upload notice (using client dataUrl fallback):', uploadErr);
+      }
     } catch (err: any) {
-      alert(err.message || 'Error al subir el logo');
+      console.error('Error handling logo:', err);
+      alert(err.message || 'Error al procesar el logo');
     } finally {
       setUploading(false);
     }

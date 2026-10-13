@@ -295,12 +295,26 @@ router.get('/speakers', async (req: Request, res: Response, next: NextFunction) 
   try {
     const speakers = await prisma.speaker.findMany({
       where: includeAll ? {} : { isActive: true },
+      include: {
+        sessions: {
+          where: includeAll ? {} : { isActive: true },
+          orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+        },
+      },
       orderBy: [{ isFeatured: 'desc' }, { displayOrder: 'asc' }],
     });
 
     const data = speakers.map((sp) => ({
       ...sp,
       specialties: safeJsonParse<string[]>(sp.specialties, []),
+      sessions: sp.sessions
+        ? sp.sessions.map((s) => ({
+            ...s,
+            date: s.date.toISOString(),
+            createdAt: s.createdAt.toISOString(),
+            updatedAt: s.updatedAt.toISOString(),
+          }))
+        : [],
       createdAt: sp.createdAt.toISOString(),
       updatedAt: sp.updatedAt.toISOString(),
     }));

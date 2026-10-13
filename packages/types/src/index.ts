@@ -112,9 +112,9 @@ export interface SpeakerDTO {
   shortBio: string;
   fullBio: string;
   specialties: string[];
-  linkedinUrl?: string;
-  websiteUrl?: string;
-  videoUrl?: string;
+  linkedinUrl?: string | null;
+  websiteUrl?: string | null;
+  videoUrl?: string | null;
   isFeatured: boolean;
   displayOrder: number;
   isActive: boolean;

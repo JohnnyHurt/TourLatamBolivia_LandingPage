@@ -119,6 +119,7 @@ export const api = {
     }),
 
   // Speakers CMS
+  getSpeakerById: (id: string) => fetcher<SpeakerDTO>(`/admin/speakers/${id}`),
   createSpeaker: (data: Partial<SpeakerDTO>) =>
     fetcher<SpeakerDTO>('/admin/speakers', {
       method: 'POST',

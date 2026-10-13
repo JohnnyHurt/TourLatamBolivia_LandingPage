@@ -1,9 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { api } from '../../services/api';
-import { SpeakerDTO } from '@tourlatam/types';
-import { ArrowLeft, Save, Upload, Image as ImageIcon } from 'lucide-react';
+import { SpeakerDTO, AgendaItemDTO } from '@tourlatam/types';
+import {
+  ArrowLeft,
+  Save,
+  Upload,
+  Image as ImageIcon,
+  Calendar,
+  Clock,
+  Eye,
+  EyeOff,
+  Link2,
+  Unlink,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+  MapPin,
+  Plus,
+} from 'lucide-react';
 import { getMediaUrl } from '../../utils/media';
+
+const formatSessionDate = (dateStr?: string) => {
+  if (!dateStr) return '';
+  const dateObj = dateStr.includes('T') ? new Date(dateStr) : new Date(`${dateStr}T00:00:00.000Z`);
+  return dateObj.toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
+};
 
 export const SpeakerFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,18 +59,45 @@ export const SpeakerFormPage: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  // Speaker sessions state
+  const [sessions, setSessions] = useState<AgendaItemDTO[]>([]);
+  const [allAgendaItems, setAllAgendaItems] = useState<AgendaItemDTO[]>([]);
+  const [updatingSessionId, setUpdatingSessionId] = useState<string | null>(null);
+  const [sessionToast, setSessionToast] = useState<string | null>(null);
+  const [selectedSessionToAssign, setSelectedSessionToAssign] = useState<string>('');
+
+  const showToast = (msg: string) => {
+    setSessionToast(msg);
+    setTimeout(() => setSessionToast(null), 3500);
+  };
+
   useEffect(() => {
     if (isEdit && id) {
-      api.getSpeakers(true)
-        .then((list) => {
-          const found = list.find((s) => s.id === id);
-          if (found) {
-            setForm(found);
-            setSpecialtiesText(found.specialties ? found.specialties.join(', ') : '');
+      Promise.all([
+        api.getSpeakerById(id).catch(async () => {
+          const list = await api.getSpeakers(true);
+          return list.find((s) => s.id === id) || null;
+        }),
+        api.getAgenda(true).catch(() => []),
+      ])
+        .then(([speakerData, agendaList]) => {
+          if (speakerData) {
+            setForm(speakerData);
+            setSpecialtiesText(speakerData.specialties ? speakerData.specialties.join(', ') : '');
+            if (Array.isArray(speakerData.sessions) && speakerData.sessions.length > 0) {
+              setSessions(speakerData.sessions);
+            }
+          }
+          if (Array.isArray(agendaList)) {
+            setAllAgendaItems(agendaList);
+            const speakerAgendas = agendaList.filter((item) => item.speakerId === id);
+            if (speakerAgendas.length > 0) {
+              setSessions(speakerAgendas);
+            }
           }
         })
         .catch((err) => {
-          console.error('Error loading speaker:', err);
+          console.error('Error loading speaker data:', err);
         })
         .finally(() => {
           setLoading(false);
@@ -79,6 +132,62 @@ export const SpeakerFormPage: React.FC = () => {
     }
   };
 
+  const handleToggleSessionVisibility = async (session: AgendaItemDTO) => {
+    setUpdatingSessionId(session.id);
+    const newStatus = !session.isActive;
+    try {
+      await api.updateAgendaItem(session.id, { isActive: newStatus });
+      setSessions((prev) =>
+        prev.map((s) => (s.id === session.id ? { ...s, isActive: newStatus } : s))
+      );
+      setAllAgendaItems((prev) =>
+        prev.map((s) => (s.id === session.id ? { ...s, isActive: newStatus } : s))
+      );
+      showToast(newStatus ? 'Sesión configurada como VISIBLE en la web' : 'Sesión configurada como OCULTA');
+    } catch (err: any) {
+      alert(err.message || 'Error al cambiar visibilidad de la sesión');
+    } finally {
+      setUpdatingSessionId(null);
+    }
+  };
+
+  const handleUnlinkSession = async (sessionId: string) => {
+    if (!confirm('¿Deseas desvincular esta sesión del speaker?')) return;
+    setUpdatingSessionId(sessionId);
+    try {
+      await api.updateAgendaItem(sessionId, { speakerId: undefined });
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+      setAllAgendaItems((prev) =>
+        prev.map((s) => (s.id === sessionId ? { ...s, speakerId: undefined } : s))
+      );
+      showToast('Sesión desvinculada del speaker');
+    } catch (err: any) {
+      alert(err.message || 'Error al desvincular sesión');
+    } finally {
+      setUpdatingSessionId(null);
+    }
+  };
+
+  const handleAssignSession = async () => {
+    if (!selectedSessionToAssign || !id) return;
+    setUpdatingSessionId(selectedSessionToAssign);
+    try {
+      const updated = await api.updateAgendaItem(selectedSessionToAssign, { speakerId: id });
+      const found = allAgendaItems.find((s) => s.id === selectedSessionToAssign);
+      const updatedItem = found ? { ...found, speakerId: id } : updated;
+      setSessions((prev) => [...prev.filter((s) => s.id !== selectedSessionToAssign), updatedItem]);
+      setAllAgendaItems((prev) =>
+        prev.map((s) => (s.id === selectedSessionToAssign ? { ...s, speakerId: id } : s))
+      );
+      setSelectedSessionToAssign('');
+      showToast('Sesión asignada al speaker exitosamente');
+    } catch (err: any) {
+      alert(err.message || 'Error al asignar sesión');
+    } finally {
+      setUpdatingSessionId(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -97,9 +206,9 @@ export const SpeakerFormPage: React.FC = () => {
       shortBio: (form.shortBio || '').trim(),
       fullBio: (form.fullBio || '').trim(),
       specialties: specsArray,
-      linkedinUrl: (form.linkedinUrl || '').trim() || undefined,
-      websiteUrl: (form.websiteUrl || '').trim() || undefined,
-      videoUrl: (form.videoUrl || '').trim() || undefined,
+      linkedinUrl: (form.linkedinUrl || '').trim() || null,
+      websiteUrl: (form.websiteUrl || '').trim() || null,
+      videoUrl: (form.videoUrl || '').trim() || null,
       isFeatured: Boolean(form.isFeatured),
       displayOrder: Number(form.displayOrder ?? 0),
       isActive: form.isActive !== undefined ? Boolean(form.isActive) : true,
@@ -316,14 +425,29 @@ export const SpeakerFormPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">Video Destacado (YouTube/Vimeo)</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-bold text-slate-300">Video Destacado (YouTube/Vimeo)</label>
+                {form.videoUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, videoUrl: '' }))}
+                    className="text-[11px] text-red-400 hover:text-red-300 underline font-semibold flex items-center gap-1 transition-colors"
+                  >
+                    <span>Quitar video</span>
+                  </button>
+                )}
+              </div>
               <input
-                type="url"
+                type="text"
                 name="videoUrl"
                 value={form.videoUrl || ''}
                 onChange={handleChange}
+                placeholder="https://www.youtube.com/watch?v=... (opcional)"
                 className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-slate-700 text-white text-sm focus:border-brand-cyan"
               />
+              <p className="text-[11px] text-slate-400 mt-1">
+                Deja este campo vacío para que no se muestre ningún video en el perfil público del speaker.
+              </p>
             </div>
 
             {/* Toggles */}
@@ -351,6 +475,186 @@ export const SpeakerFormPage: React.FC = () => {
               </label>
             </div>
           </div>
+        </div>
+
+        {/* ============================================================== */}
+        {/* CONGRESS SESSIONS SECTION (Sesiones del Speaker en el Congreso) */}
+        {/* ============================================================== */}
+        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-slate-700/80 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+            <div>
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="p-2 rounded-xl bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-black text-white">Sesiones del Speaker en el Congreso</h3>
+                <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-[11px] font-bold text-slate-300 border border-slate-700">
+                  {sessions.length} {sessions.length === 1 ? 'sesión' : 'sesiones'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">
+                Configura qué ponencias o talleres imparte este speaker y controla su visibilidad (visibles u ocultas en su perfil y en la agenda).
+              </p>
+            </div>
+
+            {sessionToast && (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold animate-pulse">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{sessionToast}</span>
+              </div>
+            )}
+          </div>
+
+          {!isEdit ? (
+            <div className="p-6 rounded-2xl bg-dark-900/60 border border-dashed border-slate-700 text-center space-y-2">
+              <Calendar className="w-8 h-8 mx-auto text-slate-500" />
+              <p className="text-xs text-slate-300 font-bold">Vincular sesiones tras guardar</p>
+              <p className="text-[11px] text-slate-400 max-w-md mx-auto">
+                Una vez guardado el speaker por primera vez, podrás asociar sus ponencias de la agenda y configurar si están visibles u ocultas.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {sessions.length === 0 ? (
+                <div className="p-6 rounded-2xl bg-dark-900/60 border border-dashed border-slate-700 text-center space-y-2">
+                  <p className="text-xs text-slate-300 font-semibold">
+                    Este speaker aún no tiene sesiones asociadas en la agenda.
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    Puedes vincular una sesión existente utilizando el selector de abajo o crear nuevas en el módulo de Agenda.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sessions.map((sess) => {
+                    const isUpdating = updatingSessionId === sess.id;
+                    return (
+                      <div
+                        key={sess.id}
+                        className={`p-4 rounded-2xl bg-dark-900/90 border transition-all ${
+                          sess.isActive
+                            ? 'border-slate-700 hover:border-slate-600'
+                            : 'border-slate-800 bg-dark-950/60 opacity-80'
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-black bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/20 uppercase tracking-wider">
+                                {sess.type}
+                              </span>
+                              <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
+                                <Calendar className="w-3 h-3 text-brand-cyan" />
+                                {formatSessionDate(sess.date)}
+                              </span>
+                              <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-slate-500" />
+                                {sess.startTime} - {sess.endTime}
+                              </span>
+                              {sess.room && (
+                                <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                                  <MapPin className="w-3 h-3 text-slate-500" />
+                                  {sess.room}
+                                </span>
+                              )}
+                            </div>
+
+                            <h4 className="text-sm font-bold text-white truncate">{sess.title}</h4>
+
+                            {sess.description && (
+                              <p className="text-xs text-slate-400 line-clamp-2 font-light">
+                                {sess.description}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Visibility Controls */}
+                          <div className="flex items-center gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleSessionVisibility(sess)}
+                              disabled={isUpdating}
+                              title={
+                                sess.isActive
+                                  ? 'La sesión es visible en la web. Clic para ocultarla.'
+                                  : 'La sesión está oculta. Clic para hacerla visible.'
+                              }
+                              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-sm ${
+                                sess.isActive
+                                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40 hover:bg-emerald-500/25'
+                                  : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-white hover:bg-slate-800'
+                              } ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                              {sess.isActive ? (
+                                <>
+                                  <Eye className="w-3.5 h-3.5 text-emerald-400" />
+                                  <span>Visible en la web</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOff className="w-3.5 h-3.5 text-slate-400" />
+                                  <span>Oculta</span>
+                                </>
+                              )}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleUnlinkSession(sess.id)}
+                              disabled={isUpdating}
+                              title="Desvincular esta sesión de este speaker"
+                              className="p-1.5 rounded-xl bg-dark-800 border border-slate-700 text-slate-400 hover:text-red-400 hover:border-red-500/40 transition-colors"
+                            >
+                              <Unlink className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Assign existing session from agenda */}
+              {allAgendaItems.filter((s) => s.speakerId !== id).length > 0 && (
+                <div className="p-4 rounded-2xl bg-dark-900 border border-slate-800 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Link2 className="w-4 h-4 text-brand-cyan" />
+                    <span className="text-xs font-bold text-slate-300">
+                      Asignar sesión existente de la agenda a este speaker
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2.5">
+                    <select
+                      value={selectedSessionToAssign}
+                      onChange={(e) => setSelectedSessionToAssign(e.target.value)}
+                      className="flex-1 px-3.5 py-2 rounded-xl bg-dark-950 border border-slate-700 text-white text-xs focus:border-brand-cyan"
+                    >
+                      <option value="">-- Seleccionar sesión de la agenda para asignar --</option>
+                      {allAgendaItems
+                        .filter((s) => s.speakerId !== id)
+                        .map((ag) => (
+                          <option key={ag.id} value={ag.id}>
+                            [{ag.type}] {formatSessionDate(ag.date)} {ag.startTime} - {ag.title}
+                          </option>
+                        ))}
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={handleAssignSession}
+                      disabled={!selectedSessionToAssign || Boolean(updatingSessionId)}
+                      className="px-4 py-2 rounded-xl bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan hover:bg-brand-cyan hover:text-dark-950 text-xs font-extrabold transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Asignar Sesión</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end">

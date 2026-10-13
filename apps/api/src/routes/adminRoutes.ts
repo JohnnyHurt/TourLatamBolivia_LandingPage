@@ -154,6 +154,42 @@ const speakerSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
+// GET /api/admin/speakers/:id (includes all sessions, active and inactive)
+router.get('/speakers/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const speaker = await prisma.speaker.findUnique({
+      where: { id },
+      include: {
+        sessions: {
+          orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+        },
+      },
+    });
+
+    if (!speaker) return res.status(404).json({ success: false, error: 'Speaker not found' });
+
+    const formatted = {
+      ...speaker,
+      specialties: typeof speaker.specialties === 'string'
+        ? (() => { try { return JSON.parse(speaker.specialties); } catch { return []; } })()
+        : speaker.specialties,
+      sessions: speaker.sessions.map((s) => ({
+        ...s,
+        date: s.date.toISOString(),
+        createdAt: s.createdAt.toISOString(),
+        updatedAt: s.updatedAt.toISOString(),
+      })),
+      createdAt: speaker.createdAt.toISOString(),
+      updatedAt: speaker.updatedAt.toISOString(),
+    };
+
+    return res.json({ success: true, data: formatted });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/speakers', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const data = speakerSchema.parse(req.body);
@@ -167,9 +203,16 @@ router.post('/speakers', async (req: AuthenticatedRequest, res: Response, next: 
     // destructure specialties to avoid sending raw array to Prisma
     const { specialties, ...rest } = data;
 
+    const sanitizedRest = {
+      ...rest,
+      videoUrl: rest.videoUrl && rest.videoUrl.trim() ? rest.videoUrl.trim() : null,
+      linkedinUrl: rest.linkedinUrl && rest.linkedinUrl.trim() ? rest.linkedinUrl.trim() : null,
+      websiteUrl: rest.websiteUrl && rest.websiteUrl.trim() ? rest.websiteUrl.trim() : null,
+    };
+
     const speaker = await prisma.speaker.create({
       data: {
-        ...rest,
+        ...sanitizedRest,
         slug: generatedSlug,
         specialties: JSON.stringify(specialties),
       },
@@ -229,10 +272,24 @@ router.put('/speakers/:id', async (req: AuthenticatedRequest, res: Response, nex
     // explicitly exclude specialties from spread to avoid type conflict
     const { specialties, ...restData } = data;
 
+    // Sanitize optional URLs so empty strings or null explicitly clear the database value
+    const sanitizedData = {
+      ...restData,
+      ...(restData.videoUrl !== undefined && {
+        videoUrl: restData.videoUrl && restData.videoUrl.trim() ? restData.videoUrl.trim() : null,
+      }),
+      ...(restData.linkedinUrl !== undefined && {
+        linkedinUrl: restData.linkedinUrl && restData.linkedinUrl.trim() ? restData.linkedinUrl.trim() : null,
+      }),
+      ...(restData.websiteUrl !== undefined && {
+        websiteUrl: restData.websiteUrl && restData.websiteUrl.trim() ? restData.websiteUrl.trim() : null,
+      }),
+    };
+
     const updated = await prisma.speaker.update({
       where: { id },
       data: {
-        ...restData,
+        ...sanitizedData,
         slug,
         // Only update specialties if explicitly provided in the request
         ...(specialties !== undefined && { specialties: JSON.stringify(specialties) }),

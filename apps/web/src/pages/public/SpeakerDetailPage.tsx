@@ -164,7 +164,7 @@ export const SpeakerDetailPage: React.FC = () => {
           </div>
 
           {/* Video Embed Section if present */}
-          {speaker.videoUrl && (
+          {speaker.videoUrl && speaker.videoUrl.trim() !== '' && (
             <div className="glass-panel rounded-3xl p-8 border border-dark-600 mb-10 bg-dark-800/80">
               <h3 className="text-xl font-black text-white mb-4 flex items-center gap-2">
                 <Video className="w-5 h-5 text-brand-magenta" />
@@ -174,7 +174,11 @@ export const SpeakerDetailPage: React.FC = () => {
                 <iframe
                   src={
                     speaker.videoUrl.includes('youtube.com') || speaker.videoUrl.includes('youtu.be')
-                      ? speaker.videoUrl.replace('watch?v=', 'embed/')
+                      ? speaker.videoUrl
+                          .replace('watch?v=', 'embed/')
+                          .replace('youtu.be/', 'www.youtube.com/embed/')
+                      : speaker.videoUrl.includes('vimeo.com') && !speaker.videoUrl.includes('player.vimeo.com')
+                      ? speaker.videoUrl.replace('vimeo.com/', 'player.vimeo.com/video/')
                       : speaker.videoUrl
                   }
                   title={`Video of ${speaker.name}`}

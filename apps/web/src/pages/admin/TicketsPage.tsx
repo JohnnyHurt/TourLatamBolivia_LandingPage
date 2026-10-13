@@ -268,7 +268,7 @@ export const TicketsPage: React.FC = () => {
               priceBs: 105,
               price: 15,
               currency: 'USD',
-              features: ['Acceso a conferencias plenarias', 'Certificado 24 PDUs'],
+              features: ['Acceso a conferencias plenarias', 'Certificado 20 PDUs'],
               isFeatured: false,
               isActive: true,
               displayOrder: tickets.length + 1,
@@ -493,7 +493,7 @@ export const TicketsPage: React.FC = () => {
                       features: e.target.value.split('\n').filter((l) => l.trim().length > 0),
                     })
                   }
-                  placeholder="Acceso a conferencias plenarias&#10;Certificado 24 PDUs&#10;Kit oficial del participante"
+                  placeholder="Acceso a conferencias plenarias&#10;Certificado 20 PDUs&#10;Kit oficial del participante"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-dark-900 border border-slate-700 focus:border-brand-cyan text-white font-normal"
                 />
               </div>

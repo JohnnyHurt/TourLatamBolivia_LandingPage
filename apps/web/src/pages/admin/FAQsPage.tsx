@@ -404,7 +404,7 @@ export const FAQsPage: React.FC = () => {
                   rows={4}
                   value={editingFaq.answer || ''}
                   onChange={(e) => setEditingFaq({ ...editingFaq, answer: e.target.value })}
-                  placeholder="Sí, al finalizar el congreso se emitirá un certificado oficial emitido por el PMI Bolivia Chapter acreditando 24 PDUs..."
+                  placeholder="Sí, al finalizar el congreso se emitirá un certificado oficial emitido por el PMI Bolivia Chapter acreditando 20 PDUs..."
                   className="w-full px-3.5 py-2.5 rounded-xl bg-dark-900 border border-slate-700 text-white focus:border-brand-cyan leading-relaxed"
                   required
                 />

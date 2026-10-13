@@ -127,7 +127,7 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
               <div className="p-4 rounded-2xl bg-dark-850/80 border border-slate-800 flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-brand-magenta shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-xs font-bold text-white">24 PDUs</div>
+                  <div className="text-xs font-bold text-white">20 PDUs</div>
                   <div className="text-[11px] text-slate-400">Créditos certificados</div>
                 </div>
               </div>

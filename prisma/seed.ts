@@ -77,7 +77,7 @@ async function main() {
       heroOverlayOpacity: 0.85,
       aboutTitle: 'Congreso Internacional de Dirección de Proyectos',
       aboutSubtitle: 'Impulsando el Futuro de la Gestión con PMO, Agilidad e Inteligencia Artificial',
-      aboutDescription: 'Tour LATAM Bolivia 2026 es el congreso internacional cumbre que reúne a líderes, directores de proyecto, gestores de PMO y expertos en agilidad e inteligencia artificial. Organizado por el PMI Bolivia Chapter, esta edición 100% virtual ofrece conferencias magistrales, workshops de IA y acreditación oficial de 24 PDUs.',
+      aboutDescription: 'Tour LATAM Bolivia 2026 es el congreso internacional cumbre que reúne a líderes, directores de proyecto, gestores de PMO y expertos en agilidad e inteligencia artificial. Organizado por el PMI Bolivia Chapter, esta edición 100% virtual ofrece conferencias magistrales, workshops de IA y acreditación oficial de 20 PDUs.',
       aboutImageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
       gaTrackingId: 'G-TOURLATAM2026',
       gtmId: 'GTM-PMIBOLIVIA',
@@ -363,7 +363,7 @@ async function main() {
       features: JSON.stringify([
         'Acceso completo a 3 días de conferencias magistrales',
         'Acceso a Workshops inmersivos de IA & Agilidad',
-        'Certificado oficial de asistencia con PDU credits (24 PDUs)',
+        'Certificado oficial de asistencia con PDU credits (20 PDUs)',
         'Coffee breaks ejecutivos y material digital exclusivo',
         'Acceso a la plataforma virtual por 60 días post-evento',
       ]),

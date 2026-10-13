@@ -38,7 +38,7 @@ export const EventInfo: React.FC<EventInfoProps> = ({ settings }) => {
     {
       icon: Award,
       label: 'ACREDITACIÓN',
-      value: '24 PDUs Certificados',
+      value: '20 PDUs Certificados',
       subtext: 'Talent Triangle PMI',
       color: 'text-brand-cyan',
       borderColor: 'border-brand-cyan/30',

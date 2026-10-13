@@ -52,7 +52,7 @@ export const About: React.FC<AboutProps> = ({ settings }) => {
                   <Award className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="font-black text-white text-base">24 PDUs Certificados</h4>
+                  <h4 className="font-black text-white text-base">20 PDUs Certificados</h4>
                   <p className="text-xs text-slate-400 mt-0.5">
                     Acreditación oficial conforme al Talent Triangle del PMI para renovar tus certificaciones.
                   </p>

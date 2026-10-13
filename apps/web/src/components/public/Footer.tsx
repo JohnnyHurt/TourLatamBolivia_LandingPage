@@ -18,13 +18,11 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
         return Instagram;
       case 'youtube':
         return Youtube;
-      default:
-        return Linkedin;
     }
   };
 
   const socialLinks: SocialLinkDTO[] = settings?.socialLinks || [
-    { id: '1', platform: 'LinkedIn', url: 'https://www.linkedin.com/company/pmibolivia/?', displayOrder: 1, isActive: true },
+    { id: '1', platform: 'LinkedIn', url: 'https://www.linkedin.com/company/pmibolivia/?viewAsMember=true?', displayOrder: 1, isActive: true },
     { id: '2', platform: 'Facebook', url: 'https://www.facebook.com/PMIBoliviaChapter/', displayOrder: 2, isActive: true },
     { id: '3', platform: 'Instagram', url: 'https://www.instagram.com/pmi_santacruz/', displayOrder: 3, isActive: true },
     { id: '4', platform: 'YouTube', url: 'https://www.youtube.com/watch?v=HCDFBuxvLS4', displayOrder: 4, isActive: true },

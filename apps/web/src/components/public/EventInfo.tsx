@@ -56,7 +56,7 @@ export const EventInfo: React.FC<EventInfoProps> = ({ settings }) => {
   ];
 
   return (
-    <section className="relative z-20 -mt-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative z-20 pt-8 sm:pt-14 pb-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="glass-panel rounded-3xl p-6 sm:p-8 shadow-[0_15px_40px_rgba(11,4,24,0.95)] border border-dark-600 bg-dark-800/90 backdrop-blur-2xl">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 divide-y sm:divide-y-0 lg:divide-x divide-dark-600">
           {items.map((item, idx) => {

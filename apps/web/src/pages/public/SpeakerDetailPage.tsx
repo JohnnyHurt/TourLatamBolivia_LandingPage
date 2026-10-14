@@ -103,7 +103,7 @@ export const SpeakerDetailPage: React.FC = () => {
                   ) : null}
                 </div>
                 {speaker.isFeatured && (
-                  <span className="absolute top-4 left-4 px-3.5 py-1 rounded-full bg-gradient-to-r from-brand-magenta to-brand-purple text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-glow-magenta">
+                  <span className="absolute top-4 left-4 z-20 px-3.5 py-1 rounded-full bg-gradient-to-r from-brand-magenta to-brand-purple text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-glow-magenta">
                     <Award className="w-3.5 h-3.5" />
                     Keynote Speaker
                   </span>

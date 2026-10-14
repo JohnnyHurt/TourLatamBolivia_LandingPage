@@ -120,6 +120,8 @@ export const CountryFlag: React.FC<CountryFlagProps> = ({
           alt={`Bandera de ${country}`}
           className={`${sizeClasses} object-cover rounded-[2px] shadow-sm border border-white/25 shrink-0 inline-block`}
           loading="lazy"
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
           onError={() => setImgError(true)}
         />
       ) : (

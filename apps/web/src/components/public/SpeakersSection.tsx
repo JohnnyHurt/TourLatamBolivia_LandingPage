@@ -65,14 +65,14 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                   <div className="absolute inset-0 z-10 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-95 pointer-events-none" />
 
                   {speaker.isFeatured && (
-                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-gradient-to-r from-brand-magenta to-brand-purple text-white text-[10px] font-black tracking-wider uppercase shadow-glow-magenta flex items-center gap-1.5">
+                    <div className="absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-gradient-to-r from-brand-magenta to-brand-purple text-white text-[10px] font-black tracking-wider uppercase shadow-glow-magenta flex items-center gap-1.5">
                       <Award className="w-3 h-3" />
                       Keynote Speaker
                     </div>
                   )}
 
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-200 bg-dark-950/80 px-3 py-1 rounded-full backdrop-blur-md border border-dark-600">
+                  <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between text-white">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-200 bg-dark-950/85 px-3 py-1 rounded-full backdrop-blur-md border border-dark-600 shadow-lg">
                       <CountryFlag country={speaker.country} size="sm" />
                       <span>{speaker.country}</span>
                     </span>
@@ -81,7 +81,7 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                         href={speaker.linkedinUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 rounded-full bg-dark-950/80 text-slate-300 hover:text-brand-cyan hover:bg-dark-800 transition-colors border border-dark-600"
+                        className="p-2 rounded-full bg-dark-950/85 text-slate-300 hover:text-brand-cyan hover:bg-dark-800 transition-colors border border-dark-600 shadow-lg"
                         title="LinkedIn"
                       >
                         <Linkedin className="w-4 h-4" />
@@ -92,10 +92,18 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
 
                 {/* Content */}
                 <div className="p-6">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <p className="text-xs font-bold text-brand-cyan">{speaker.position}</p>
+                    {speaker.country && (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 bg-dark-800/80 px-2.5 py-0.5 rounded-full border border-dark-600/80">
+                        <CountryFlag country={speaker.country} size="xs" />
+                        <span>{speaker.country}</span>
+                      </span>
+                    )}
+                  </div>
                   <h3 className="text-xl font-black text-white group-hover:text-brand-cyan transition-colors mb-1">
                     {speaker.name}
                   </h3>
-                  <p className="text-xs font-bold text-brand-cyan mb-1">{speaker.position}</p>
                   <p className="text-xs text-slate-400 font-medium mb-4">{speaker.company}</p>
 
                   <p className="text-xs text-slate-300 leading-relaxed font-light line-clamp-3 mb-4">

@@ -129,6 +129,32 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
             </div>
           ))}
         </div>
+
+        {/* Notice: Ongoing speaker lineup updates */}
+        <div className="mt-14 max-w-3xl mx-auto">
+          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-brand-cyan/30 bg-gradient-to-r from-dark-850 via-dark-800 to-dark-850 shadow-[0_0_35px_rgba(0,242,254,0.12)] flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left relative overflow-hidden">
+            <div className="absolute -top-12 -right-12 w-40 h-40 bg-brand-cyan/15 blur-2xl rounded-full pointer-events-none" />
+
+            <div className="w-12 h-12 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-center text-brand-cyan shrink-0">
+              <Sparkles className="w-6 h-6 animate-pulse" />
+            </div>
+
+            <div className="relative z-10 flex-1">
+              <div className="flex items-center justify-center sm:justify-start gap-2 mb-1.5">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-cyan"></span>
+                </span>
+                <span className="text-[11px] font-black uppercase tracking-wider text-brand-cyan">
+                  ACTUALIZACIÓN CONTINUA DE PONENTES
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+                Estamos en pleno proceso de confirmación e incorporación de nuevos ponentes internacionales para el congreso. <span className="text-white font-bold">¡Mantente atento a las próximas publicaciones y novedades!</span>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

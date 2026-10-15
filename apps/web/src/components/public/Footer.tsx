@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ShieldCheck, Linkedin, Facebook, Instagram, Youtube, Twitter, Heart } from 'lucide-react';
 import { EventSettingsDTO, SocialLinkDTO } from '@tourlatam/types';
 import { PmiBoliviaLogo } from '../common/PmiBoliviaLogo';
@@ -8,6 +9,29 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ settings }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isHomePage = location.pathname === '/';
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetHash: string) => {
+    e.preventDefault();
+    const cleanHash = targetHash.replace(/^#/, '');
+
+    if (isHomePage) {
+      if (cleanHash === 'hero' || !cleanHash) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.history.pushState(null, '', '/');
+      } else {
+        const el = document.getElementById(cleanHash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+          window.history.pushState(null, '', `/#${cleanHash}`);
+        }
+      }
+    } else {
+      navigate(cleanHash === 'hero' || !cleanHash ? '/' : `/#${cleanHash}`);
+    }
+  };
   const getSocialIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
       case 'linkedin':
@@ -84,14 +108,62 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
           <div className="md:col-span-4">
             <h4 className="text-white font-black text-xs uppercase tracking-widest mb-4">Navegación del Congreso</h4>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <a href="#hero" className="hover:text-brand-cyan transition-colors py-1">Inicio</a>
-              <a href="#about" className="hover:text-brand-cyan transition-colors py-1">Sobre el Evento</a>
-              <a href="#focus-areas" className="hover:text-brand-cyan transition-colors py-1">PMO • Agilidad • IA</a>
-              <a href="#speakers" className="hover:text-brand-cyan transition-colors py-1">Keynote Speakers</a>
-              <a href="#agenda" className="hover:text-brand-cyan transition-colors py-1">Programa 20-21 Nov</a>
-              <a href="#pricing" className="hover:text-brand-cyan transition-colors py-1">Pases y Tarifas</a>
-              <a href="#sponsors" className="hover:text-brand-cyan transition-colors py-1">Patrocinadores</a>
-              <a href="#faq" className="hover:text-brand-cyan transition-colors py-1">Preguntas Frecuentes</a>
+              <a
+                href={isHomePage ? '#hero' : '/'}
+                onClick={(e) => handleNavClick(e, '#hero')}
+                className="hover:text-brand-cyan transition-colors py-1 cursor-pointer"
+              >
+                Inicio
+              </a>
+              <a
+                href={isHomePage ? '#about' : '/#about'}
+                onClick={(e) => handleNavClick(e, '#about')}
+                className="hover:text-brand-cyan transition-colors py-1 cursor-pointer"
+              >
+                Sobre el Evento
+              </a>
+              <a
+                href={isHomePage ? '#focus-areas' : '/#focus-areas'}
+                onClick={(e) => handleNavClick(e, '#focus-areas')}
+                className="hover:text-brand-cyan transition-colors py-1 cursor-pointer"
+              >
+                PMO • Agilidad • IA
+              </a>
+              <a
+                href={isHomePage ? '#speakers' : '/#speakers'}
+                onClick={(e) => handleNavClick(e, '#speakers')}
+                className="hover:text-brand-cyan transition-colors py-1 cursor-pointer"
+              >
+                Keynote Speakers
+              </a>
+              <a
+                href={isHomePage ? '#agenda' : '/#agenda'}
+                onClick={(e) => handleNavClick(e, '#agenda')}
+                className="hover:text-brand-cyan transition-colors py-1 cursor-pointer"
+              >
+                Programa 20-21 Nov
+              </a>
+              <a
+                href={isHomePage ? '#pricing' : '/#pricing'}
+                onClick={(e) => handleNavClick(e, '#pricing')}
+                className="hover:text-brand-cyan transition-colors py-1 cursor-pointer"
+              >
+                Pases y Tarifas
+              </a>
+              <a
+                href={isHomePage ? '#sponsors' : '/#sponsors'}
+                onClick={(e) => handleNavClick(e, '#sponsors')}
+                className="hover:text-brand-cyan transition-colors py-1 cursor-pointer"
+              >
+                Patrocinadores
+              </a>
+              <a
+                href={isHomePage ? '#faq' : '/#faq'}
+                onClick={(e) => handleNavClick(e, '#faq')}
+                className="hover:text-brand-cyan transition-colors py-1 cursor-pointer"
+              >
+                Preguntas Frecuentes
+              </a>
             </div>
           </div>
 

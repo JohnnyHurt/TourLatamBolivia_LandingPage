@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { LandingPage } from './pages/public/LandingPage';
 import { SpeakerDetailPage } from './pages/public/SpeakerDetailPage';
 import { ThankYouPage } from './pages/public/ThankYouPage';
+import { ScrollToHash } from './components/common/ScrollToHash';
 
 // Admin Pages
 import { LoginPage } from './pages/admin/LoginPage';
@@ -53,6 +54,7 @@ export const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToHash />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />

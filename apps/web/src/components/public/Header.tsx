@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { EventSettingsDTO } from '@tourlatam/types';
 import { PmiBoliviaLogo } from '../common/PmiBoliviaLogo';
@@ -11,6 +12,9 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ settings }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isHomePage = location.pathname === '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,6 +44,29 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
     { name: 'FAQ', href: '#faq' },
   ];
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetHash: string) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+
+    const cleanHash = targetHash.replace(/^#/, '');
+
+    if (isHomePage) {
+      if (cleanHash === 'hero' || !cleanHash) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.history.pushState(null, '', '/');
+      } else {
+        const el = document.getElementById(cleanHash);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+          window.history.pushState(null, '', `/#${cleanHash}`);
+        }
+      }
+    } else {
+      // From another page (such as /speakers/:slug)
+      navigate(cleanHash === 'hero' || !cleanHash ? '/' : `/#${cleanHash}`);
+    }
+  };
+
   return (
     <>
       <header
@@ -49,9 +76,12 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            {/* Logo & Organizer */}
-            <a href="#hero" className="flex items-center gap-3 group shrink-0">
+          <div className="flex items-center justify-between">            {/* Logo & Organizer */}
+            <a
+              href={isHomePage ? '#hero' : '/'}
+              onClick={(e) => handleNavClick(e, '#hero')}
+              className="flex items-center gap-3 group shrink-0"
+            >
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 shadow-md">
                 <img
                   src="/PMI Logo Full Color.jpg"
@@ -77,8 +107,9 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
               {navLinks.map((link) => (
                 <a
                   key={link.name}
-                  href={link.href}
-                  className="text-xs font-bold text-slate-300 hover:text-brand-cyan transition-colors uppercase tracking-wider py-1 px-1"
+                  href={isHomePage ? link.href : `/${link.href}`}
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  className="text-xs font-bold text-slate-300 hover:text-brand-cyan transition-colors uppercase tracking-wider py-1 px-1 cursor-pointer"
                 >
                   {link.name}
                 </a>
@@ -94,7 +125,8 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
                 //CMS Backoffice
               </a>*/}
               <a
-                href="#pricing"
+                href={isHomePage ? '#pricing' : '/#pricing'}
+                onClick={(e) => handleNavClick(e, '#pricing')}
                 className="relative inline-flex items-center justify-center px-5 xl:px-6 py-2.5 text-xs font-black tracking-wider btn-pmi-neon rounded-full uppercase gap-1.5 shadow-lg shadow-brand-pmiOrange/20 hover:scale-105 transition-all cursor-pointer"
               >
                 <span>{settings?.primaryCtaText || 'REGÍSTRATE AHORA'}</span>
@@ -105,7 +137,8 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
             {/* Mobile / Tablet Actions (< 1024px) */}
             <div className="flex lg:hidden items-center gap-2 sm:gap-3">
               <a
-                href="#pricing"
+                href={isHomePage ? '#pricing' : '/#pricing'}
+                onClick={(e) => handleNavClick(e, '#pricing')}
                 className="hidden sm:inline-flex items-center justify-center px-4 py-2 text-[11px] font-black tracking-wider btn-pmi-neon rounded-full uppercase gap-1 cursor-pointer"
               >
                 <span>{settings?.primaryCtaText || 'REGÍSTRATE'}</span>
@@ -138,9 +171,9 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
               {navLinks.map((link) => (
                 <a
                   key={link.name}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold text-slate-200 hover:text-brand-cyan hover:bg-dark-800/80 transition-colors"
+                  href={isHomePage ? link.href : `/${link.href}`}
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold text-slate-200 hover:text-brand-cyan hover:bg-dark-800/80 transition-colors cursor-pointer"
                 >
                   <span>{link.name}</span>
                   <ArrowRight className="w-3.5 h-3.5 text-slate-500 opacity-60" />
@@ -149,8 +182,8 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
             </div>
             <div className="pt-5 mt-3 border-t border-dark-600/80 flex flex-col gap-3">
               <a
-                href="#pricing"
-                onClick={() => setMobileMenuOpen(false)}
+                href={isHomePage ? '#pricing' : '/#pricing'}
+                onClick={(e) => handleNavClick(e, '#pricing')}
                 className="w-full text-center py-3 text-xs font-black btn-pmi-neon rounded-xl uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>{settings?.primaryCtaText || 'REGÍSTRATE AHORA'}</span>
@@ -166,7 +199,7 @@ export const Header: React.FC<HeaderProps> = ({ settings }) => {
             </div>
           </div>
         )}
-      </header >
+      </header>
 
       {/* Backdrop overlay for mobile menu */}
       {

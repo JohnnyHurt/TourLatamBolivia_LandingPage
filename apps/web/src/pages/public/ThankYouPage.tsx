@@ -1,13 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Mail, Calendar, ArrowLeft } from 'lucide-react';
+import { EventSettingsDTO } from '@tourlatam/types';
+import { api } from '../../services/api';
 import { Header } from '../../components/public/Header';
 import { Footer } from '../../components/public/Footer';
 
 export const ThankYouPage: React.FC = () => {
+  const [settings, setSettings] = useState<EventSettingsDTO | null>(() => {
+    try {
+      const raw = localStorage.getItem('tourlatam_landing_cache_v1');
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached?.settings) return cached.settings;
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (!settings) {
+      api.getEventInfo().then((data) => setSettings(data)).catch(() => {});
+    }
+  }, [settings]);
+
   return (
     <div className="min-h-screen bg-dark-900 text-slate-100 selection:bg-brand-cyan selection:text-dark-950 flex flex-col">
-      <Header settings={null} />
+      <Header settings={settings} />
 
       <main className="flex-1 pt-32 pb-24 relative overflow-hidden flex items-center justify-center">
         {/* Glow ambient background */}
@@ -79,7 +100,7 @@ export const ThankYouPage: React.FC = () => {
         </div>
       </main>
 
-      <Footer settings={null} />
+      <Footer settings={settings} />
     </div>
   );
 };

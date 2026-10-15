@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { SpeakerDTO } from '@tourlatam/types';
+import { SpeakerDTO, EventSettingsDTO } from '@tourlatam/types';
 import { api } from '../../services/api';
 import { ArrowLeft, Linkedin, Globe, Video, MapPin, Clock, Award, Sparkles } from 'lucide-react';
 import { Header } from '../../components/public/Header';
@@ -13,6 +13,24 @@ export const SpeakerDetailPage: React.FC = () => {
   const [speaker, setSpeaker] = useState<SpeakerDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [settings, setSettings] = useState<EventSettingsDTO | null>(() => {
+    try {
+      const raw = localStorage.getItem('tourlatam_landing_cache_v1');
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (cached?.settings) return cached.settings;
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (!settings) {
+      api.getEventInfo().then((data) => setSettings(data)).catch(() => {});
+    }
+  }, [settings]);
 
   useEffect(() => {
     if (slug) {
@@ -57,7 +75,7 @@ export const SpeakerDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-dark-900 text-slate-100 selection:bg-brand-cyan selection:text-dark-950">
-      <Header settings={null} />
+      <Header settings={settings} />
 
       <main className="pt-32 pb-24 relative overflow-hidden">
         {/* Glow ambient background */}
@@ -233,7 +251,7 @@ export const SpeakerDetailPage: React.FC = () => {
         </div>
       </main>
 
-      <Footer settings={null} />
+      <Footer settings={settings} />
     </div>
   );
 };

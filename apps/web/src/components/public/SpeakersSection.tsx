@@ -268,7 +268,7 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
 
           {/* Confirmed Speakers Grid */}
           {displayedSpeakers.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 relative z-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 relative z-10">
               {displayedSpeakers.map((speaker) => {
                 // Check if this speaker already exists in loaded CMS speakers with full detail
                 const matchingLoadedSpeaker = (speakers || []).find(
@@ -276,8 +276,8 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                 );
 
                 const CardContent = (
-                  <div className="w-full flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-full flex items-center justify-between gap-3 min-h-[52px]">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       {/* Initials Avatar */}
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-cyan/20 to-brand-purple/30 border border-brand-cyan/30 flex items-center justify-center text-xs font-black text-brand-cyan shrink-0 shadow-inner group-hover:scale-105 transition-transform">
                         {speaker.name
@@ -288,13 +288,16 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                           .join('')
                           .toUpperCase()}
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="text-xs sm:text-sm font-bold text-white group-hover:text-brand-cyan transition-colors truncate">
+                      <div className="min-w-0 flex-1">
+                        <h4
+                          title={speaker.name}
+                          className="text-xs sm:text-sm font-bold text-white group-hover:text-brand-cyan transition-colors leading-snug break-words"
+                        >
                           {speaker.name}
                         </h4>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <CountryFlag country={speaker.country} size="xs" />
-                          <span className="text-[11px] text-slate-400 font-medium truncate">
+                          <span className="text-[11px] text-slate-400 font-medium">
                             {speaker.country}
                           </span>
                         </div>
@@ -309,7 +312,10 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                           <ArrowUpRight className="w-3 h-3" />
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+                        <span
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shrink-0"
+                          title="Ponente Confirmado"
+                        >
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                           <span>Confirmado</span>
                         </span>
@@ -322,14 +328,14 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                   <Link
                     key={speaker.name}
                     to={`/speakers/${matchingLoadedSpeaker.slug}`}
-                    className="glass-card rounded-2xl p-3.5 sm:p-4 border border-dark-600/80 hover:border-brand-cyan/60 bg-dark-850/80 hover:bg-dark-800 transition-all duration-200 group flex items-center shadow-md hover:shadow-[0_4px_20px_rgba(0,242,254,0.12)] cursor-pointer"
+                    className="glass-card rounded-2xl p-3.5 sm:p-4 border border-dark-600/80 hover:border-brand-cyan/60 bg-dark-850/80 hover:bg-dark-800 transition-all duration-200 group flex items-center shadow-md hover:shadow-[0_4px_20px_rgba(0,242,254,0.12)] cursor-pointer h-full"
                   >
                     {CardContent}
                   </Link>
                 ) : (
                   <div
                     key={speaker.name}
-                    className="glass-card rounded-2xl p-3.5 sm:p-4 border border-dark-600/80 hover:border-brand-cyan/40 bg-dark-850/80 hover:bg-dark-800/90 transition-all duration-200 group flex items-center shadow-md"
+                    className="glass-card rounded-2xl p-3.5 sm:p-4 border border-dark-600/80 hover:border-brand-cyan/40 bg-dark-850/80 hover:bg-dark-800/90 transition-all duration-200 group flex items-center shadow-md h-full"
                   >
                     {CardContent}
                   </div>

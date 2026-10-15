@@ -4,41 +4,68 @@ export interface ConfirmedSpeaker {
 }
 
 export const CONFIRMED_SPEAKERS_LIST: ConfirmedSpeaker[] = [
-  { name: 'Steeven Apaza', country: 'Perú' },
-  { name: 'Sergio Reynaldo Alcázar Antequera', country: 'Bolivia' },
-  { name: 'Rómulo Lomparte', country: 'Perú' },
-  { name: 'Alexander Páez', country: 'Paraguay' },
-  { name: 'Jorge Valdés Garciatorres', country: 'México' },
-  { name: 'Carlos Humberto Gómez', country: 'Colombia' },
-  { name: 'Carlos Javier Ruiz Zapata', country: 'Bolivia' },
-  { name: 'Noel Rodríguez', country: 'Nicaragua' },
-  { name: 'Luz Alicia Acevedo Avila', country: 'Perú' },
-  { name: 'Jonatan Octavio Fierro Sáez', country: 'Chile' },
-  { name: 'Marco Antonio Arellano Hervoso', country: 'Bolivia' },
-  { name: 'Tanyshka Lewis', country: 'Estados Unidos' },
-  { name: 'Erik Chacón Pillpa', country: 'Perú' },
-  { name: 'Enrique Aparicio', country: 'Bolivia' },
+  // Argentina
   { name: 'Ariel Rizzi y Emilse Kasem', country: 'Argentina' },
-  { name: 'Eddi Rodas', country: 'Perú' },
-  { name: 'Dr. Tony Prensa', country: 'Estados Unidos' },
-  { name: 'Santiago Armas', country: 'Ecuador' },
-  { name: 'José Reyes Asto', country: 'Perú' },
-  { name: 'Sergio Candelo', country: 'Argentina' },
-  { name: 'Daniel Bustos Valdivieso', country: 'Bolivia' },
-  { name: 'Manuel Benítez Codas', country: 'Paraguay' },
-  { name: 'Ingrid Lucía Muñoz Periñán', country: 'Colombia' },
   { name: 'Mónica Delsouc', country: 'Argentina' },
-  { name: 'Shogun Shimose', country: 'Bolivia' },
-  { name: 'Stalin Rivas', country: 'República Dominicana' },
-  { name: 'René Neira Marín', country: 'Chile' },
-  { name: 'Carlos Schellenberg', country: 'Uruguay' },
-  { name: 'Carlos Daniel Briceño Burgos', country: 'Perú' },
-  { name: 'Irina Valdez', country: 'México' },
+  { name: 'Sergio Candelo', country: 'Argentina' },
+
+  // Bolivia
+  { name: 'Carlos Javier Ruiz Zapata', country: 'Bolivia' },
+  { name: 'Daniel Bustos Valdivieso', country: 'Bolivia' },
+  { name: 'Enrique Aparicio', country: 'Bolivia' },
   { name: 'Iván José Mendoza Moya', country: 'Bolivia' },
-  { name: 'Gustavo Conejo', country: 'Costa Rica' },
-  { name: 'Carolina Herrera Solera', country: 'Colombia' },
+  { name: 'Marco Antonio Arellano Hervoso', country: 'Bolivia' },
+  { name: 'Sergio Reynaldo Alcázar Antequera', country: 'Bolivia' },
+  { name: 'Shogun Shimose', country: 'Bolivia' },
+
+  // Chile
+  { name: 'Jonatan Octavio Fierro Sáez', country: 'Chile' },
   { name: 'Nathalie Fuentes Altez', country: 'Chile' },
-  { name: 'Luis Alberto Gutierrez Gutierrez', country: 'Estados Unidos' },
+  { name: 'René Neira Marín', country: 'Chile' },
+
+  // Colombia
+  { name: 'Carlos Humberto Gómez', country: 'Colombia' },
+  { name: 'Carolina Herrera Solera', country: 'Colombia' },
+  { name: 'Ingrid Lucía Muñoz Periñán', country: 'Colombia' },
+
+  // Costa Rica
+  { name: 'Gustavo Conejo', country: 'Costa Rica' },
+
+  // Ecuador
+  { name: 'Santiago Armas', country: 'Ecuador' },
+
+  // Estados Unidos
+  { name: 'Dr. Tony Prensa', country: 'Estados Unidos' },
   { name: 'Gabriela Gutiérrez', country: 'Estados Unidos' },
+  { name: 'Luis Alberto Gutierrez Gutierrez', country: 'Estados Unidos' },
+  { name: 'Tanyshka Lewis', country: 'Estados Unidos' },
+
+  // México
+  { name: 'Irina Valdez', country: 'México' },
+  { name: 'Jorge Valdés Garciatorres', country: 'México' },
+
+  // Nicaragua
+  { name: 'Noel Rodríguez', country: 'Nicaragua' },
+
+  // Paraguay
+  { name: 'Alexander Páez', country: 'Paraguay' },
+  { name: 'Manuel Benítez Codas', country: 'Paraguay' },
+
+  // Perú
+  { name: 'Carlos Daniel Briceño Burgos', country: 'Perú' },
+  { name: 'Eddi Rodas', country: 'Perú' },
+  { name: 'Erik Chacón Pillpa', country: 'Perú' },
+  { name: 'José Reyes Asto', country: 'Perú' },
+  { name: 'Luz Alicia Acevedo Avila', country: 'Perú' },
+  { name: 'Rómulo Lomparte', country: 'Perú' },
+  { name: 'Steeven Apaza', country: 'Perú' },
+
+  // República Dominicana
+  { name: 'Stalin Rivas', country: 'República Dominicana' },
+
+  // Uruguay
+  { name: 'Carlos Schellenberg', country: 'Uruguay' },
+
+  // Venezuela
   { name: 'Nelia María Ponte Vieira', country: 'Venezuela' },
 ];

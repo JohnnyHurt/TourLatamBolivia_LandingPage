@@ -25,12 +25,12 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
   }, []);
 
   const uniqueCountries = useMemo(() => {
-    return Object.keys(countryCounts).sort((a, b) => countryCounts[b] - countryCounts[a]);
+    return Object.keys(countryCounts).sort((a, b) => a.localeCompare(b, 'es'));
   }, [countryCounts]);
 
-  // Filter speakers based on search term and country filter
+  // Filter speakers based on search term and country filter, sorted alphabetically by country and name
   const filteredConfirmedSpeakers = useMemo(() => {
-    return CONFIRMED_SPEAKERS_LIST.filter((speaker) => {
+    const list = CONFIRMED_SPEAKERS_LIST.filter((speaker) => {
       const matchesCountry =
         selectedCountry === 'all' || speaker.country.toLowerCase() === selectedCountry.toLowerCase();
       const matchesSearch =
@@ -38,6 +38,12 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
         speaker.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
         speaker.country.toLowerCase().includes(searchTerm.toLowerCase().trim());
       return matchesCountry && matchesSearch;
+    });
+
+    return list.sort((a, b) => {
+      const countryCompare = a.country.localeCompare(b.country, 'es');
+      if (countryCompare !== 0) return countryCompare;
+      return a.name.localeCompare(b.name, 'es');
     });
   }, [searchTerm, selectedCountry]);
 

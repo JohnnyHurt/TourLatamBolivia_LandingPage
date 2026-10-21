@@ -76,7 +76,15 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
 
         {/* Featured Keynote Speakers Cards Grid */}
         {speakers && speakers.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+          <div
+            className={`grid gap-8 mb-20 mx-auto justify-center ${
+              speakers.length === 4 || speakers.length === 2
+                ? 'grid-cols-1 md:grid-cols-2 max-w-5xl'
+                : speakers.length === 1
+                ? 'grid-cols-1 max-w-md'
+                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl'
+            }`}
+          >
             {speakers.map((speaker) => (
               <div
                 key={speaker.id}

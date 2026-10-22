@@ -74,124 +74,239 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
           </p>
         </div>
 
-        {/* Featured Keynote Speakers Cards Grid */}
-        {speakers && speakers.length > 0 && (
-          <div
-            className={`grid gap-8 mb-20 mx-auto justify-center ${
-              speakers.length === 4 || speakers.length === 2
-                ? 'grid-cols-1 md:grid-cols-2 max-w-5xl'
-                : speakers.length === 1
-                ? 'grid-cols-1 max-w-md'
-                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl'
-            }`}
-          >
-            {speakers.map((speaker) => (
-              <div
-                key={speaker.id}
-                className="glass-card rounded-3xl overflow-hidden group flex flex-col justify-between border border-dark-600 hover:border-brand-cyan/50 transition-all duration-300"
-              >
-                <div>
-                  {/* Photo & Featured Badge */}
-                  <div className="relative h-72 overflow-hidden bg-gradient-to-b from-dark-800 to-dark-950 flex items-center justify-center">
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
-                      <div className="w-20 h-20 rounded-full bg-dark-900 border border-slate-700/80 flex items-center justify-center text-brand-cyan font-black text-2xl shadow-xl">
-                        {speaker.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .filter(Boolean)
-                          .slice(0, 2)
-                          .join('')
-                          .toUpperCase()}
-                      </div>
-                    </div>
-                    {speaker.photo ? (
-                      <img
-                        src={getMediaUrl(speaker.photo)}
-                        alt={speaker.name}
-                        className="relative z-10 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                    ) : null}
-                    <div className="absolute inset-0 z-10 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-95 pointer-events-none" />
+        {/* Separate Keynote from Non-Keynote Speakers */}
+        {(() => {
+          const keynoteSpeakers = (speakers || []).filter((s) => s.isFeatured);
+          const nonKeynoteSpeakers = (speakers || []).filter((s) => !s.isFeatured);
 
-                    {speaker.isFeatured && (
-                      <div className="absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-gradient-to-r from-brand-magenta to-brand-purple text-white text-[10px] font-black tracking-wider uppercase shadow-glow-magenta flex items-center gap-1.5">
-                        <Award className="w-3 h-3" />
-                        Keynote Speaker
-                      </div>
-                    )}
+          return (
+            <>
+              {/* Featured Keynote Speakers Cards Grid (2x2 centered) */}
+              {keynoteSpeakers.length > 0 && (
+                <div
+                  className={`grid gap-8 mb-20 mx-auto justify-center ${
+                    keynoteSpeakers.length === 4 || keynoteSpeakers.length === 2
+                      ? 'grid-cols-1 md:grid-cols-2 max-w-5xl'
+                      : keynoteSpeakers.length === 1
+                      ? 'grid-cols-1 max-w-md'
+                      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl'
+                  }`}
+                >
+                  {keynoteSpeakers.map((speaker) => (
+                    <div
+                      key={speaker.id}
+                      className="glass-card rounded-3xl overflow-hidden group flex flex-col justify-between border border-dark-600 hover:border-brand-cyan/50 transition-all duration-300"
+                    >
+                      <div>
+                        {/* Photo & Featured Badge */}
+                        <div className="relative h-72 overflow-hidden bg-gradient-to-b from-dark-800 to-dark-950 flex items-center justify-center">
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
+                            <div className="w-20 h-20 rounded-full bg-dark-900 border border-slate-700/80 flex items-center justify-center text-brand-cyan font-black text-2xl shadow-xl">
+                              {speaker.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .filter(Boolean)
+                                .slice(0, 2)
+                                .join('')
+                                .toUpperCase()}
+                            </div>
+                          </div>
+                          {speaker.photo ? (
+                            <img
+                              src={getMediaUrl(speaker.photo)}
+                              alt={speaker.name}
+                              className="relative z-10 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                              loading="lazy"
+                              decoding="async"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          ) : null}
+                          <div className="absolute inset-0 z-10 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-95 pointer-events-none" />
 
-                    <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between text-white">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-200 bg-dark-950/85 px-3 py-1 rounded-full backdrop-blur-md border border-dark-600 shadow-lg">
-                        <CountryFlag country={speaker.country} size="sm" />
-                        <span>{speaker.country}</span>
-                      </span>
-                      {speaker.linkedinUrl && (
-                        <a
-                          href={speaker.linkedinUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 rounded-full bg-dark-950/85 text-slate-300 hover:text-brand-cyan hover:bg-dark-800 transition-colors border border-dark-600 shadow-lg"
-                          title="LinkedIn"
+                          <div className="absolute top-4 left-4 z-20 px-3 py-1 rounded-full bg-gradient-to-r from-brand-magenta to-brand-purple text-white text-[10px] font-black tracking-wider uppercase shadow-glow-magenta flex items-center gap-1.5">
+                            <Award className="w-3 h-3" />
+                            Keynote Speaker
+                          </div>
+
+                          <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between text-white">
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-200 bg-dark-950/85 px-3 py-1 rounded-full backdrop-blur-md border border-dark-600 shadow-lg">
+                              <CountryFlag country={speaker.country} size="sm" />
+                              <span>{speaker.country}</span>
+                            </span>
+                            {speaker.linkedinUrl && (
+                              <a
+                                href={speaker.linkedinUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 rounded-full bg-dark-950/85 text-slate-300 hover:text-brand-cyan hover:bg-dark-800 transition-colors border border-dark-600 shadow-lg"
+                                title="LinkedIn"
+                              >
+                                <Linkedin className="w-4 h-4" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6">
+                          <div className="flex items-center justify-between gap-2 mb-1.5">
+                            <p className="text-xs font-bold text-brand-cyan">{speaker.position}</p>
+                            {speaker.country && (
+                              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 bg-dark-800/80 px-2.5 py-0.5 rounded-full border border-dark-600/80">
+                                <CountryFlag country={speaker.country} size="xs" />
+                                <span>{speaker.country}</span>
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="text-xl font-black text-white group-hover:text-brand-cyan transition-colors mb-1">
+                            {speaker.name}
+                          </h3>
+                          <p className="text-xs text-slate-400 font-medium mb-4">{speaker.company}</p>
+
+                          <p className="text-xs text-slate-300 leading-relaxed font-light line-clamp-3 mb-4">
+                            {speaker.shortBio}
+                          </p>
+
+                          {/* Specialty Badges */}
+                          <div className="flex flex-wrap gap-1.5 mb-4">
+                            {speaker.specialties?.slice(0, 3).map((spec, i) => (
+                              <span
+                                key={i}
+                                className="px-2.5 py-0.5 rounded-lg bg-dark-800 text-[10px] font-bold text-brand-cyan border border-brand-cyan/20"
+                              >
+                                {spec}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Link to Profile Page */}
+                      <div className="px-6 pb-6">
+                        <Link
+                          to={`/speakers/${speaker.slug}`}
+                          className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-dark-800 hover:bg-brand-cyan hover:text-dark-950 text-xs font-black text-white transition-all uppercase tracking-wider group-hover:shadow-glow-cyan"
                         >
-                          <Linkedin className="w-4 h-4" />
-                        </a>
-                      )}
+                          <span>VER PERFIL COMPLETO</span>
+                          <ArrowUpRight className="w-4 h-4" />
+                        </Link>
+                      </div>
                     </div>
-                  </div>
+                  ))}
+                </div>
+              )}
 
-                  {/* Content */}
-                  <div className="p-6">
-                    <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <p className="text-xs font-bold text-brand-cyan">{speaker.position}</p>
-                      {speaker.country && (
-                        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-300 bg-dark-800/80 px-2.5 py-0.5 rounded-full border border-dark-600/80">
-                          <CountryFlag country={speaker.country} size="xs" />
-                          <span>{speaker.country}</span>
-                        </span>
-                      )}
+              {/* ── Non-Keynote Speakers Section (Simpler card, smaller photo, 3 in a row) ── */}
+              {nonKeynoteSpeakers.length > 0 && (
+                <div className="mb-20">
+                  <div className="text-center max-w-3xl mx-auto mb-10">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-xs font-black text-brand-cyan uppercase tracking-widest mb-3">
+                      <Users className="w-3.5 h-3.5" />
+                      <span>SPEAKERS & CONFERENCISTAS</span>
                     </div>
-                    <h3 className="text-xl font-black text-white group-hover:text-brand-cyan transition-colors mb-1">
-                      {speaker.name}
+                    <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight mb-3">
+                      Especialistas y Líderes de la Región
                     </h3>
-                    <p className="text-xs text-slate-400 font-medium mb-4">{speaker.company}</p>
-
-                    <p className="text-xs text-slate-300 leading-relaxed font-light line-clamp-3 mb-4">
-                      {speaker.shortBio}
+                    <p className="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto font-light">
+                      Profesionales destacados que liderarán workshops, conferencias y paneles temáticos en TourLatam Bolivia 2026.
                     </p>
+                  </div>
 
-                    {/* Specialty Badges */}
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {speaker.specialties?.slice(0, 3).map((spec, i) => (
-                        <span
-                          key={i}
-                          className="px-2.5 py-0.5 rounded-lg bg-dark-800 text-[10px] font-bold text-brand-cyan border border-brand-cyan/20"
-                        >
-                          {spec}
-                        </span>
-                      ))}
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                    {nonKeynoteSpeakers.map((speaker) => (
+                      <div
+                        key={speaker.id}
+                        className="glass-card rounded-2xl overflow-hidden group flex flex-col justify-between border border-dark-600/80 hover:border-brand-cyan/50 transition-all duration-300 hover:-translate-y-1"
+                      >
+                        <div>
+                          {/* Compact Photo (h-44 sm:h-48) */}
+                          <div className="relative h-44 sm:h-48 overflow-hidden bg-gradient-to-b from-dark-800 to-dark-950 flex items-center justify-center">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
+                              <div className="w-14 h-14 rounded-full bg-dark-900 border border-slate-700/80 flex items-center justify-center text-brand-cyan font-black text-lg shadow-lg">
+                                {speaker.name
+                                  .split(' ')
+                                  .map((n) => n[0])
+                                  .filter(Boolean)
+                                  .slice(0, 2)
+                                  .join('')
+                                  .toUpperCase()}
+                              </div>
+                            </div>
+                            {speaker.photo ? (
+                              <img
+                                src={getMediaUrl(speaker.photo)}
+                                alt={speaker.name}
+                                className="relative z-10 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                                loading="lazy"
+                                decoding="async"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                                }}
+                              />
+                            ) : null}
+                            <div className="absolute inset-0 z-10 bg-gradient-to-t from-dark-900 via-transparent to-transparent opacity-90 pointer-events-none" />
+
+                            <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between text-white">
+                              {speaker.country && (
+                                <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-200 bg-dark-950/85 px-2.5 py-0.5 rounded-full backdrop-blur-md border border-dark-600 shadow-md">
+                                  <CountryFlag country={speaker.country} size="xs" />
+                                  <span>{speaker.country}</span>
+                                </span>
+                              )}
+                              {speaker.linkedinUrl && (
+                                <a
+                                  href={speaker.linkedinUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-1.5 rounded-full bg-dark-950/85 text-slate-300 hover:text-brand-cyan hover:bg-dark-800 transition-colors border border-dark-600 shadow-md"
+                                  title="LinkedIn"
+                                >
+                                  <Linkedin className="w-3.5 h-3.5" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Content */}
+                          <div className="p-4 sm:p-5">
+                            <p className="text-[11px] font-bold text-brand-cyan truncate mb-1" title={speaker.position}>
+                              {speaker.position}
+                            </p>
+                            <h4 className="text-base sm:text-lg font-black text-white group-hover:text-brand-cyan transition-colors mb-1 leading-snug">
+                              {speaker.name}
+                            </h4>
+                            {speaker.company && (
+                              <p className="text-xs text-slate-400 font-medium truncate mb-2">
+                                {speaker.company}
+                              </p>
+                            )}
+                            {speaker.shortBio && (
+                              <p className="text-xs text-slate-300 font-light leading-relaxed line-clamp-2 mb-3">
+                                {speaker.shortBio}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-0">
+                          <Link
+                            to={`/speakers/${speaker.slug}`}
+                            className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-xl bg-dark-800/90 hover:bg-brand-cyan hover:text-dark-950 text-xs font-black text-slate-200 transition-all uppercase tracking-wider group-hover:shadow-glow-cyan"
+                          >
+                            <span>Ver perfil</span>
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-
-                {/* Action Link to Profile Page */}
-                <div className="px-6 pb-6">
-                  <Link
-                    to={`/speakers/${speaker.slug}`}
-                    className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-dark-800 hover:bg-brand-cyan hover:text-dark-950 text-xs font-black text-white transition-all uppercase tracking-wider group-hover:shadow-glow-cyan"
-                  >
-                    <span>VER PERFIL COMPLETO</span>
-                    <ArrowUpRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              )}
+            </>
+          );
+        })()}
 
         {/* ─── CONFIRMED SPEAKERS ROSTER (Ongoing upload stage) ─── */}
         <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-brand-cyan/25 bg-gradient-to-b from-dark-850/90 to-dark-900/90 shadow-2xl relative overflow-hidden">
@@ -292,16 +407,31 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                 const CardContent = (
                   <div className="w-full flex items-center justify-between gap-3 min-h-[52px]">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      {/* Initials Avatar */}
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-cyan/20 to-brand-purple/30 border border-brand-cyan/30 flex items-center justify-center text-xs font-black text-brand-cyan shrink-0 shadow-inner group-hover:scale-105 transition-transform">
-                        {speaker.name
-                          .split(' ')
-                          .filter(Boolean)
-                          .slice(0, 2)
-                          .map((n) => n[0])
-                          .join('')
-                          .toUpperCase()}
-                      </div>
+                      {/* Photo or Initials Avatar */}
+                      {matchingLoadedSpeaker?.photo ? (
+                        <div className="w-11 h-11 rounded-xl overflow-hidden border border-brand-cyan/40 shrink-0 shadow-md relative bg-dark-900 flex items-center justify-center group-hover:scale-105 transition-transform">
+                          <img
+                            src={getMediaUrl(matchingLoadedSpeaker.photo)}
+                            alt={speaker.name}
+                            className="w-full h-full object-cover object-center"
+                            loading="lazy"
+                            decoding="async"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-cyan/20 to-brand-purple/30 border border-brand-cyan/30 flex items-center justify-center text-xs font-black text-brand-cyan shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                          {speaker.name
+                            .split(' ')
+                            .filter(Boolean)
+                            .slice(0, 2)
+                            .map((n) => n[0])
+                            .join('')
+                            .toUpperCase()}
+                        </div>
+                      )}
                       <div className="min-w-0 flex-1">
                         <h4
                           title={speaker.name}

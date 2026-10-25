@@ -77,7 +77,19 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
         {/* Separate Keynote from Non-Keynote Speakers */}
         {(() => {
           const keynoteSpeakers = (speakers || []).filter((s) => s.isFeatured);
-          const nonKeynoteSpeakers = (speakers || []).filter((s) => !s.isFeatured);
+          // Non-keynote speakers: sorted 1st by Country (A-Z), then by Name (A-Z)
+          const nonKeynoteSpeakers = (speakers || [])
+            .filter((s) => !s.isFeatured)
+            .slice()
+            .sort((a, b) => {
+              const countryCompare = (a.country || '')
+                .trim()
+                .localeCompare((b.country || '').trim(), 'es', { sensitivity: 'base' });
+              if (countryCompare !== 0) return countryCompare;
+              return (a.name || '')
+                .trim()
+                .localeCompare((b.name || '').trim(), 'es', { sensitivity: 'base' });
+            });
 
           return (
             <>

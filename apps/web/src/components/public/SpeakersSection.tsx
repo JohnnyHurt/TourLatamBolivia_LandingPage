@@ -115,7 +115,7 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                             <img
                               src={getMediaUrl(speaker.photo)}
                               alt={speaker.name}
-                              className="relative z-10 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                              className="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                               loading="lazy"
                               decoding="async"
                               onError={(e) => {
@@ -221,8 +221,8 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                         className="glass-card rounded-2xl overflow-hidden group flex flex-col justify-between border border-dark-600/80 hover:border-brand-cyan/50 transition-all duration-300 hover:-translate-y-1"
                       >
                         <div>
-                          {/* Compact Photo (h-44 sm:h-48) */}
-                          <div className="relative h-44 sm:h-48 overflow-hidden bg-gradient-to-b from-dark-800 to-dark-950 flex items-center justify-center">
+                          {/* Compact Photo (h-56 sm:h-64 with object-top for natural portrait framing) */}
+                          <div className="relative h-56 sm:h-64 overflow-hidden bg-gradient-to-b from-dark-800 to-dark-950 flex items-center justify-center">
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
                               <div className="w-14 h-14 rounded-full bg-dark-900 border border-slate-700/80 flex items-center justify-center text-brand-cyan font-black text-lg shadow-lg">
                                 {speaker.name
@@ -238,7 +238,7 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                               <img
                                 src={getMediaUrl(speaker.photo)}
                                 alt={speaker.name}
-                                className="relative z-10 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                                className="relative z-10 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                                 loading="lazy"
                                 decoding="async"
                                 onError={(e) => {
@@ -413,7 +413,7 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
                           <img
                             src={getMediaUrl(matchingLoadedSpeaker.photo)}
                             alt={speaker.name}
-                            className="w-full h-full object-cover object-center"
+                            className="w-full h-full object-cover object-top"
                             loading="lazy"
                             decoding="async"
                             onError={(e) => {

@@ -231,7 +231,7 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
                           <img
                             src={getMediaUrl(item.speaker.photo)}
                             alt={item.speaker.name}
-                            className="w-9 h-9 rounded-full object-cover border border-brand-cyan/40"
+                            className="w-9 h-9 rounded-full object-cover object-top border border-brand-cyan/40"
                             onError={(e) => {
                               (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
                             }}

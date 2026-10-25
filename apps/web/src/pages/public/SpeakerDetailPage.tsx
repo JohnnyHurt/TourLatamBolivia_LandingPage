@@ -113,7 +113,7 @@ export const SpeakerDetailPage: React.FC = () => {
                     <img
                       src={getMediaUrl(speaker.photo)}
                       alt={speaker.name}
-                      className="relative z-10 w-full h-full object-cover object-center"
+                      className="relative z-10 w-full h-full object-cover object-top"
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).style.display = 'none';
                       }}

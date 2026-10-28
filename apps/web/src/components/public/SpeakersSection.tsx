@@ -11,6 +11,9 @@ interface SpeakersSectionProps {
 }
 
 export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) => {
+  // Toggle to show/hide the temporary confirmed speakers roster now that all speakers are uploaded
+  const SHOW_CONFIRMED_ROSTER = false;
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<string>('all');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -212,7 +215,7 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
 
               {/* ── Non-Keynote Speakers Section (Simpler card, smaller photo, 3 in a row) ── */}
               {nonKeynoteSpeakers.length > 0 && (
-                <div className="mb-20">
+                <div className={SHOW_CONFIRMED_ROSTER ? "mb-20" : "mb-6"}>
                   <div className="text-center max-w-3xl mx-auto mb-10">
                     <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-xs font-black text-brand-cyan uppercase tracking-widest mb-3">
                       <Users className="w-3.5 h-3.5" />
@@ -321,7 +324,9 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
         })()}
 
         {/* ─── CONFIRMED SPEAKERS ROSTER (Ongoing upload stage) ─── */}
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-brand-cyan/25 bg-gradient-to-b from-dark-850/90 to-dark-900/90 shadow-2xl relative overflow-hidden">
+        {SHOW_CONFIRMED_ROSTER && (
+          <>
+            <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-brand-cyan/25 bg-gradient-to-b from-dark-850/90 to-dark-900/90 shadow-2xl relative overflow-hidden">
           {/* Decorative ambient gradients */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-brand-cyan/10 blur-[100px] rounded-full pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-purple/15 blur-[100px] rounded-full pointer-events-none" />
@@ -566,7 +571,9 @@ export const SpeakersSection: React.FC<SpeakersSectionProps> = ({ speakers }) =>
             </div>
           </div>
         </div>
-      </div>
+      </>
+    )}
+  </div>
     </section>
   );
 };

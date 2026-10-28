@@ -53,10 +53,17 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
   const uniqueDates = extractedDates.length > 0 ? extractedDates : ['2026-11-20', '2026-11-21'];
 
   const [selectedDate, setSelectedDate] = useState<string>(uniqueDates[0]);
+  const [selectedChannel, setSelectedChannel] = useState<string>('all');
 
-  const filteredItems = items.filter(
-    (it) => it.date.split('T')[0] === selectedDate
-  );
+  const filteredItems = items.filter((it) => {
+    const matchesDate = it.date.split('T')[0] === selectedDate;
+    const itChannel = it.channel || 'Canal A';
+    const matchesChannel =
+      selectedChannel === 'all' ||
+      itChannel === selectedChannel ||
+      itChannel === 'Ambos Canales';
+    return matchesDate && matchesChannel;
+  });
 
   const getTypeBadgeStyle = (type: string) => {
     switch (type) {
@@ -184,6 +191,47 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
               </div>
             )}
 
+            {/* Parallel Channels Filter Tabs */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+              <button
+                type="button"
+                onClick={() => setSelectedChannel('all')}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                  selectedChannel === 'all'
+                    ? 'bg-slate-700 text-white border border-slate-600 shadow-sm'
+                    : 'bg-dark-900/70 text-slate-400 hover:text-white border border-dark-700'
+                }`}
+              >
+                Ambos Canales en Paralelo
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedChannel('Canal A')}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all ${
+                  selectedChannel === 'Canal A'
+                    ? 'bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/50 shadow-glow-cyan'
+                    : 'bg-dark-900/70 text-slate-400 hover:text-brand-cyan border border-dark-700'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-brand-cyan" />
+                <span>Canal A</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedChannel('Canal B')}
+                className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all ${
+                  selectedChannel === 'Canal B'
+                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+                    : 'bg-dark-900/70 text-slate-400 hover:text-purple-300 border border-dark-700'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-purple-400" />
+                <span>Canal B</span>
+              </button>
+            </div>
+
             {/* Sessions List */}
             <div className="space-y-4 max-w-4xl mx-auto">
               {filteredItems.length > 0 ? (
@@ -208,13 +256,34 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
 
                     {/* Middle Column: Title & Speaker */}
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         <span
                           className={`px-3 py-0.5 rounded-full text-[10px] font-black uppercase border ${getTypeBadgeStyle(
                             item.type
                           )}`}
                         >
                           {item.type}
+                        </span>
+
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border flex items-center gap-1.5 ${
+                            (item.channel || 'Canal A') === 'Canal B'
+                              ? 'bg-purple-500/15 text-purple-300 border-purple-500/40'
+                              : (item.channel || 'Canal A') === 'Ambos Canales'
+                              ? 'bg-amber-500/15 text-amber-300 border-amber-500/40'
+                              : 'bg-brand-cyan/15 text-brand-cyan border-brand-cyan/40'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              (item.channel || 'Canal A') === 'Canal B'
+                                ? 'bg-purple-400'
+                                : (item.channel || 'Canal A') === 'Ambos Canales'
+                                ? 'bg-amber-400'
+                                : 'bg-brand-cyan'
+                            }`}
+                          />
+                          <span>{item.channel || 'Canal A'}</span>
                         </span>
                       </div>
 

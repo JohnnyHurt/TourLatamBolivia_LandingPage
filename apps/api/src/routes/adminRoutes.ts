@@ -601,6 +601,7 @@ const agendaSchema = z.object({
   // FIX #3: normalize empty string to null to avoid FK constraint errors
   speakerId: z.string().transform((v) => (v && v.trim() !== '' ? v : null)).nullable().optional(),
   room: z.string().optional().nullable(),
+  channel: z.string().optional().nullable().default('Canal A'),
   displayOrder: z.number().default(0),
   isActive: z.boolean().default(true),
 });

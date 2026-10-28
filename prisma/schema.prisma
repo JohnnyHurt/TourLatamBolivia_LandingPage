@@ -112,6 +112,7 @@ model AgendaItem {
   speakerId    String?
   speaker      Speaker? @relation(fields: [speakerId], references: [id], onDelete: SetNull)
   room         String?
+  channel      String?  @default("Canal A") // Canal A | Canal B | Ambos Canales
   displayOrder Int      @default(0)
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())

@@ -134,6 +134,7 @@ export interface AgendaItemDTO {
   speakerId?: string;
   speaker?: SpeakerDTO;
   room?: string;
+  channel?: string;
   displayOrder: number;
   isActive: boolean;
   createdAt: string;

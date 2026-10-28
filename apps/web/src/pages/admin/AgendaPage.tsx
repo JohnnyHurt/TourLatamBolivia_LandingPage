@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { api } from '../../services/api';
 import { AgendaItemDTO, SpeakerDTO, AgendaType, PageSectionDTO } from '@tourlatam/types';
-import { Plus, Edit2, Trash2, Clock, Calendar, MapPin, RefreshCw, AlertCircle, Loader2, Construction, Eye, CheckCircle2, Sliders } from 'lucide-react';
+import { Plus, Edit2, Trash2, Clock, Calendar, MapPin, RefreshCw, AlertCircle, Loader2, Construction, Eye, CheckCircle2, Sliders, Radio, Tv, Search, Filter } from 'lucide-react';
 
-const AGENDA_CACHE_KEY = 'tourlatam_agenda_cache';
-const SPEAKERS_CACHE_KEY = 'tourlatam_agenda_speakers_cache';
+const AGENDA_CACHE_KEY = 'tourlatam_agenda_cache_v2';
+const SPEAKERS_CACHE_KEY = 'tourlatam_agenda_speakers_cache_v2';
 const AGENDA_SECTION_CACHE_KEY = 'tourlatam_agenda_section_config';
 
 const formatDateLabel = (dateStr?: string) => {
@@ -78,6 +78,37 @@ export const AgendaPage: React.FC = () => {
   const [showConfigPanel, setShowConfigPanel] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<Partial<AgendaItemDTO> | null>(null);
+  const [selectedChannelFilter, setSelectedChannelFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Counts of sessions per channel
+  const channelCounts = useMemo(() => {
+    const counts = { all: items.length, 'Canal A': 0, 'Canal B': 0, 'Ambos Canales': 0 };
+    items.forEach((it) => {
+      const ch = it.channel || 'Canal A';
+      if (ch === 'Canal B') counts['Canal B']++;
+      else if (ch === 'Ambos Canales') counts['Ambos Canales']++;
+      else counts['Canal A']++;
+    });
+    return counts;
+  }, [items]);
+
+  // Filtered sessions based on channel tab and search query
+  const filteredItems = useMemo(() => {
+    return items.filter((it) => {
+      const itemChannel = it.channel || 'Canal A';
+      const matchesChannel =
+        selectedChannelFilter === 'all' ||
+        itemChannel === selectedChannelFilter ||
+        (selectedChannelFilter !== 'all' && itemChannel === 'Ambos Canales');
+      const matchesSearch =
+        searchQuery.trim() === '' ||
+        it.title.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
+        (it.speaker?.name && it.speaker.name.toLowerCase().includes(searchQuery.toLowerCase().trim())) ||
+        (it.room && it.room.toLowerCase().includes(searchQuery.toLowerCase().trim()));
+      return matchesChannel && matchesSearch;
+    });
+  }, [items, selectedChannelFilter, searchQuery]);
 
   const loadData = useCallback(async () => {
     setIsSyncing(true);
@@ -225,6 +256,7 @@ export const AgendaPage: React.FC = () => {
     try {
       const payload = {
         ...editingItem,
+        channel: editingItem.channel || 'Canal A',
         date: editingItem.date
           ? (editingItem.date.includes('T')
               ? editingItem.date
@@ -309,6 +341,8 @@ export const AgendaPage: React.FC = () => {
                 endTime: '10:00',
                 title: '',
                 type: 'KEYNOTE',
+                channel: selectedChannelFilter !== 'all' ? selectedChannelFilter : 'Canal A',
+                room: '',
                 displayOrder: items.length + 1,
                 isActive: true,
               })
@@ -492,11 +526,13 @@ export const AgendaPage: React.FC = () => {
                   endTime: '10:00',
                   title: '',
                   type: 'KEYNOTE',
+                  channel: 'Canal A',
+                  room: '',
                   displayOrder: 1,
                   isActive: true,
                 })
               }
-              className="px-5 py-2 rounded-xl bg-brand-cyan text-dark-900 font-extrabold text-xs hover:bg-white transition-all inline-flex items-center gap-1.5"
+              className="px-5 py-2.5 rounded-xl bg-brand-cyan text-dark-900 font-extrabold text-xs hover:bg-white transition-all inline-flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4" />
               <span>Crear primera sesión</span>
@@ -504,61 +540,164 @@ export const AgendaPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="glass-panel rounded-3xl border border-slate-700/80 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-800/80 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-700">
-                <tr>
-                  <th className="py-4 px-6">Horario & Día</th>
-                  <th className="py-4 px-6">Título Sesión</th>
-                  <th className="py-4 px-6">Tipo</th>
-                  <th className="py-4 px-6">Speaker Asignado</th>
-                  <th className="py-4 px-6">Sala</th>
-                  <th className="py-4 px-6 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800 text-slate-300">
-                {items.map((it) => (
-                  <tr key={it.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-4 px-6">
-                      <div className="font-bold text-brand-cyan flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" />
-                        {it.startTime} - {it.endTime}
-                      </div>
-                      <div className="text-[11px] text-slate-400 capitalize">
-                        {formatDateLabel(it.date)}
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div className="font-bold text-white text-sm">{it.title}</div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="px-2.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-800 text-brand-magenta border border-slate-700">
-                        {it.type}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 font-semibold text-slate-200">
-                      {it.speaker?.name || 'N/A'}
-                    </td>
-                    <td className="py-4 px-6 text-slate-400">{it.room || 'Auditorio Principal'}</td>
-                    <td className="py-4 px-6 text-right space-x-2">
-                      <button
-                        onClick={() => setEditingItem(it)}
-                        className="p-2 rounded-lg bg-slate-800 text-brand-cyan hover:bg-slate-700"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(it.id, it.title)}
-                        className="p-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
+        <div className="space-y-4">
+          {/* Channel Filter & Search Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-dark-800/80 border border-slate-700/80">
+            {/* Parallel Channel Tabs */}
+            <div className="flex flex-wrap items-center gap-1.5 bg-dark-900 p-1.5 rounded-xl border border-slate-700">
+              <button
+                type="button"
+                onClick={() => setSelectedChannelFilter('all')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedChannelFilter === 'all'
+                    ? 'bg-slate-700 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <span>Todos ({channelCounts.all})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedChannelFilter('Canal A')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  selectedChannelFilter === 'Canal A'
+                    ? 'bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/40 shadow-glow-cyan'
+                    : 'text-slate-400 hover:text-brand-cyan'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-brand-cyan" />
+                <span>Canal A ({channelCounts['Canal A']})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedChannelFilter('Canal B')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  selectedChannelFilter === 'Canal B'
+                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+                    : 'text-slate-400 hover:text-purple-300'
+                }`}
+              >
+                <span className="w-2 h-2 rounded-full bg-purple-400" />
+                <span>Canal B ({channelCounts['Canal B']})</span>
+              </button>
+
+              {channelCounts['Ambos Canales'] > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedChannelFilter('Ambos Canales')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                    selectedChannelFilter === 'Ambos Canales'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'text-slate-400 hover:text-amber-300'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span>Ambos ({channelCounts['Ambos Canales']})</span>
+                </button>
+              )}
+            </div>
+
+            {/* Quick Search */}
+            <div className="relative flex-1 max-w-xs">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar sesión, speaker o sala..."
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-dark-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:border-brand-cyan focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Sessions Table */}
+          <div className="glass-panel rounded-3xl border border-slate-700/80 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-800/80 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-700">
+                  <tr>
+                    <th className="py-4 px-6">Horario & Día</th>
+                    <th className="py-4 px-6">Título Sesión</th>
+                    <th className="py-4 px-6">Canal</th>
+                    <th className="py-4 px-6">Tipo</th>
+                    <th className="py-4 px-6">Speaker Asignado</th>
+                    <th className="py-4 px-6">Sala</th>
+                    <th className="py-4 px-6 text-right">Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-800 text-slate-300">
+                  {filteredItems.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-slate-400">
+                        No hay sesiones que coincidan con el filtro seleccionado.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredItems.map((it) => (
+                      <tr key={it.id} className="hover:bg-slate-800/40 transition-colors">
+                        <td className="py-4 px-6">
+                          <div className="font-bold text-brand-cyan flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" />
+                            {it.startTime} - {it.endTime}
+                          </div>
+                          <div className="text-[11px] text-slate-400 capitalize">
+                            {formatDateLabel(it.date)}
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="font-bold text-white text-sm">{it.title}</div>
+                        </td>
+                        <td className="py-4 px-6">
+                          {it.channel === 'Canal B' ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black bg-purple-500/15 text-purple-300 border border-purple-500/40">
+                              <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                              Canal B
+                            </span>
+                          ) : it.channel === 'Ambos Canales' ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black bg-amber-500/15 text-amber-300 border border-amber-500/40">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                              Ambos
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/40">
+                              <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan" />
+                              Canal A
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="px-2.5 py-0.5 rounded text-[10px] font-extrabold bg-slate-800 text-brand-magenta border border-slate-700">
+                            {it.type}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 font-semibold text-slate-200">
+                          {it.speaker?.name || 'N/A'}
+                        </td>
+                        <td className="py-4 px-6 text-slate-400">{it.room || 'Auditorio Principal'}</td>
+                        <td className="py-4 px-6 text-right space-x-2">
+                          <button
+                            onClick={() => setEditingItem(it)}
+                            className="p-2 rounded-lg bg-slate-800 text-brand-cyan hover:bg-slate-700"
+                            title="Editar sesión"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(it.id, it.title)}
+                            className="p-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20"
+                            title="Eliminar sesión"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -651,13 +790,72 @@ export const AgendaPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Canal de Transmisión (Paralelo) */}
               <div>
-                <label className="block text-slate-300 font-bold mb-1">Sala / Auditorio</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-slate-300 font-bold">
+                    Canal de Transmisión (En Paralelo) *
+                  </label>
+                  <span className="text-[10px] text-slate-400">
+                    Transmisión en vivo simultánea
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem({ ...editingItem, channel: 'Canal A' })}
+                    className={`py-2.5 px-3 rounded-xl border text-xs font-black flex items-center justify-center gap-2 transition-all ${
+                      (editingItem.channel || 'Canal A') === 'Canal A'
+                        ? 'bg-brand-cyan/20 border-brand-cyan text-brand-cyan shadow-[0_0_15px_rgba(0,242,254,0.25)] ring-1 ring-brand-cyan/50'
+                        : 'bg-dark-900 border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${
+                      (editingItem.channel || 'Canal A') === 'Canal A' ? 'bg-brand-cyan animate-pulse' : 'bg-slate-500'
+                    }`} />
+                    <span>Canal A</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem({ ...editingItem, channel: 'Canal B' })}
+                    className={`py-2.5 px-3 rounded-xl border text-xs font-black flex items-center justify-center gap-2 transition-all ${
+                      editingItem.channel === 'Canal B'
+                        ? 'bg-purple-500/20 border-purple-400 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.25)] ring-1 ring-purple-400/50'
+                        : 'bg-dark-900 border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${
+                      editingItem.channel === 'Canal B' ? 'bg-purple-400 animate-pulse' : 'bg-slate-500'
+                    }`} />
+                    <span>Canal B</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditingItem({ ...editingItem, channel: 'Ambos Canales' })}
+                    className={`py-2.5 px-3 rounded-xl border text-xs font-black flex items-center justify-center gap-2 transition-all ${
+                      editingItem.channel === 'Ambos Canales'
+                        ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)] ring-1 ring-amber-400/50'
+                        : 'bg-dark-900 border-slate-700 text-slate-400 hover:text-white hover:border-slate-600'
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${
+                      editingItem.channel === 'Ambos Canales' ? 'bg-amber-400 animate-pulse' : 'bg-slate-500'
+                    }`} />
+                    <span>Ambos Canales</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-bold mb-1">Sala / Auditorio (Nombre específico)</label>
                 <input
                   type="text"
                   value={editingItem.room || ''}
                   onChange={(e) => setEditingItem({ ...editingItem, room: e.target.value })}
-                  placeholder="Auditorio Principal A"
+                  placeholder="Ej: Sala IA & Estrategia, Laboratorio Virtual"
                   className="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-700 text-white"
                 />
               </div>

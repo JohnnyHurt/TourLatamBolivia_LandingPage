@@ -408,9 +408,14 @@ router.get('/sponsors', async (req: Request, res: Response, next: NextFunction) 
 router.get('/agenda', async (req: Request, res: Response, next: NextFunction) => {
   const includeAll = req.query.all === 'true';
   const cacheKey = includeAll ? 'agenda-all' : 'agenda-active';
-  const cached = cacheService.get(cacheKey);
-  if (cached) {
-    return res.json({ success: true, data: cached, _fromCache: true });
+  if (includeAll) {
+    // Admin CMS must always see the real DB state (no server/browser cache)
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  } else {
+    const cached = cacheService.get(cacheKey);
+    if (cached) {
+      return res.json({ success: true, data: cached, _fromCache: true });
+    }
   }
 
   try {

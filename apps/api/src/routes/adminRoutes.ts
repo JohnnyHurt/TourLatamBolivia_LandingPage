@@ -672,10 +672,16 @@ router.put('/agenda/:id', async (req: AuthenticatedRequest, res: Response, next:
 router.delete('/agenda/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    await prisma.agendaItem.delete({ where: { id } });
+    // Idempotent delete: deleteMany does not throw (P2025) when the record was already removed
+    // (e.g. double click or stale list in the admin panel).
+    const result = await prisma.agendaItem.deleteMany({ where: { id } });
 
     cacheService.invalidate('agenda');
     cacheService.del('landing-data');
+
+    if (result.count === 0) {
+      return res.json({ success: true, message: 'Agenda item already deleted', alreadyDeleted: true });
+    }
 
     await AuditService.log({
       userId: req.user?.id,

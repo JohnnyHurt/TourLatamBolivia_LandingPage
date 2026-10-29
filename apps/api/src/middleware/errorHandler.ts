@@ -15,6 +15,14 @@ export function errorHandler(err: any, req: Request, res: Response, _next: NextF
     });
   }
 
+  // Prisma: record required for the operation was not found (deleted / stale id)
+  if (err?.code === 'P2025') {
+    return res.status(404).json({
+      success: false,
+      error: 'El registro no existe o ya fue eliminado. Refresca la página para ver los datos actualizados.',
+    });
+  }
+
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
 

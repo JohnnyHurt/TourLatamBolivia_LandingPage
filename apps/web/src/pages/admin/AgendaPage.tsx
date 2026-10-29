@@ -232,20 +232,39 @@ export const AgendaPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (confirm(`¿Eliminar la sesión "${title}"?`)) {
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const removeItemLocally = (id: string) => {
+    setItems((prev) => {
+      const updated = prev.filter((i) => i.id !== id);
       try {
-        await api.deleteAgendaItem(id);
-        const updated = items.filter((i) => i.id !== id);
-        setItems(updated);
-        try {
-          localStorage.setItem(AGENDA_CACHE_KEY, JSON.stringify(updated));
-        } catch {
-          // ignore
-        }
-      } catch (err: any) {
-        alert(err.message || 'Error al eliminar');
+        localStorage.setItem(AGENDA_CACHE_KEY, JSON.stringify(updated));
+      } catch {
+        // ignore
       }
+      return updated;
+    });
+  };
+
+  const handleDelete = async (id: string, title: string) => {
+    if (deletingId) return; // prevent double clicks
+    if (!confirm(`¿Eliminar la sesión "${title}"?`)) return;
+
+    setDeletingId(id);
+    try {
+      await api.deleteAgendaItem(id);
+      removeItemLocally(id);
+    } catch (err: any) {
+      const msg: string = err?.message || '';
+      // If the session no longer exists in the DB, just drop it from the list
+      if (/no existe|not found|does not exist|ya fue eliminado/i.test(msg)) {
+        removeItemLocally(id);
+      } else {
+        alert(msg || 'Error al eliminar');
+      }
+    } finally {
+      setDeletingId(null);
+      loadData(); // re-sync with the real DB state
     }
   };
 
@@ -686,7 +705,8 @@ export const AgendaPage: React.FC = () => {
                           </button>
                           <button
                             onClick={() => handleDelete(it.id, it.title)}
-                            className="p-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20"
+                            disabled={deletingId === it.id}
+                            className="p-2 rounded-lg bg-slate-800 text-red-400 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-wait"
                             title="Eliminar sesión"
                           >
                             <Trash2 className="w-4 h-4" />

@@ -135,7 +135,7 @@ const DEFAULT_TICKETS: TicketTypeDTO[] = [
 
 function getLocalCache() {
   try {
-    const raw = localStorage.getItem('tourlatam_landing_cache_v5');
+    const raw = localStorage.getItem('tourlatam_landing_cache_v6');
     if (raw) return JSON.parse(raw);
   } catch (e) {
     // Ignore storage parse issues
@@ -175,7 +175,7 @@ export const LandingPage: React.FC = () => {
           if (aggregated.faqs?.length) setFaqs(aggregated.faqs);
 
           try {
-            localStorage.setItem('tourlatam_landing_cache_v5', JSON.stringify(aggregated));
+            localStorage.setItem('tourlatam_landing_cache_v6', JSON.stringify(aggregated));
           } catch (e) {}
           return;
         }

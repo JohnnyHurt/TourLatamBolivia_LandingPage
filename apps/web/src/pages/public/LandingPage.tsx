@@ -135,7 +135,7 @@ const DEFAULT_TICKETS: TicketTypeDTO[] = [
 
 function getLocalCache() {
   try {
-    const raw = localStorage.getItem('tourlatam_landing_cache_v6');
+    const raw = localStorage.getItem('tourlatam_landing_cache_v7');
     if (raw) return JSON.parse(raw);
   } catch (e) {
     // Ignore storage parse issues
@@ -175,7 +175,7 @@ export const LandingPage: React.FC = () => {
           if (aggregated.faqs?.length) setFaqs(aggregated.faqs);
 
           try {
-            localStorage.setItem('tourlatam_landing_cache_v6', JSON.stringify(aggregated));
+            localStorage.setItem('tourlatam_landing_cache_v7', JSON.stringify(aggregated));
           } catch (e) {}
           return;
         }
@@ -254,7 +254,14 @@ export const LandingPage: React.FC = () => {
         return <SpeakersSection key="speakers" speakers={speakers} />;
       case 'AGENDA': {
         const agendaSec = sections.find((s) => s.sectionType === 'AGENDA');
-        return <AgendaSection key="agenda" items={agenda} sectionConfig={agendaSec?.content} />;
+        return (
+          <AgendaSection
+            key="agenda"
+            items={agenda}
+            speakers={speakers}
+            sectionConfig={agendaSec?.content}
+          />
+        );
       }
       case 'PRICING':
         return <PricingSection key="pricing" tickets={tickets} registrationUrl={settings?.registrationUrl} />;

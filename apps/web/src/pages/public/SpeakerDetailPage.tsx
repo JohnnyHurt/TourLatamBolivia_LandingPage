@@ -2,11 +2,27 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { SpeakerDTO, EventSettingsDTO } from '@tourlatam/types';
 import { api } from '../../services/api';
-import { ArrowLeft, Linkedin, Globe, Video, MapPin, Clock, Award, Sparkles } from 'lucide-react';
+import { ArrowLeft, Linkedin, Globe, Video, MapPin, Clock, Calendar, Award, Sparkles } from 'lucide-react';
 import { Header } from '../../components/public/Header';
 import { Footer } from '../../components/public/Footer';
 import { getMediaUrl } from '../../utils/media';
 import { CountryFlag } from '../../components/common/CountryFlag';
+
+const formatSessionDate = (dateStr?: string) => {
+  if (!dateStr) return '';
+  const rawDate = dateStr.split('T')[0];
+  if (rawDate === '2026-11-20') return 'Viernes 20 de Noviembre';
+  if (rawDate === '2026-11-21') return 'Sábado 21 de Noviembre';
+
+  const dateObj = new Date(`${rawDate}T00:00:00.000Z`);
+  const formatted = dateObj.toLocaleDateString('es-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  });
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+};
 
 export const SpeakerDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -226,22 +242,67 @@ export const SpeakerDetailPage: React.FC = () => {
               <h3 className="text-xl font-black text-white mb-6">Sesiones en el Congreso</h3>
               <div className="space-y-4">
                 {speaker.sessions.map((sess) => (
-                  <div key={sess.id} className="p-5 rounded-2xl bg-dark-900 border border-dark-600 flex items-start justify-between">
-                    <div>
-                      <span className="inline-block px-2.5 py-0.5 rounded text-[10px] font-black bg-brand-cyan/20 text-brand-cyan uppercase tracking-wider mb-2">
-                        {sess.type}
-                      </span>
+                  <div
+                    key={sess.id}
+                    className="p-5 rounded-2xl bg-dark-900 border border-dark-600 flex flex-col sm:flex-row sm:items-start justify-between gap-4"
+                  >
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className="inline-block px-2.5 py-0.5 rounded text-[10px] font-black bg-brand-cyan/20 text-brand-cyan uppercase tracking-wider">
+                          {sess.type}
+                        </span>
+                        {sess.channel && (
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                              sess.channel === 'Canal B'
+                                ? 'bg-purple-500/15 text-purple-300 border-purple-500/40'
+                                : sess.channel === 'Ambos Canales'
+                                ? 'bg-amber-500/15 text-amber-300 border-amber-500/40'
+                                : 'bg-brand-cyan/15 text-brand-cyan border-brand-cyan/40'
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                sess.channel === 'Canal B'
+                                  ? 'bg-purple-400'
+                                  : sess.channel === 'Ambos Canales'
+                                  ? 'bg-amber-400'
+                                  : 'bg-brand-cyan'
+                              }`}
+                            />
+                            <span>{sess.channel}</span>
+                          </span>
+                        )}
+                      </div>
                       <h4 className="text-base font-black text-white">{sess.title}</h4>
                       {sess.description && (
-                        <p className="text-xs text-slate-400 mt-1 font-light">{sess.description}</p>
+                        <p className="text-xs text-slate-400 mt-1 font-light leading-relaxed">
+                          {sess.description}
+                        </p>
                       )}
                     </div>
-                    <div className="text-right text-xs text-slate-400 shrink-0 ml-4">
-                      <div className="flex items-center gap-1 font-bold text-white">
-                        <Clock className="w-3.5 h-3.5 text-brand-cyan" />
-                        {sess.startTime} - {sess.endTime}
+                    <div className="text-left sm:text-right text-xs text-slate-400 shrink-0 flex flex-col sm:items-end gap-1.5 pt-1 sm:pt-0 border-t sm:border-t-0 border-dark-700">
+                      {/* Día de la sesión */}
+                      {sess.date && (
+                        <div className="flex items-center gap-1.5 font-bold text-brand-magenta text-xs">
+                          <Calendar className="w-3.5 h-3.5 text-brand-magenta shrink-0" />
+                          <span>{formatSessionDate(sess.date)}</span>
+                        </div>
+                      )}
+                      {/* Horario */}
+                      <div className="flex items-center gap-1.5 font-bold text-white text-xs">
+                        <Clock className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
+                        <span>
+                          {sess.startTime} - {sess.endTime}
+                        </span>
                       </div>
-                      {sess.room && <div className="mt-1 text-[11px] text-slate-400">{sess.room}</div>}
+                      {/* Sala / Pilar */}
+                      {sess.room && (
+                        <div className="flex items-center gap-1 text-[11px] text-slate-400 mt-0.5">
+                          <Video className="w-3 h-3 text-brand-magenta shrink-0" />
+                          <span>{sess.room}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

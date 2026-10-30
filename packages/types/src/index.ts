@@ -131,8 +131,11 @@ export interface AgendaItemDTO {
   title: string;
   description?: string;
   type: AgendaType;
-  speakerId?: string;
+  speakerId?: string | null;
   speaker?: SpeakerDTO;
+  coSpeakerId?: string | null;
+  coSpeaker?: SpeakerDTO;
+  speakers?: SpeakerDTO[];
   room?: string;
   channel?: string;
   displayOrder: number;

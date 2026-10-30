@@ -87,6 +87,17 @@ router.get('/landing-data', async (_req: Request, res: Response, next: NextFunct
                 country: true,
               },
             },
+            coSpeaker: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                position: true,
+                company: true,
+                photo: true,
+                country: true,
+              },
+            },
           },
         }),
         prisma.ticketType.findMany({
@@ -124,12 +135,39 @@ router.get('/landing-data', async (_req: Request, res: Response, next: NextFunct
       updatedAt: s.updatedAt.toISOString(),
     }));
 
-    const formattedAgenda = agenda.map((item) => ({
-      ...item,
-      date: item.date.toISOString(),
-      createdAt: item.createdAt.toISOString(),
-      updatedAt: item.updatedAt.toISOString(),
-    }));
+    const emilseSpeaker = formattedSpeakers.find((s) => s.slug === 'emilse-kasem');
+
+    const formattedAgenda = agenda.map((item) => {
+      let coSpeaker: any = (item as any).coSpeaker;
+
+      if (
+        !coSpeaker &&
+        item.description &&
+        (item.description.includes('Emilse Kasem') || item.description.includes('Emilse')) &&
+        emilseSpeaker
+      ) {
+        coSpeaker = {
+          id: emilseSpeaker.id,
+          slug: emilseSpeaker.slug,
+          name: emilseSpeaker.name,
+          position: emilseSpeaker.position,
+          company: emilseSpeaker.company,
+          photo: emilseSpeaker.photo,
+          country: emilseSpeaker.country,
+        };
+      }
+
+      const speakersList: any[] = [item.speaker, coSpeaker].filter(Boolean);
+
+      return {
+        ...item,
+        coSpeaker,
+        speakers: speakersList,
+        date: item.date.toISOString(),
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+      };
+    });
 
     const formattedTickets = tickets.map((t) => ({
       ...t,
@@ -346,6 +384,10 @@ router.get('/speakers/:slug', async (req: Request, res: Response, next: NextFunc
           where: { isActive: true },
           orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
         },
+        coSessions: {
+          where: { isActive: true },
+          orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+        },
       },
     });
 
@@ -353,12 +395,26 @@ router.get('/speakers/:slug', async (req: Request, res: Response, next: NextFunc
       return res.status(404).json({ success: false, error: 'Speaker not found' });
     }
 
+    let sessions = [...(speaker.sessions || []), ...(speaker.coSessions || [])];
+    if (sessions.length === 0) {
+      const coSessionsFallback = await prisma.agendaItem.findMany({
+        where: {
+          isActive: true,
+          description: { contains: speaker.name, mode: 'insensitive' },
+        },
+        orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
+      });
+      if (coSessionsFallback.length > 0) {
+        sessions = coSessionsFallback;
+      }
+    }
+
     return res.json({
       success: true,
       data: {
         ...speaker,
         specialties: speaker.specialties ? JSON.parse(speaker.specialties) : [],
-        sessions: speaker.sessions.map((s) => ({
+        sessions: sessions.map((s) => ({
           ...s,
           date: s.date.toISOString(),
         })),
@@ -419,30 +475,71 @@ router.get('/agenda', async (req: Request, res: Response, next: NextFunction) =>
   }
 
   try {
-    const agendaItems = await prisma.agendaItem.findMany({
-      where: includeAll ? {} : { isActive: true },
-      orderBy: [{ date: 'asc' }, { startTime: 'asc' }, { displayOrder: 'asc' }],
-      include: {
-        speaker: {
-          select: {
-            id: true,
-            slug: true,
-            name: true,
-            position: true,
-            company: true,
-            photo: true,
-            country: true,
+    const [agendaItems, emilseSpeaker] = await Promise.all([
+      prisma.agendaItem.findMany({
+        where: includeAll ? {} : { isActive: true },
+        orderBy: [{ date: 'asc' }, { startTime: 'asc' }, { displayOrder: 'asc' }],
+        include: {
+          speaker: {
+            select: {
+              id: true,
+              slug: true,
+              name: true,
+              position: true,
+              company: true,
+              photo: true,
+              country: true,
+            },
+          },
+          coSpeaker: {
+            select: {
+              id: true,
+              slug: true,
+              name: true,
+              position: true,
+              company: true,
+              photo: true,
+              country: true,
+            },
           },
         },
-      },
-    });
+      }),
+      prisma.speaker.findUnique({
+        where: { slug: 'emilse-kasem' },
+        select: {
+          id: true,
+          slug: true,
+          name: true,
+          position: true,
+          company: true,
+          photo: true,
+          country: true,
+        },
+      }).catch(() => null),
+    ]);
 
-    const data = agendaItems.map((item) => ({
-      ...item,
-      date: item.date.toISOString(),
-      createdAt: item.createdAt.toISOString(),
-      updatedAt: item.updatedAt.toISOString(),
-    }));
+    const data = agendaItems.map((item) => {
+      let coSpeaker: any = (item as any).coSpeaker;
+
+      if (
+        !coSpeaker &&
+        item.description &&
+        (item.description.includes('Emilse Kasem') || item.description.includes('Emilse')) &&
+        emilseSpeaker
+      ) {
+        coSpeaker = emilseSpeaker;
+      }
+      const speakersList: any[] = [item.speaker, coSpeaker].filter(Boolean);
+
+      return {
+        ...item,
+        coSpeaker,
+        speakers: speakersList,
+        date: item.date.toISOString(),
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+      };
+    });
 
     cacheService.set(cacheKey, data, 600);
     return res.json({ success: true, data });

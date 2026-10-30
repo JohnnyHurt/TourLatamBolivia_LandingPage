@@ -3,7 +3,7 @@ import { api } from '../../services/api';
 import { AgendaItemDTO, SpeakerDTO, AgendaType, PageSectionDTO } from '@tourlatam/types';
 import { Plus, Edit2, Trash2, Clock, Calendar, MapPin, RefreshCw, AlertCircle, Loader2, Construction, Eye, CheckCircle2, Sliders, Radio, Tv, Search, Filter } from 'lucide-react';
 
-const AGENDA_CACHE_KEY = 'tourlatam_agenda_cache_v2';
+const AGENDA_CACHE_KEY = 'tourlatam_agenda_cache_v3';
 const SPEAKERS_CACHE_KEY = 'tourlatam_agenda_speakers_cache_v2';
 const AGENDA_SECTION_CACHE_KEY = 'tourlatam_agenda_section_config';
 
@@ -275,6 +275,8 @@ export const AgendaPage: React.FC = () => {
     try {
       const payload = {
         ...editingItem,
+        speakerId: editingItem.speakerId || null,
+        coSpeakerId: editingItem.coSpeakerId || null,
         channel: editingItem.channel || 'Canal A',
         date: editingItem.date
           ? (editingItem.date.includes('T')
@@ -692,12 +694,29 @@ export const AgendaPage: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-4 px-6 font-semibold text-slate-200">
-                          {it.speaker?.name || 'N/A'}
+                          {(() => {
+                            const names: string[] = [];
+                            if (it.speaker?.name) names.push(it.speaker.name);
+                            if (it.coSpeaker?.name && !names.includes(it.coSpeaker.name)) {
+                              names.push(it.coSpeaker.name);
+                            } else if (
+                              it.description?.includes('Emilse Kasem') &&
+                              !names.includes('Emilse Kasem')
+                            ) {
+                              names.push('Emilse Kasem');
+                            }
+                            return names.length > 0 ? names.join(' & ') : '—';
+                          })()}
                         </td>
                         <td className="py-4 px-6 text-slate-400">{it.room || 'Auditorio Principal'}</td>
                         <td className="py-4 px-6 text-right space-x-2">
                           <button
-                            onClick={() => setEditingItem(it)}
+                            onClick={() =>
+                              setEditingItem({
+                                ...it,
+                                coSpeakerId: it.coSpeakerId || it.coSpeaker?.id,
+                              })
+                            }
                             className="p-2 rounded-lg bg-slate-800 text-brand-cyan hover:bg-slate-700"
                             title="Editar sesión"
                           >
@@ -776,7 +795,7 @@ export const AgendaPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-slate-300 font-bold mb-1">Tipo de Sesión</label>
                   <select
@@ -794,7 +813,7 @@ export const AgendaPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1">Speaker Asignado</label>
+                  <label className="block text-slate-300 font-bold mb-1">Speaker Principal</label>
                   <select
                     value={editingItem.speakerId || ''}
                     onChange={(e) => setEditingItem({ ...editingItem, speakerId: e.target.value || undefined })}
@@ -806,6 +825,24 @@ export const AgendaPage: React.FC = () => {
                         {sp.name} ({sp.company})
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-bold mb-1">Co-Speaker (Opcional)</label>
+                  <select
+                    value={editingItem.coSpeakerId || ''}
+                    onChange={(e) => setEditingItem({ ...editingItem, coSpeakerId: e.target.value || undefined })}
+                    className="w-full px-3 py-2 rounded-xl bg-dark-900 border border-slate-700 text-white"
+                  >
+                    <option value="">-- Sin co-speaker --</option>
+                    {speakers
+                      .filter((sp) => sp.id !== editingItem.speakerId)
+                      .map((sp) => (
+                        <option key={sp.id} value={sp.id}>
+                          {sp.name} ({sp.company})
+                        </option>
+                      ))}
                   </select>
                 </div>
               </div>

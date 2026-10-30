@@ -98,7 +98,8 @@ model Speaker {
   isActive     Boolean      @default(true)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-  sessions     AgendaItem[]
+  sessions     AgendaItem[] @relation("SpeakerSessions")
+  coSessions   AgendaItem[] @relation("CoSpeakerSessions")
 }
 
 model AgendaItem {
@@ -110,7 +111,9 @@ model AgendaItem {
   description  String?
   type         String   @default("KEYNOTE") // KEYNOTE | PANEL | WORKSHOP | BREAK | NETWORKING | OTHER
   speakerId    String?
-  speaker      Speaker? @relation(fields: [speakerId], references: [id], onDelete: SetNull)
+  speaker      Speaker? @relation("SpeakerSessions", fields: [speakerId], references: [id], onDelete: SetNull)
+  coSpeakerId  String?
+  coSpeaker    Speaker? @relation("CoSpeakerSessions", fields: [coSpeakerId], references: [id], onDelete: SetNull)
   room         String?
   channel      String?  @default("Canal A") // Canal A | Canal B | Ambos Canales
   displayOrder Int      @default(0)

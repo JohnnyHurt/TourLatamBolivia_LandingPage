@@ -600,6 +600,7 @@ const agendaSchema = z.object({
   type: z.enum(['KEYNOTE', 'PANEL', 'WORKSHOP', 'BREAK', 'NETWORKING', 'OTHER']),
   // FIX #3: normalize empty string to null to avoid FK constraint errors
   speakerId: z.string().transform((v) => (v && v.trim() !== '' ? v : null)).nullable().optional(),
+  coSpeakerId: z.string().transform((v) => (v && v.trim() !== '' ? v : null)).nullable().optional(),
   room: z.string().optional().nullable(),
   channel: z.string().optional().nullable().default('Canal A'),
   displayOrder: z.number().default(0),
@@ -616,6 +617,7 @@ router.post('/agenda', async (req: AuthenticatedRequest, res: Response, next: Ne
         date: new Date(data.date),
         // FIX #3: speakerId already normalized to null by Zod transform above
         speakerId: data.speakerId ?? null,
+        coSpeakerId: data.coSpeakerId ?? null,
       },
     });
 
@@ -649,6 +651,7 @@ router.put('/agenda/:id', async (req: AuthenticatedRequest, res: Response, next:
         date: data.date ? new Date(data.date) : undefined,
         // FIX #3: normalize empty speakerId to null
         ...(data.speakerId !== undefined && { speakerId: data.speakerId ?? null }),
+        ...(data.coSpeakerId !== undefined && { coSpeakerId: data.coSpeakerId ?? null }),
       },
     });
 

@@ -1,15 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { Calendar, Clock, MapPin, ChevronRight, Sparkles, Video, Construction, Bell, CheckCircle2 } from 'lucide-react';
-import { AgendaItemDTO } from '@tourlatam/types';
+import { AgendaItemDTO, SpeakerDTO } from '@tourlatam/types';
 import { Link } from 'react-router-dom';
 import { getMediaUrl } from '../../utils/media';
 
 interface AgendaSectionProps {
   items: AgendaItemDTO[];
+  speakers?: SpeakerDTO[];
   sectionConfig?: any;
 }
 
-export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConfig }) => {
+export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, speakers = [], sectionConfig }) => {
   // Normalize sectionConfig if received as string or double-encoded JSON
   let resolvedConfig: any = sectionConfig;
   if (typeof resolvedConfig === 'string') {
@@ -96,6 +97,27 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
         <span>Canal A</span>
       </span>
     );
+  };
+
+  const getItemSpeakers = (item: AgendaItemDTO): SpeakerDTO[] => {
+    if (item.speakers && item.speakers.length > 0) {
+      return item.speakers;
+    }
+    const list: SpeakerDTO[] = [];
+    if (item.speaker) list.push(item.speaker);
+    if (item.coSpeaker) list.push(item.coSpeaker);
+
+    if (
+      item.description &&
+      (item.description.includes('Emilse Kasem') || item.description.includes('Emilse')) &&
+      !list.some((s) => s.slug === 'emilse-kasem')
+    ) {
+      const emilse = speakers.find((s) => s.slug === 'emilse-kasem');
+      if (emilse) {
+        list.push(emilse);
+      }
+    }
+    return list;
   };
 
   // Group sessions by schedule blocks / time slots for the selected date
@@ -253,34 +275,43 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
         </div>
 
         {/* Speaker Footer */}
-        {item.speaker && (
-          <div className="flex items-center gap-3 pt-3 mt-4 border-t border-slate-700/60 relative z-10">
-            <img
-              src={getMediaUrl(item.speaker.photo)}
-              alt={item.speaker.name}
-              className={`w-10 h-10 rounded-full object-cover object-top border shrink-0 ${
-                isCanalA
-                  ? 'border-brand-cyan/50 shadow-glow-cyan'
-                  : 'border-purple-400/50 shadow-[0_0_10px_rgba(168,85,247,0.3)]'
-              }`}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
-              }}
-            />
-            <div className="min-w-0 flex-1">
-              <Link
-                to={`/speakers/${item.speaker.slug}`}
-                className="text-xs font-bold text-slate-200 hover:text-brand-cyan flex items-center gap-1 group-hover/link:underline"
-              >
-                <span className="truncate">{item.speaker.name}</span>
-                <ChevronRight className="w-3 h-3 text-brand-cyan shrink-0" />
-              </Link>
-              <span className="text-[10px] text-slate-400 block font-medium truncate">
-                {item.speaker.position} • {item.speaker.company}
-              </span>
+        {(() => {
+          const sessionSpeakers = getItemSpeakers(item);
+          if (sessionSpeakers.length === 0) return null;
+
+          return (
+            <div className="pt-3 mt-4 border-t border-slate-700/60 relative z-10 space-y-2.5">
+              {sessionSpeakers.map((sp) => (
+                <div key={sp.slug || sp.id} className="flex items-center gap-3">
+                  <img
+                    src={getMediaUrl(sp.photo)}
+                    alt={sp.name}
+                    className={`w-9 h-9 rounded-full object-cover object-top border shrink-0 ${
+                      isCanalA
+                        ? 'border-brand-cyan/50 shadow-glow-cyan'
+                        : 'border-purple-400/50 shadow-[0_0_10px_rgba(168,85,247,0.3)]'
+                    }`}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                    }}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      to={`/speakers/${sp.slug}`}
+                      className="text-xs font-bold text-slate-200 hover:text-brand-cyan flex items-center gap-1 group-hover/link:underline"
+                    >
+                      <span className="truncate">{sp.name}</span>
+                      <ChevronRight className="w-3 h-3 text-brand-cyan shrink-0" />
+                    </Link>
+                    <span className="text-[10px] text-slate-400 block font-medium truncate">
+                      {sp.position} • {sp.company}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     );
   };
@@ -345,30 +376,40 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, sectionConf
             </p>
           )}
 
-          {item.speaker && (
-            <div className="flex items-center gap-3 pt-2">
-              <img
-                src={getMediaUrl(item.speaker.photo)}
-                alt={item.speaker.name}
-                className="w-9 h-9 rounded-full object-cover object-top border border-brand-cyan/40 shrink-0"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
-                }}
-              />
-              <div>
-                <Link
-                  to={`/speakers/${item.speaker.slug}`}
-                  className="text-xs font-bold text-slate-200 hover:text-brand-cyan flex items-center gap-1"
-                >
-                  <span>{item.speaker.name}</span>
-                  <ChevronRight className="w-3 h-3 text-brand-cyan shrink-0" />
-                </Link>
-                <span className="text-[10px] text-slate-400 block font-medium">
-                  {item.speaker.position} • {item.speaker.company}
-                </span>
+          {/* Speaker Footer */}
+          {(() => {
+            const sessionSpeakers = getItemSpeakers(item);
+            if (sessionSpeakers.length === 0) return null;
+
+            return (
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                {sessionSpeakers.map((sp) => (
+                  <div key={sp.slug || sp.id} className="flex items-center gap-3">
+                    <img
+                      src={getMediaUrl(sp.photo)}
+                      alt={sp.name}
+                      className="w-9 h-9 rounded-full object-cover object-top border border-brand-cyan/40 shrink-0"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.opacity = '0.3';
+                      }}
+                    />
+                    <div>
+                      <Link
+                        to={`/speakers/${sp.slug}`}
+                        className="text-xs font-bold text-slate-200 hover:text-brand-cyan flex items-center gap-1"
+                      >
+                        <span>{sp.name}</span>
+                        <ChevronRight className="w-3 h-3 text-brand-cyan shrink-0" />
+                      </Link>
+                      <span className="text-[10px] text-slate-400 block font-medium">
+                        {sp.position} • {sp.company}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </div>
     );

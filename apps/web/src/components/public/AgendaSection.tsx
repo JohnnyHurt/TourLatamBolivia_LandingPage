@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Calendar, Clock, MapPin, ChevronRight, Sparkles, Video, Construction, Bell, CheckCircle2 } from 'lucide-react';
+import { Calendar, Clock, MapPin, ChevronRight, Sparkles, Video, Construction, Bell, CheckCircle2, Download, FileText, FileSpreadsheet } from 'lucide-react';
 import { AgendaItemDTO, SpeakerDTO } from '@tourlatam/types';
 import { Link } from 'react-router-dom';
 import { getMediaUrl } from '../../utils/media';
+import { downloadAgendaExcel, downloadAgendaPdf } from '../../utils/agendaExport';
 
 interface AgendaSectionProps {
   items: AgendaItemDTO[];
@@ -432,6 +433,32 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, speakers = 
           <p className="text-slate-400 text-base sm:text-lg">
             2 días intensivos de Keynotes magistrales, paneles de debate y workshops de IA, Agilidad y PMO.
           </p>
+
+          {!isUnderConstruction && items.length > 0 && (
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => downloadAgendaPdf(items, speakers)}
+                className="inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-brand-cyan text-dark-950 font-black text-xs uppercase tracking-wider hover:bg-white transition-all shadow-glow-cyan group"
+                title="Descargar el programa oficial completo en formato PDF imprimible"
+              >
+                <FileText className="w-4 h-4 shrink-0" />
+                <span>Descargar Programa (PDF)</span>
+                <Download className="w-3.5 h-3.5 opacity-80 group-hover:translate-y-0.5 transition-transform" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => downloadAgendaExcel(items, speakers)}
+                className="inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 hover:border-emerald-400 font-black text-xs uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(16,185,129,0.15)] group"
+                title="Descargar el cronograma comparativo por jornadas en archivo Excel (.xlsx)"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Descargar en Excel (.xlsx)</span>
+                <Download className="w-3.5 h-3.5 text-emerald-400 opacity-80 group-hover:translate-y-0.5 transition-transform" />
+              </button>
+            </div>
+          )}
         </div>
 
         {isUnderConstruction ? (

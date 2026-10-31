@@ -676,6 +676,7 @@ function renderPdfSessionCell(item?: AgendaItemDTO, allSpeakers: SpeakerDTO[] = 
 
 export function buildPrintableAgendaHtml(items: AgendaItemDTO[], speakers: SpeakerDTO[] = []): string {
   const days = groupAgendaByDayAndSlot(items);
+  const logoUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/logos-bolivia-white.png`;
 
   const daysHtml = days
     .map((day, idx) => {
@@ -887,20 +888,19 @@ export function buildPrintableAgendaHtml(items: AgendaItemDTO[], speakers: Speak
       font-size: 11px;
     }
     .doc-header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
       text-align: right;
       font-size: 11px;
       color: #e2e8f0;
     }
-    .doc-header-right .pill {
-      display: inline-block;
-      background: rgba(0, 242, 254, 0.15);
-      border: 1px solid rgba(0, 242, 254, 0.4);
-      color: #00f2fe;
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-weight: 800;
-      font-size: 10px;
-      margin-bottom: 4px;
+    .doc-header-right .pmi-logo {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+      display: block;
     }
     .day-section {
       margin-bottom: 26px;
@@ -1191,7 +1191,7 @@ export function buildPrintableAgendaHtml(items: AgendaItemDTO[], speakers: Speak
         <p>Congreso Internacional de Dirección de Proyectos • PMO • Agilidad • Inteligencia Artificial</p>
       </div>
       <div class="doc-header-right">
-        <div class="pill">PMI BOLIVIA CHAPTER</div>
+        <img src="${logoUrl}" alt="PMI Bolivia Chapter" class="pmi-logo" />
         <div><strong>20 &amp; 21 de Noviembre, 2026</strong> • 100% Virtual</div>
       </div>
     </header>

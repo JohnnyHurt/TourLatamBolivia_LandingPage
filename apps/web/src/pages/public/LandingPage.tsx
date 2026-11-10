@@ -23,6 +23,7 @@ import { SponsorsSection } from '../../components/public/SponsorsSection';
 import { FAQSection } from '../../components/public/FAQSection';
 import { CtaSection } from '../../components/public/CtaSection';
 import { Footer } from '../../components/public/Footer';
+import { applyThemePalette } from '../../utils/themePalettes';
 
 const DEFAULT_SETTINGS: EventSettingsDTO = {
   id: 'default',
@@ -156,6 +157,12 @@ export const LandingPage: React.FC = () => {
     cached?.tickets && cached.tickets.length > 0 ? cached.tickets : DEFAULT_TICKETS
   );
   const [faqs, setFaqs] = useState<FAQDTO[]>(cached?.faqs || []);
+
+  useEffect(() => {
+    if (settings?.themePalette) {
+      applyThemePalette(settings.themePalette);
+    }
+  }, [settings?.themePalette]);
 
   useEffect(() => {
     let isMounted = true;

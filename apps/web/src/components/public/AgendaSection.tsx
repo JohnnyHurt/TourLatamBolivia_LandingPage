@@ -37,11 +37,11 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, speakers = 
     }
   }
 
-  // Under construction unless explicitly published (isUnderConstruction === false)
+  // Published by default unless explicitly marked as under construction (isUnderConstruction === true)
   const isUnderConstruction =
     resolvedConfig?.isUnderConstruction !== undefined
       ? Boolean(resolvedConfig.isUnderConstruction)
-      : true;
+      : false;
 
   const noticeTitle = resolvedConfig?.noticeTitle || 'Agenda Oficial en Proceso de Confirmación';
   const noticeMessage = resolvedConfig?.noticeMessage || 'Estamos ultimando detalles con nuestros ponentes internacionales y organizando los horarios de cada sesión magistral y workshop para brindarte la mejor experiencia formativa. El cronograma completo será publicado muy pronto.';

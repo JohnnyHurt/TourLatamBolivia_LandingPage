@@ -76,11 +76,34 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: dark;
+  --color-dark-950: 7 2 15;
+  --color-dark-900: 11 4 24;
+  --color-dark-850: 15 6 32;
+  --color-dark-800: 19 9 36;
+  --color-dark-750: 24 11 46;
+  --color-dark-700: 29 11 56;
+  --color-dark-650: 36 14 68;
+  --color-dark-600: 47 18 88;
+  --color-dark-500: 61 22 114;
+  --color-brand-cyan: 0 242 254;
+  --color-brand-cyan-light: 79 172 254;
+  --color-brand-magenta: 255 0 127;
+  --color-brand-magenta-light: 247 37 133;
+  --color-brand-purple: 121 40 202;
+  --color-brand-violet: 131 56 236;
+  --color-brand-pmi-orange: 255 94 20;
+  --color-brand-pmi-orange-dark: 224 74 5;
+  --color-brand-navy: 11 4 24;
+}
+
 @layer base {
   body {
-    background-color: #0B0418;
+    background-color: rgb(var(--color-dark-900));
     color: #F8FAFC;
     font-family: 'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: background-color 0.3s ease;
   }
 }
 
@@ -88,39 +111,39 @@
   font-family: 'Barlow Condensed', sans-serif !important;
 }
 
-/* Glassmorphism utility classes with cosmic violet tints */
+/* Glassmorphism utility classes with dynamic PMI palette tints */
 .glass-panel {
-  background: rgba(19, 9, 36, 0.75);
+  background: rgb(var(--color-dark-800) / 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(121, 40, 202, 0.22);
+  border: 1px solid rgb(var(--color-brand-purple) / 0.22);
 }
 
 .glass-card {
-  background: rgba(29, 11, 56, 0.55);
+  background: rgb(var(--color-dark-700) / 0.55);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(121, 40, 202, 0.28);
+  border: 1px solid rgb(var(--color-brand-purple) / 0.28);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  background: rgba(38, 14, 74, 0.75);
-  border-color: rgba(0, 242, 254, 0.45);
+  background: rgb(var(--color-dark-650) / 0.75);
+  border-color: rgb(var(--color-brand-cyan) / 0.45);
   transform: translateY(-4px);
-  box-shadow: 0 12px 35px -10px rgba(0, 242, 254, 0.25), 0 0 20px rgba(121, 40, 202, 0.2);
+  box-shadow: 0 12px 35px -10px rgb(var(--color-brand-cyan) / 0.25), 0 0 20px rgb(var(--color-brand-purple) / 0.2);
 }
 
 .glass-card-magenta:hover {
-  background: rgba(38, 14, 74, 0.75);
-  border-color: rgba(255, 0, 127, 0.45);
+  background: rgb(var(--color-dark-650) / 0.75);
+  border-color: rgb(var(--color-brand-magenta) / 0.45);
   transform: translateY(-4px);
-  box-shadow: 0 12px 35px -10px rgba(255, 0, 127, 0.25), 0 0 20px rgba(121, 40, 202, 0.2);
+  box-shadow: 0 12px 35px -10px rgb(var(--color-brand-magenta) / 0.25), 0 0 20px rgb(var(--color-brand-purple) / 0.2);
 }
 
-/* Gradient Text Utilities matching poster */
+/* Gradient Text Utilities matching active PMI palette */
 .gradient-text-latam {
-  background: linear-gradient(90deg, #00F2FE 0%, #8338EC 48%, #FF007F 100%);
+  background: linear-gradient(90deg, rgb(var(--color-brand-cyan)) 0%, rgb(var(--color-brand-violet)) 48%, rgb(var(--color-brand-magenta)) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -128,7 +151,7 @@
 }
 
 .gradient-text-cyan {
-  background: linear-gradient(135deg, #00F2FE 0%, #00C6FF 100%);
+  background: linear-gradient(135deg, rgb(var(--color-brand-cyan)) 0%, rgb(var(--color-brand-cyan-light)) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -136,7 +159,7 @@
 }
 
 .gradient-text-magenta {
-  background: linear-gradient(135deg, #FF007F 0%, #F72585 100%);
+  background: linear-gradient(135deg, rgb(var(--color-brand-magenta)) 0%, rgb(var(--color-brand-magenta-light)) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -151,17 +174,17 @@
   color: transparent;
 }
 
-/* Neon Divider Lines from the Poster — thin cyan lines under each pillar/date */
+/* Neon Divider Lines */
 .neon-line-cyan {
   height: 1.5px;
-  background: linear-gradient(90deg, #00F2FE 0%, rgba(0, 242, 254, 0.6) 60%, transparent 100%);
-  box-shadow: 0 0 6px rgba(0, 242, 254, 0.9), 0 0 14px rgba(0, 242, 254, 0.4);
+  background: linear-gradient(90deg, rgb(var(--color-brand-cyan)) 0%, rgb(var(--color-brand-cyan) / 0.6) 60%, transparent 100%);
+  box-shadow: 0 0 6px rgb(var(--color-brand-cyan) / 0.9), 0 0 14px rgb(var(--color-brand-cyan) / 0.4);
 }
 
 .neon-line-magenta {
   height: 1.5px;
-  background: linear-gradient(90deg, #FF007F 0%, rgba(255, 0, 127, 0.6) 60%, transparent 100%);
-  box-shadow: 0 0 6px rgba(255, 0, 127, 0.9), 0 0 14px rgba(255, 0, 127, 0.4);
+  background: linear-gradient(90deg, rgb(var(--color-brand-magenta)) 0%, rgb(var(--color-brand-magenta) / 0.6) 60%, transparent 100%);
+  box-shadow: 0 0 6px rgb(var(--color-brand-magenta) / 0.9), 0 0 14px rgb(var(--color-brand-magenta) / 0.4);
 }
 
 .neon-underline-cyan {
@@ -176,19 +199,19 @@
   bottom: -4px;
   width: 100%;
   height: 2.5px;
-  background: #00F2FE;
-  box-shadow: 0 0 10px #00F2FE, 0 0 20px rgba(0, 242, 254, 0.6);
+  background: rgb(var(--color-brand-cyan));
+  box-shadow: 0 0 10px rgb(var(--color-brand-cyan)), 0 0 20px rgb(var(--color-brand-cyan) / 0.6);
   border-radius: 2px;
 }
 
 /* Geometric Facet Background Texture overlay */
 .geometric-facet-bg {
-  background-color: #0B0418;
+  background-color: rgb(var(--color-dark-900));
   background-image: 
-    radial-gradient(at 15% 15%, rgba(0, 242, 254, 0.12) 0px, transparent 50%),
-    radial-gradient(at 85% 20%, rgba(255, 0, 127, 0.15) 0px, transparent 50%),
-    radial-gradient(at 50% 60%, rgba(121, 40, 202, 0.18) 0px, transparent 65%),
-    radial-gradient(at 80% 90%, rgba(0, 242, 254, 0.10) 0px, transparent 50%);
+    radial-gradient(at 15% 15%, rgb(var(--color-brand-cyan) / 0.12) 0px, transparent 50%),
+    radial-gradient(at 85% 20%, rgb(var(--color-brand-magenta) / 0.15) 0px, transparent 50%),
+    radial-gradient(at 50% 60%, rgb(var(--color-brand-purple) / 0.18) 0px, transparent 65%),
+    radial-gradient(at 80% 90%, rgb(var(--color-brand-cyan) / 0.10) 0px, transparent 50%);
 }
 
 .poly-facets-pattern {
@@ -207,18 +230,18 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0418;
+  background: rgb(var(--color-dark-900));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #240E44;
-  border: 1px solid rgba(121, 40, 202, 0.3);
+  background: rgb(var(--color-dark-650));
+  border: 1px solid rgb(var(--color-brand-purple) / 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00F2FE;
-  box-shadow: 0 0 10px #00F2FE;
+  background: rgb(var(--color-brand-cyan));
+  box-shadow: 0 0 10px rgb(var(--color-brand-cyan));
 }
 
 /* Glow effects */
@@ -230,7 +253,7 @@
   content: '';
   position: absolute;
   inset: -1px;
-  background: linear-gradient(90deg, #00F2FE, #7928CA, #FF007F);
+  background: linear-gradient(90deg, rgb(var(--color-brand-cyan)), rgb(var(--color-brand-purple)), rgb(var(--color-brand-magenta)));
   border-radius: inherit;
   z-index: -1;
   opacity: 0;
@@ -243,18 +266,18 @@
 
 /* PMI Orange primary CTA button glow */
 .shadow-glow-pmi {
-  box-shadow: 0 0 20px rgba(255, 94, 20, 0.55), 0 8px 25px rgba(255, 94, 20, 0.35);
+  box-shadow: 0 0 20px rgb(var(--color-brand-pmi-orange) / 0.55), 0 8px 25px rgb(var(--color-brand-pmi-orange) / 0.35);
 }
 
 .shadow-glow-pmi:hover {
-  box-shadow: 0 0 35px rgba(255, 94, 20, 0.75), 0 12px 40px rgba(255, 94, 20, 0.5);
+  box-shadow: 0 0 35px rgb(var(--color-brand-pmi-orange) / 0.75), 0 12px 40px rgb(var(--color-brand-pmi-orange) / 0.5);
 }
 
 /* PMI Orange Neon button (Dark Glass + Orange Neon Halo - matching local preferred aesthetic) */
 .btn-pmi-neon {
-  background: rgba(19, 8, 38, 0.85);
-  border: 1.5px solid rgba(255, 94, 20, 0.85);
-  box-shadow: 0 0 22px rgba(255, 94, 20, 0.5), inset 0 0 14px rgba(255, 94, 20, 0.15);
+  background: rgb(var(--color-dark-800) / 0.85);
+  border: 1.5px solid rgb(var(--color-brand-pmi-orange) / 0.85);
+  box-shadow: 0 0 22px rgb(var(--color-brand-pmi-orange) / 0.5), inset 0 0 14px rgb(var(--color-brand-pmi-orange) / 0.15);
   color: #FFFFFF;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -262,9 +285,9 @@
 }
 
 .btn-pmi-neon:hover {
-  background: rgba(255, 94, 20, 0.2);
-  border-color: #FF5E14;
-  box-shadow: 0 0 35px rgba(255, 94, 20, 0.85), 0 0 16px rgba(255, 94, 20, 0.5), inset 0 0 16px rgba(255, 94, 20, 0.3);
+  background: rgb(var(--color-brand-pmi-orange) / 0.2);
+  border-color: rgb(var(--color-brand-pmi-orange));
+  box-shadow: 0 0 35px rgb(var(--color-brand-pmi-orange) / 0.85), 0 0 16px rgb(var(--color-brand-pmi-orange) / 0.5), inset 0 0 16px rgb(var(--color-brand-pmi-orange) / 0.3);
   transform: translateY(-2px);
 }
 

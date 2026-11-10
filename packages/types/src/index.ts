@@ -71,6 +71,7 @@ export interface EventSettingsDTO {
   gaTrackingId?: string;
   gtmId?: string;
   metaPixelId?: string;
+  themePalette?: string;
   socialLinks?: SocialLinkDTO[];
   updatedAt: string;
 }

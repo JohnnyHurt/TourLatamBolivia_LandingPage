@@ -18,7 +18,13 @@ import {
   Instagram,
   Youtube,
   Twitter,
+  Palette,
 } from 'lucide-react';
+import {
+  PMI_COLOR_PALETTES,
+  DEFAULT_PALETTE_ID,
+  applyThemePalette,
+} from '../../utils/themePalettes';
 
 const SETTINGS_CACHE_KEY = 'tourlatam_event_settings_cache';
 
@@ -54,6 +60,9 @@ export const EventSettingsPage: React.FC = () => {
       const data = await api.getEventInfo();
       if (data && typeof data === 'object') {
         setSettings(data);
+        if (data.themePalette) {
+          applyThemePalette(data.themePalette);
+        }
         try {
           localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(data));
         } catch {
@@ -95,18 +104,32 @@ export const EventSettingsPage: React.FC = () => {
     });
   };
 
+  const handlePaletteSelect = (paletteId: string) => {
+    setSettings((prev) => ({ ...prev, themePalette: paletteId }));
+    applyThemePalette(paletteId);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
       const updated = await api.updateEventSettings(settings);
       setSettings(updated);
+      if (updated.themePalette) {
+        applyThemePalette(updated.themePalette);
+      }
       try {
         localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(updated));
+        const landingRaw = localStorage.getItem('tourlatam_landing_cache_v7');
+        if (landingRaw) {
+          const parsed = JSON.parse(landingRaw);
+          parsed.settings = { ...(parsed.settings || {}), ...updated };
+          localStorage.setItem('tourlatam_landing_cache_v7', JSON.stringify(parsed));
+        }
       } catch {
         // ignore
       }
-      setToast('Configuración del evento guardada exitosamente.');
+      setToast('Configuración y paleta de colores guardadas exitosamente.');
       setTimeout(() => setToast(null), 3500);
     } catch (err: any) {
       alert(err.message || 'Error al guardar la configuración');
@@ -201,6 +224,86 @@ export const EventSettingsPage: React.FC = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* PMI.org Official Color Palette Selector Card */}
+        <div className="glass-panel rounded-3xl p-6 border border-slate-700/80 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Palette className="w-5 h-5 text-brand-cyan" />
+              <span>Paleta de Colores del Sitio (Sistema de Diseño PMI.org)</span>
+            </h3>
+            <span className="text-[11px] font-semibold text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/30 px-3 py-1 rounded-full">
+              Vista previa en tiempo real
+            </span>
+          </div>
+
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Selecciona una de las paletas oficiales inspiradas en los lineamientos de marca de{' '}
+            <strong className="text-slate-200">pmi.org</strong>. Al elegir una paleta verás una vista previa inmediata y, al hacer clic en{' '}
+            <strong className="text-slate-200">Guardar Configuración</strong>, se aplicará para todos los visitantes de la plataforma.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+            {PMI_COLOR_PALETTES.map((palette) => {
+              const activePaletteId = settings.themePalette || DEFAULT_PALETTE_ID;
+              const isSelected = activePaletteId === palette.id;
+
+              return (
+                <button
+                  key={palette.id}
+                  type="button"
+                  onClick={() => handlePaletteSelect(palette.id)}
+                  aria-pressed={isSelected}
+                  className={`text-left rounded-2xl p-4 border transition-all flex flex-col justify-between gap-3 relative overflow-hidden ${
+                    isSelected
+                      ? 'border-brand-cyan bg-dark-800/95 shadow-glow-cyan ring-1 ring-brand-cyan/50'
+                      : 'border-slate-700/80 bg-dark-900/70 hover:border-slate-500 hover:bg-dark-800/60'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <div>
+                        <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 mb-1">
+                          {palette.badge}
+                        </span>
+                        <h4 className="text-sm font-black text-white leading-snug">{palette.name}</h4>
+                      </div>
+
+                      {isSelected ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-cyan text-dark-950 text-[10px] font-black uppercase tracking-wider shrink-0">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Activa</span>
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-slate-400 px-2 py-1 rounded-lg border border-slate-700/80 shrink-0">
+                          Seleccionar
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-[11px] text-slate-400 leading-relaxed mb-3">{palette.description}</p>
+                  </div>
+
+                  {/* Color Swatches Bar */}
+                  <div className="grid grid-cols-6 gap-1.5 pt-2 border-t border-slate-800/80">
+                    {palette.swatches.map((sw) => (
+                      <div key={sw.label} className="flex flex-col items-center gap-1">
+                        <span
+                          className="w-full h-6 rounded-lg border border-white/20 shadow-inner block"
+                          style={{ backgroundColor: sw.hex, forcedColorAdjust: 'none' }}
+                          title={`${sw.label}: ${sw.hex}`}
+                        />
+                        <span className="text-[9px] text-slate-400 font-mono truncate max-w-full">
+                          {sw.hex}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Basic General Info Card */}
         <div className="glass-panel rounded-3xl p-6 border border-slate-700/80 space-y-4">
           <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">

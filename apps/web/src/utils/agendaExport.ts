@@ -24,7 +24,7 @@ export interface DayScheduleGroup {
 
 const TYPE_LABELS: Record<string, string> = {
   KEYNOTE: 'KEYNOTE MAGISTRAL',
-  PANEL: 'PANEL / DEBATE',
+  PANEL: 'CONFERENCIA',
   WORKSHOP: 'WORKSHOP / CHARLA',
   NETWORKING: 'NETWORKING / APERTURA',
   BREAK: 'BREAK / RECESO',

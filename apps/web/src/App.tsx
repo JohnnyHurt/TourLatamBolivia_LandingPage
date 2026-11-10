@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { initThemePaletteFromStorage } from './utils/themePalettes';
+
+// Initialize saved PMI color palette immediately before first render
+initThemePaletteFromStorage();
 
 // Public Pages
 import { LandingPage } from './pages/public/LandingPage';

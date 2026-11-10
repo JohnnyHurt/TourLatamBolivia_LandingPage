@@ -61,10 +61,10 @@ function safeJsonParse<T>(val: string | null | undefined, fallback: T): T {
 router.get('/landing-data', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     res.set('Cache-Control', 'public, max-age=10, s-maxage=60, stale-while-revalidate=300');
-    const [settings, socialLinks, sections, focusAreas, speakers, sponsors, agenda, tickets, faqs] =
+    const [settings, allSocialLinks, sections, focusAreas, speakers, sponsors, agenda, tickets, faqs] =
       await Promise.all([
         prisma.eventSettings.findFirst(),
-        prisma.socialLink.findMany({ where: { isActive: true }, orderBy: { displayOrder: 'asc' } }),
+        prisma.socialLink.findMany({ orderBy: { displayOrder: 'asc' } }),
         prisma.pageSection.findMany({ where: { isVisible: true }, orderBy: { displayOrder: 'asc' } }),
         prisma.focusArea.findMany({ where: { isActive: true }, orderBy: { displayOrder: 'asc' } }),
         prisma.speaker.findMany({
@@ -107,12 +107,16 @@ router.get('/landing-data', async (_req: Request, res: Response, next: NextFunct
         prisma.fAQ.findMany({ where: { isActive: true }, orderBy: { displayOrder: 'asc' } }),
       ]);
 
+    const themeRecord = allSocialLinks.find((s) => s.platform === '__theme_palette__');
+    const socialLinks = allSocialLinks.filter((s) => s.isActive && s.platform !== '__theme_palette__');
+
     const formattedSettings = settings
       ? {
           ...settings,
           startDate: settings.startDate.toISOString(),
           endDate: settings.endDate.toISOString(),
           updatedAt: settings.updatedAt.toISOString(),
+          themePalette: themeRecord?.url || 'pmi-latam-neon',
           socialLinks,
         }
       : null;
@@ -233,16 +237,18 @@ router.get('/event-info', async (_req: Request, res: Response, next: NextFunctio
       });
     }
 
-    const socialLinks = await prisma.socialLink.findMany({
-      where: { isActive: true },
+    const allSocialLinks = await prisma.socialLink.findMany({
       orderBy: { displayOrder: 'asc' },
     });
+    const themeRecord = allSocialLinks.find((s) => s.platform === '__theme_palette__');
+    const socialLinks = allSocialLinks.filter((s) => s.isActive && s.platform !== '__theme_palette__');
 
     const responsePayload = {
       ...settings,
       startDate: settings.startDate.toISOString(),
       endDate: settings.endDate.toISOString(),
       updatedAt: settings.updatedAt.toISOString(),
+      themePalette: themeRecord?.url || 'pmi-latam-neon',
       socialLinks,
     };
 

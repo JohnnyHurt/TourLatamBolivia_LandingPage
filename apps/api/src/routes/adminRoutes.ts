@@ -828,13 +828,14 @@ const eventSettingsSchema = z.object({
       isActive: z.boolean().optional(),
     })
   ).optional(),
+  themePalette: z.string().optional().nullable(),
 });
 
 router.put('/event-settings', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     // FIX #1: validate body through Zod schema first — unknown fields are stripped
     const body = eventSettingsSchema.parse(req.body);
-    const { startDate, endDate, socialLinks, ...rest } = body;
+    const { startDate, endDate, socialLinks, themePalette, ...rest } = body;
 
     // Helper: convert null → undefined for Prisma create input (nullable optional fields)
     // Prisma's optional-String fields expect `string | undefined`, NOT `string | null`
@@ -948,9 +949,32 @@ router.put('/event-settings', async (req: AuthenticatedRequest, res: Response, n
       }
     }
 
-    const currentSocialLinks = await prisma.socialLink.findMany({
+    if (themePalette && typeof themePalette === 'string') {
+      const existingTheme = await prisma.socialLink.findFirst({
+        where: { platform: '__theme_palette__' },
+      });
+      if (existingTheme) {
+        await prisma.socialLink.update({
+          where: { id: existingTheme.id },
+          data: { url: themePalette.trim(), isActive: false },
+        });
+      } else {
+        await prisma.socialLink.create({
+          data: {
+            platform: '__theme_palette__',
+            url: themePalette.trim(),
+            displayOrder: 999,
+            isActive: false,
+          },
+        });
+      }
+    }
+
+    const allSocialLinks = await prisma.socialLink.findMany({
       orderBy: { displayOrder: 'asc' },
     });
+    const themeRecord = allSocialLinks.find((s) => s.platform === '__theme_palette__');
+    const currentSocialLinks = allSocialLinks.filter((s) => s.platform !== '__theme_palette__');
 
     // Invalidate event-info and landing-data in-memory cache so fresh data is immediately served
     cacheService.del('event-info');
@@ -961,7 +985,7 @@ router.put('/event-settings', async (req: AuthenticatedRequest, res: Response, n
       action: 'UPDATE',
       entity: 'EventSettings',
       entityId: updated.id,
-      details: { eventName: updated.eventName },
+      details: { eventName: updated.eventName, themePalette: themeRecord?.url },
       ipAddress: req.ip,
     });
 
@@ -969,6 +993,7 @@ router.put('/event-settings', async (req: AuthenticatedRequest, res: Response, n
       success: true,
       data: {
         ...updated,
+        themePalette: themeRecord?.url || 'pmi-latam-neon',
         socialLinks: currentSocialLinks,
       },
     });

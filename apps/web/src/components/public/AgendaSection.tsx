@@ -4,6 +4,7 @@ import { AgendaItemDTO, SpeakerDTO } from '@tourlatam/types';
 import { Link } from 'react-router-dom';
 import { getMediaUrl } from '../../utils/media';
 import { downloadAgendaExcel, downloadAgendaPdf } from '../../utils/agendaExport';
+import { BoliviaFlag } from '../common/BoliviaFlag';
 
 interface AgendaSectionProps {
   items: AgendaItemDTO[];
@@ -344,8 +345,12 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, speakers = 
               {item.startTime} - {item.endTime}
             </span>
           </div>
+          <div className="text-[11px] font-bold text-slate-400 mt-0.5 flex items-center gap-1.5">
+            <BoliviaFlag size="sm" />
+            <span>Hora de Bolivia (GMT -4)</span>
+          </div>
           {item.room && (
-            <div className="flex items-center gap-1.5 text-xs text-brand-magenta mt-1 font-semibold">
+            <div className="flex items-center gap-1.5 text-xs text-brand-magenta mt-1.5 font-semibold">
               <Video className="w-3.5 h-3.5 shrink-0" />
               <span>{item.room}</span>
             </div>
@@ -433,6 +438,17 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, speakers = 
           <p className="text-slate-400 text-base sm:text-lg">
             2 días intensivos de Keynotes magistrales, paneles de debate y workshops de IA, Agilidad y PMO.
           </p>
+
+          {/* Explicit Timezone Notice (Bolivia GMT -4) */}
+          <div className="mt-5 flex justify-center">
+            <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-dark-900/90 border border-brand-cyan/35 text-xs sm:text-sm font-bold text-slate-200 shadow-sm">
+              <Clock className="w-4 h-4 text-brand-cyan shrink-0" />
+              <BoliviaFlag size="sm" />
+              <span>
+                Todos los horarios están expresados en <strong className="text-brand-cyan font-black">Hora de Bolivia (GMT -4)</strong>
+              </span>
+            </div>
+          </div>
 
           {!isUnderConstruction && items.length > 0 && (
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
@@ -637,6 +653,9 @@ export const AgendaSection: React.FC<AgendaSectionProps> = ({ items, speakers = 
                           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-dark-900 border border-slate-700/80 text-xs font-black text-brand-cyan shadow-sm">
                             <Clock className="w-3.5 h-3.5 text-brand-cyan" />
                             <span>{slot.startTime} — {slot.endTime}</span>
+                            <span className="text-[10px] font-bold text-slate-400 border-l border-slate-700 pl-2">
+                              GMT -4 (Bolivia)
+                            </span>
                           </div>
                           <div className="h-px flex-1 bg-gradient-to-r from-slate-800 via-slate-700/50 to-transparent" />
                           <span className="text-[10px] font-black uppercase tracking-wider text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/20 px-2.5 py-0.5 rounded-full hidden sm:inline-flex items-center gap-1.5">

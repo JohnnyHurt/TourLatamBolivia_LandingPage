@@ -293,7 +293,7 @@ export const SpeakerDetailPage: React.FC = () => {
                       <div className="flex items-center gap-1.5 font-bold text-white text-xs">
                         <Clock className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
                         <span>
-                          {sess.startTime} - {sess.endTime}
+                          {sess.startTime} - {sess.endTime} <span className="text-slate-400 font-semibold">(GMT -4 Bolivia)</span>
                         </span>
                       </div>
                       {/* Sala / Pilar */}

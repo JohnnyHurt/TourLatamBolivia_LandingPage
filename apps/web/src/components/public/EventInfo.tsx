@@ -12,7 +12,7 @@ export const EventInfo: React.FC<EventInfoProps> = ({ settings }) => {
       icon: Calendar,
       label: 'FECHA OFICIAL',
       value: '20 y 21 Nov 2026',
-      subtext: '2 Jornadas Intensivas',
+      subtext: '2 Jornadas • Hora Bolivia (GMT -4)',
       color: 'text-brand-cyan',
       borderColor: 'border-brand-cyan/30',
       bgColor: 'bg-brand-cyan/10',
